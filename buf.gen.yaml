@@ -1,0 +1,12 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/nherson/psc/api/internal/proto
+plugins:
+  - plugin: buf.build/protocolbuffers/go
+    out: .
+    opt: paths=source_relative
+  - plugin: twirp
+    out: .
+    opt: paths=source_relative
