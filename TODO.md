@@ -1,8 +1,10 @@
 Base work
 ---
-* Ent models
+* ~~Ent models~~
 * Conversion from ufc struct to Ent model
 * Bulk upsert of historical data (mage target)
+* API: upcoming
+* Mage: historical import (import:all and import:event XXXX)
 
 Monthly process
 ---
@@ -16,6 +18,5 @@ Monthly process
 
 Nice to haves
 ---
-* Mage target to _update_ odds
+* API to update upcoming events, fighters, odds, etc
   * Make it an API endpoint and hit it on a cron?
-* 

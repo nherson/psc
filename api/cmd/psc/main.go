@@ -3,21 +3,17 @@ package main
 import (
 	"net/http"
 
-	v1 "github.com/nherson/psc/api/internal/proto/api/v1"
-	"github.com/nherson/psc/api/internal/services/ufcstats"
+	"github.com/nherson/psc/api/internal/services/psc"
+	"github.com/nherson/psc/api/proto/api/v1/apiv1connect"
 )
 
 func main() {
 	mux := http.NewServeMux()
 	apiMux := http.NewServeMux()
 
-	ufcStatsService := &ufcstats.Service{}
-	apiMux.Handle(v1.UfcStatsPathPrefix, v1.NewUfcStatsServer(ufcStatsService))
-
-	// API routes go under /api
-	mux.Handle("/api", apiMux)
-
-	// TODO wire some embedded files to serve a react app
+	pscServer := &psc.PSCServer{}
+	apiMux.Handle(apiv1connect.NewPSCServiceHandler(pscServer))
+	mux.Handle("/api/", http.StripPrefix("/api", apiMux))
 
 	http.ListenAndServe(":8080", mux)
 }
