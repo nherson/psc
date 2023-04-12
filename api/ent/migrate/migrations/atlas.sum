@@ -1,3 +1,6 @@
-h1:vwZmogfLv7b2vLZk6QQsKNgt9bSrcefkoZ/DuahYHug=
+h1:u/slhZQK8JTU3TrT+vtGs1uhzI2ZXrvpg/sfP9l/Lww=
 20230409220322_initial_schema.sql h1:6YA2D6EMqSNhsREcbipuGImfRExwjYymuHPMBXUi+iE=
 20230411032334_basic_fields_and_edges.sql h1:GYHtCGx4YocROWW6Yfa3bFT/WXEzm/Jc8lYQte7BfQk=
+20230412041400_fighter_fields.sql h1:mUjLc43lS+t5Lbq7t68bMQDboQ3neKFTVnm9R4mxP7w=
+20230412044228_fighter_results_index.sql h1:0wlJhEqa3q6rP1K2EsK8p0NHL02ckVdF0SQ1Y8VhTyU=
+20230412044615_missed_weight_optional.sql h1:SPGVE46RBBNbdH+gJnQhNgtK3vErgZdNvxokfAZCO6Q=

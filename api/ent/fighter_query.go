@@ -366,6 +366,18 @@ func (fq *FighterQuery) WithFighterResults(opts ...func(*FighterResultsQuery)) *
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		UfcFighterID string `json:"ufc_fighter_id,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Fighter.Query().
+//		GroupBy(fighter.FieldUfcFighterID).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (fq *FighterQuery) GroupBy(field string, fields ...string) *FighterGroupBy {
 	fq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &FighterGroupBy{build: fq}
@@ -377,6 +389,16 @@ func (fq *FighterQuery) GroupBy(field string, fields ...string) *FighterGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		UfcFighterID string `json:"ufc_fighter_id,omitempty"`
+//	}
+//
+//	client.Fighter.Query().
+//		Select(fighter.FieldUfcFighterID).
+//		Scan(ctx, &v)
 func (fq *FighterQuery) Select(fields ...string) *FighterSelect {
 	fq.ctx.Fields = append(fq.ctx.Fields, fields...)
 	sbuild := &FighterSelect{FighterQuery: fq}

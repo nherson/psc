@@ -12,6 +12,16 @@ const (
 	Label = "fighter"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldUfcFighterID holds the string denoting the ufc_fighter_id field in the database.
+	FieldUfcFighterID = "ufc_fighter_id"
+	// FieldMmaID holds the string denoting the mma_id field in the database.
+	FieldMmaID = "mma_id"
+	// FieldFirstName holds the string denoting the first_name field in the database.
+	FieldFirstName = "first_name"
+	// FieldLastName holds the string denoting the last_name field in the database.
+	FieldLastName = "last_name"
+	// FieldNickName holds the string denoting the nick_name field in the database.
+	FieldNickName = "nick_name"
 	// EdgeFights holds the string denoting the fights edge name in mutations.
 	EdgeFights = "fights"
 	// EdgeFighterAliases holds the string denoting the fighter_aliases edge name in mutations.
@@ -44,6 +54,11 @@ const (
 // Columns holds all SQL columns for fighter fields.
 var Columns = []string{
 	FieldID,
+	FieldUfcFighterID,
+	FieldMmaID,
+	FieldFirstName,
+	FieldLastName,
+	FieldNickName,
 }
 
 var (
@@ -62,12 +77,42 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// UfcFighterIDValidator is a validator for the "ufc_fighter_id" field. It is called by the builders before save.
+	UfcFighterIDValidator func(string) error
+)
+
 // Order defines the ordering method for the Fighter queries.
 type Order func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByUfcFighterID orders the results by the ufc_fighter_id field.
+func ByUfcFighterID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldUfcFighterID, opts...).ToFunc()
+}
+
+// ByMmaID orders the results by the mma_id field.
+func ByMmaID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldMmaID, opts...).ToFunc()
+}
+
+// ByFirstName orders the results by the first_name field.
+func ByFirstName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldFirstName, opts...).ToFunc()
+}
+
+// ByLastName orders the results by the last_name field.
+func ByLastName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastName, opts...).ToFunc()
+}
+
+// ByNickName orders the results by the nick_name field.
+func ByNickName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldNickName, opts...).ToFunc()
 }
 
 // ByFightsCount orders the results by fights count.

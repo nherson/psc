@@ -4,8 +4,10 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/upcomingevent"
@@ -16,6 +18,7 @@ type UpcomingEventCreate struct {
 	config
 	mutation *UpcomingEventMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // Mutation returns the UpcomingEventMutation object of the builder.
@@ -78,13 +81,131 @@ func (uec *UpcomingEventCreate) createSpec() (*UpcomingEvent, *sqlgraph.CreateSp
 		_node = &UpcomingEvent{config: uec.config}
 		_spec = sqlgraph.NewCreateSpec(upcomingevent.Table, sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = uec.conflict
 	return _node, _spec
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.UpcomingEvent.Create().
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (uec *UpcomingEventCreate) OnConflict(opts ...sql.ConflictOption) *UpcomingEventUpsertOne {
+	uec.conflict = opts
+	return &UpcomingEventUpsertOne{
+		create: uec,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.UpcomingEvent.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (uec *UpcomingEventCreate) OnConflictColumns(columns ...string) *UpcomingEventUpsertOne {
+	uec.conflict = append(uec.conflict, sql.ConflictColumns(columns...))
+	return &UpcomingEventUpsertOne{
+		create: uec,
+	}
+}
+
+type (
+	// UpcomingEventUpsertOne is the builder for "upsert"-ing
+	//  one UpcomingEvent node.
+	UpcomingEventUpsertOne struct {
+		create *UpcomingEventCreate
+	}
+
+	// UpcomingEventUpsert is the "OnConflict" setter.
+	UpcomingEventUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.UpcomingEvent.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *UpcomingEventUpsertOne) UpdateNewValues() *UpcomingEventUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.UpcomingEvent.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *UpcomingEventUpsertOne) Ignore() *UpcomingEventUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *UpcomingEventUpsertOne) DoNothing() *UpcomingEventUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the UpcomingEventCreate.OnConflict
+// documentation for more info.
+func (u *UpcomingEventUpsertOne) Update(set func(*UpcomingEventUpsert)) *UpcomingEventUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&UpcomingEventUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// Exec executes the query.
+func (u *UpcomingEventUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for UpcomingEventCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *UpcomingEventUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *UpcomingEventUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *UpcomingEventUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
 }
 
 // UpcomingEventCreateBulk is the builder for creating many UpcomingEvent entities in bulk.
 type UpcomingEventCreateBulk struct {
 	config
 	builders []*UpcomingEventCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the UpcomingEvent entities in the database.
@@ -110,6 +231,7 @@ func (uecb *UpcomingEventCreateBulk) Save(ctx context.Context) ([]*UpcomingEvent
 					_, err = mutators[i+1].Mutate(root, uecb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = uecb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, uecb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -160,6 +282,102 @@ func (uecb *UpcomingEventCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (uecb *UpcomingEventCreateBulk) ExecX(ctx context.Context) {
 	if err := uecb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.UpcomingEvent.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (uecb *UpcomingEventCreateBulk) OnConflict(opts ...sql.ConflictOption) *UpcomingEventUpsertBulk {
+	uecb.conflict = opts
+	return &UpcomingEventUpsertBulk{
+		create: uecb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.UpcomingEvent.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (uecb *UpcomingEventCreateBulk) OnConflictColumns(columns ...string) *UpcomingEventUpsertBulk {
+	uecb.conflict = append(uecb.conflict, sql.ConflictColumns(columns...))
+	return &UpcomingEventUpsertBulk{
+		create: uecb,
+	}
+}
+
+// UpcomingEventUpsertBulk is the builder for "upsert"-ing
+// a bulk of UpcomingEvent nodes.
+type UpcomingEventUpsertBulk struct {
+	create *UpcomingEventCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.UpcomingEvent.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *UpcomingEventUpsertBulk) UpdateNewValues() *UpcomingEventUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.UpcomingEvent.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *UpcomingEventUpsertBulk) Ignore() *UpcomingEventUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *UpcomingEventUpsertBulk) DoNothing() *UpcomingEventUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the UpcomingEventCreateBulk.OnConflict
+// documentation for more info.
+func (u *UpcomingEventUpsertBulk) Update(set func(*UpcomingEventUpsert)) *UpcomingEventUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&UpcomingEventUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// Exec executes the query.
+func (u *UpcomingEventUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the UpcomingEventCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for UpcomingEventCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *UpcomingEventUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

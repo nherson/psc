@@ -328,6 +328,16 @@ func MissedWeightNEQ(v bool) predicate.FighterResults {
 	return predicate.FighterResults(sql.FieldNEQ(FieldMissedWeight, v))
 }
 
+// MissedWeightIsNil applies the IsNil predicate on the "missed_weight" field.
+func MissedWeightIsNil() predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldIsNull(FieldMissedWeight))
+}
+
+// MissedWeightNotNil applies the NotNil predicate on the "missed_weight" field.
+func MissedWeightNotNil() predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldNotNull(FieldMissedWeight))
+}
+
 // HasFighter applies the HasEdge predicate on the "fighter" edge.
 func HasFighter() predicate.FighterResults {
 	return predicate.FighterResults(func(s *sql.Selector) {

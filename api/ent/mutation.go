@@ -1448,6 +1448,12 @@ type FighterMutation struct {
 	op                     Op
 	typ                    string
 	id                     *int
+	ufc_fighter_id         *string
+	mma_id                 *int
+	addmma_id              *int
+	first_name             *string
+	last_name              *string
+	nick_name              *string
 	clearedFields          map[string]struct{}
 	fights                 map[int]struct{}
 	removedfights          map[int]struct{}
@@ -1559,6 +1565,206 @@ func (m *FighterMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetUfcFighterID sets the "ufc_fighter_id" field.
+func (m *FighterMutation) SetUfcFighterID(s string) {
+	m.ufc_fighter_id = &s
+}
+
+// UfcFighterID returns the value of the "ufc_fighter_id" field in the mutation.
+func (m *FighterMutation) UfcFighterID() (r string, exists bool) {
+	v := m.ufc_fighter_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUfcFighterID returns the old "ufc_fighter_id" field's value of the Fighter entity.
+// If the Fighter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterMutation) OldUfcFighterID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUfcFighterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUfcFighterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUfcFighterID: %w", err)
+	}
+	return oldValue.UfcFighterID, nil
+}
+
+// ResetUfcFighterID resets all changes to the "ufc_fighter_id" field.
+func (m *FighterMutation) ResetUfcFighterID() {
+	m.ufc_fighter_id = nil
+}
+
+// SetMmaID sets the "mma_id" field.
+func (m *FighterMutation) SetMmaID(i int) {
+	m.mma_id = &i
+	m.addmma_id = nil
+}
+
+// MmaID returns the value of the "mma_id" field in the mutation.
+func (m *FighterMutation) MmaID() (r int, exists bool) {
+	v := m.mma_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMmaID returns the old "mma_id" field's value of the Fighter entity.
+// If the Fighter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterMutation) OldMmaID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMmaID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMmaID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMmaID: %w", err)
+	}
+	return oldValue.MmaID, nil
+}
+
+// AddMmaID adds i to the "mma_id" field.
+func (m *FighterMutation) AddMmaID(i int) {
+	if m.addmma_id != nil {
+		*m.addmma_id += i
+	} else {
+		m.addmma_id = &i
+	}
+}
+
+// AddedMmaID returns the value that was added to the "mma_id" field in this mutation.
+func (m *FighterMutation) AddedMmaID() (r int, exists bool) {
+	v := m.addmma_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMmaID resets all changes to the "mma_id" field.
+func (m *FighterMutation) ResetMmaID() {
+	m.mma_id = nil
+	m.addmma_id = nil
+}
+
+// SetFirstName sets the "first_name" field.
+func (m *FighterMutation) SetFirstName(s string) {
+	m.first_name = &s
+}
+
+// FirstName returns the value of the "first_name" field in the mutation.
+func (m *FighterMutation) FirstName() (r string, exists bool) {
+	v := m.first_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstName returns the old "first_name" field's value of the Fighter entity.
+// If the Fighter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterMutation) OldFirstName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstName: %w", err)
+	}
+	return oldValue.FirstName, nil
+}
+
+// ResetFirstName resets all changes to the "first_name" field.
+func (m *FighterMutation) ResetFirstName() {
+	m.first_name = nil
+}
+
+// SetLastName sets the "last_name" field.
+func (m *FighterMutation) SetLastName(s string) {
+	m.last_name = &s
+}
+
+// LastName returns the value of the "last_name" field in the mutation.
+func (m *FighterMutation) LastName() (r string, exists bool) {
+	v := m.last_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastName returns the old "last_name" field's value of the Fighter entity.
+// If the Fighter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterMutation) OldLastName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastName: %w", err)
+	}
+	return oldValue.LastName, nil
+}
+
+// ResetLastName resets all changes to the "last_name" field.
+func (m *FighterMutation) ResetLastName() {
+	m.last_name = nil
+}
+
+// SetNickName sets the "nick_name" field.
+func (m *FighterMutation) SetNickName(s string) {
+	m.nick_name = &s
+}
+
+// NickName returns the value of the "nick_name" field in the mutation.
+func (m *FighterMutation) NickName() (r string, exists bool) {
+	v := m.nick_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNickName returns the old "nick_name" field's value of the Fighter entity.
+// If the Fighter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterMutation) OldNickName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNickName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNickName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNickName: %w", err)
+	}
+	return oldValue.NickName, nil
+}
+
+// ResetNickName resets all changes to the "nick_name" field.
+func (m *FighterMutation) ResetNickName() {
+	m.nick_name = nil
 }
 
 // AddFightIDs adds the "fights" edge to the Fight entity by ids.
@@ -1757,7 +1963,22 @@ func (m *FighterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FighterMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 5)
+	if m.ufc_fighter_id != nil {
+		fields = append(fields, fighter.FieldUfcFighterID)
+	}
+	if m.mma_id != nil {
+		fields = append(fields, fighter.FieldMmaID)
+	}
+	if m.first_name != nil {
+		fields = append(fields, fighter.FieldFirstName)
+	}
+	if m.last_name != nil {
+		fields = append(fields, fighter.FieldLastName)
+	}
+	if m.nick_name != nil {
+		fields = append(fields, fighter.FieldNickName)
+	}
 	return fields
 }
 
@@ -1765,6 +1986,18 @@ func (m *FighterMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *FighterMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case fighter.FieldUfcFighterID:
+		return m.UfcFighterID()
+	case fighter.FieldMmaID:
+		return m.MmaID()
+	case fighter.FieldFirstName:
+		return m.FirstName()
+	case fighter.FieldLastName:
+		return m.LastName()
+	case fighter.FieldNickName:
+		return m.NickName()
+	}
 	return nil, false
 }
 
@@ -1772,6 +2005,18 @@ func (m *FighterMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *FighterMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case fighter.FieldUfcFighterID:
+		return m.OldUfcFighterID(ctx)
+	case fighter.FieldMmaID:
+		return m.OldMmaID(ctx)
+	case fighter.FieldFirstName:
+		return m.OldFirstName(ctx)
+	case fighter.FieldLastName:
+		return m.OldLastName(ctx)
+	case fighter.FieldNickName:
+		return m.OldNickName(ctx)
+	}
 	return nil, fmt.Errorf("unknown Fighter field %s", name)
 }
 
@@ -1780,6 +2025,41 @@ func (m *FighterMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *FighterMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case fighter.FieldUfcFighterID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUfcFighterID(v)
+		return nil
+	case fighter.FieldMmaID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMmaID(v)
+		return nil
+	case fighter.FieldFirstName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstName(v)
+		return nil
+	case fighter.FieldLastName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastName(v)
+		return nil
+	case fighter.FieldNickName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNickName(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Fighter field %s", name)
 }
@@ -1787,13 +2067,21 @@ func (m *FighterMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *FighterMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addmma_id != nil {
+		fields = append(fields, fighter.FieldMmaID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *FighterMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case fighter.FieldMmaID:
+		return m.AddedMmaID()
+	}
 	return nil, false
 }
 
@@ -1801,6 +2089,15 @@ func (m *FighterMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *FighterMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case fighter.FieldMmaID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMmaID(v)
+		return nil
+	}
 	return fmt.Errorf("unknown Fighter numeric field %s", name)
 }
 
@@ -1826,6 +2123,23 @@ func (m *FighterMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *FighterMutation) ResetField(name string) error {
+	switch name {
+	case fighter.FieldUfcFighterID:
+		m.ResetUfcFighterID()
+		return nil
+	case fighter.FieldMmaID:
+		m.ResetMmaID()
+		return nil
+	case fighter.FieldFirstName:
+		m.ResetFirstName()
+		return nil
+	case fighter.FieldLastName:
+		m.ResetLastName()
+		return nil
+	case fighter.FieldNickName:
+		m.ResetNickName()
+		return nil
+	}
 	return fmt.Errorf("unknown Fighter field %s", name)
 }
 
@@ -2882,9 +3196,22 @@ func (m *FighterResultsMutation) OldMissedWeight(ctx context.Context) (v bool, e
 	return oldValue.MissedWeight, nil
 }
 
+// ClearMissedWeight clears the value of the "missed_weight" field.
+func (m *FighterResultsMutation) ClearMissedWeight() {
+	m.missed_weight = nil
+	m.clearedFields[fighterresults.FieldMissedWeight] = struct{}{}
+}
+
+// MissedWeightCleared returns if the "missed_weight" field was cleared in this mutation.
+func (m *FighterResultsMutation) MissedWeightCleared() bool {
+	_, ok := m.clearedFields[fighterresults.FieldMissedWeight]
+	return ok
+}
+
 // ResetMissedWeight resets all changes to the "missed_weight" field.
 func (m *FighterResultsMutation) ResetMissedWeight() {
 	m.missed_weight = nil
+	delete(m.clearedFields, fighterresults.FieldMissedWeight)
 }
 
 // ClearFighter clears the "fighter" edge to the Fighter entity.
@@ -3206,7 +3533,11 @@ func (m *FighterResultsMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *FighterResultsMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(fighterresults.FieldMissedWeight) {
+		fields = append(fields, fighterresults.FieldMissedWeight)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3219,6 +3550,11 @@ func (m *FighterResultsMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *FighterResultsMutation) ClearField(name string) error {
+	switch name {
+	case fighterresults.FieldMissedWeight:
+		m.ClearMissedWeight()
+		return nil
+	}
 	return fmt.Errorf("unknown FighterResults nullable field %s", name)
 }
 

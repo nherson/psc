@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/nherson/psc/api/ent/mixins"
 )
 
@@ -29,7 +30,7 @@ func (FighterResults) Fields() []ent.Field {
 		field.Int("control_time_seconds"),
 		field.Bool("win_by_stoppage"),
 		field.Bool("loss_by_stoppage"),
-		field.Bool("missed_weight"),
+		field.Bool("missed_weight").Optional().Default(false),
 	}
 }
 
@@ -44,5 +45,11 @@ func (FighterResults) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("fight_id"),
+	}
+}
+
+func (FighterResults) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("fighter_id", "fight_id").Unique(),
 	}
 }

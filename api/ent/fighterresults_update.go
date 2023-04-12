@@ -111,6 +111,20 @@ func (fru *FighterResultsUpdate) SetMissedWeight(b bool) *FighterResultsUpdate {
 	return fru
 }
 
+// SetNillableMissedWeight sets the "missed_weight" field if the given value is not nil.
+func (fru *FighterResultsUpdate) SetNillableMissedWeight(b *bool) *FighterResultsUpdate {
+	if b != nil {
+		fru.SetMissedWeight(*b)
+	}
+	return fru
+}
+
+// ClearMissedWeight clears the value of the "missed_weight" field.
+func (fru *FighterResultsUpdate) ClearMissedWeight() *FighterResultsUpdate {
+	fru.mutation.ClearMissedWeight()
+	return fru
+}
+
 // SetFighter sets the "fighter" edge to the Fighter entity.
 func (fru *FighterResultsUpdate) SetFighter(f *Fighter) *FighterResultsUpdate {
 	return fru.SetFighterID(f.ID)
@@ -220,6 +234,9 @@ func (fru *FighterResultsUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if value, ok := fru.mutation.MissedWeight(); ok {
 		_spec.SetField(fighterresults.FieldMissedWeight, field.TypeBool, value)
+	}
+	if fru.mutation.MissedWeightCleared() {
+		_spec.ClearField(fighterresults.FieldMissedWeight, field.TypeBool)
 	}
 	if fru.mutation.FighterCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -381,6 +398,20 @@ func (fruo *FighterResultsUpdateOne) SetMissedWeight(b bool) *FighterResultsUpda
 	return fruo
 }
 
+// SetNillableMissedWeight sets the "missed_weight" field if the given value is not nil.
+func (fruo *FighterResultsUpdateOne) SetNillableMissedWeight(b *bool) *FighterResultsUpdateOne {
+	if b != nil {
+		fruo.SetMissedWeight(*b)
+	}
+	return fruo
+}
+
+// ClearMissedWeight clears the value of the "missed_weight" field.
+func (fruo *FighterResultsUpdateOne) ClearMissedWeight() *FighterResultsUpdateOne {
+	fruo.mutation.ClearMissedWeight()
+	return fruo
+}
+
 // SetFighter sets the "fighter" edge to the Fighter entity.
 func (fruo *FighterResultsUpdateOne) SetFighter(f *Fighter) *FighterResultsUpdateOne {
 	return fruo.SetFighterID(f.ID)
@@ -520,6 +551,9 @@ func (fruo *FighterResultsUpdateOne) sqlSave(ctx context.Context) (_node *Fighte
 	}
 	if value, ok := fruo.mutation.MissedWeight(); ok {
 		_spec.SetField(fighterresults.FieldMissedWeight, field.TypeBool, value)
+	}
+	if fruo.mutation.MissedWeightCleared() {
+		_spec.ClearField(fighterresults.FieldMissedWeight, field.TypeBool)
 	}
 	if fruo.mutation.FighterCleared() {
 		edge := &sqlgraph.EdgeSpec{

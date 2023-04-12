@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/fighter"
@@ -18,6 +19,7 @@ type FighterAliasCreate struct {
 	config
 	mutation *FighterAliasMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetAlias sets the "alias" field.
@@ -113,6 +115,7 @@ func (fac *FighterAliasCreate) createSpec() (*FighterAlias, *sqlgraph.CreateSpec
 		_node = &FighterAlias{config: fac.config}
 		_spec = sqlgraph.NewCreateSpec(fighteralias.Table, sqlgraph.NewFieldSpec(fighteralias.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = fac.conflict
 	if value, ok := fac.mutation.Alias(); ok {
 		_spec.SetField(fighteralias.FieldAlias, field.TypeString, value)
 		_node.Alias = value
@@ -137,10 +140,159 @@ func (fac *FighterAliasCreate) createSpec() (*FighterAlias, *sqlgraph.CreateSpec
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.FighterAlias.Create().
+//		SetAlias(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FighterAliasUpsert) {
+//			SetAlias(v+v).
+//		}).
+//		Exec(ctx)
+func (fac *FighterAliasCreate) OnConflict(opts ...sql.ConflictOption) *FighterAliasUpsertOne {
+	fac.conflict = opts
+	return &FighterAliasUpsertOne{
+		create: fac,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.FighterAlias.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (fac *FighterAliasCreate) OnConflictColumns(columns ...string) *FighterAliasUpsertOne {
+	fac.conflict = append(fac.conflict, sql.ConflictColumns(columns...))
+	return &FighterAliasUpsertOne{
+		create: fac,
+	}
+}
+
+type (
+	// FighterAliasUpsertOne is the builder for "upsert"-ing
+	//  one FighterAlias node.
+	FighterAliasUpsertOne struct {
+		create *FighterAliasCreate
+	}
+
+	// FighterAliasUpsert is the "OnConflict" setter.
+	FighterAliasUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetAlias sets the "alias" field.
+func (u *FighterAliasUpsert) SetAlias(v string) *FighterAliasUpsert {
+	u.Set(fighteralias.FieldAlias, v)
+	return u
+}
+
+// UpdateAlias sets the "alias" field to the value that was provided on create.
+func (u *FighterAliasUpsert) UpdateAlias() *FighterAliasUpsert {
+	u.SetExcluded(fighteralias.FieldAlias)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.FighterAlias.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FighterAliasUpsertOne) UpdateNewValues() *FighterAliasUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.FighterAlias.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *FighterAliasUpsertOne) Ignore() *FighterAliasUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FighterAliasUpsertOne) DoNothing() *FighterAliasUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FighterAliasCreate.OnConflict
+// documentation for more info.
+func (u *FighterAliasUpsertOne) Update(set func(*FighterAliasUpsert)) *FighterAliasUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FighterAliasUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAlias sets the "alias" field.
+func (u *FighterAliasUpsertOne) SetAlias(v string) *FighterAliasUpsertOne {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.SetAlias(v)
+	})
+}
+
+// UpdateAlias sets the "alias" field to the value that was provided on create.
+func (u *FighterAliasUpsertOne) UpdateAlias() *FighterAliasUpsertOne {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.UpdateAlias()
+	})
+}
+
+// Exec executes the query.
+func (u *FighterAliasUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FighterAliasCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FighterAliasUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *FighterAliasUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *FighterAliasUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // FighterAliasCreateBulk is the builder for creating many FighterAlias entities in bulk.
 type FighterAliasCreateBulk struct {
 	config
 	builders []*FighterAliasCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the FighterAlias entities in the database.
@@ -166,6 +318,7 @@ func (facb *FighterAliasCreateBulk) Save(ctx context.Context) ([]*FighterAlias, 
 					_, err = mutators[i+1].Mutate(root, facb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = facb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, facb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -216,6 +369,121 @@ func (facb *FighterAliasCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (facb *FighterAliasCreateBulk) ExecX(ctx context.Context) {
 	if err := facb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.FighterAlias.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FighterAliasUpsert) {
+//			SetAlias(v+v).
+//		}).
+//		Exec(ctx)
+func (facb *FighterAliasCreateBulk) OnConflict(opts ...sql.ConflictOption) *FighterAliasUpsertBulk {
+	facb.conflict = opts
+	return &FighterAliasUpsertBulk{
+		create: facb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.FighterAlias.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (facb *FighterAliasCreateBulk) OnConflictColumns(columns ...string) *FighterAliasUpsertBulk {
+	facb.conflict = append(facb.conflict, sql.ConflictColumns(columns...))
+	return &FighterAliasUpsertBulk{
+		create: facb,
+	}
+}
+
+// FighterAliasUpsertBulk is the builder for "upsert"-ing
+// a bulk of FighterAlias nodes.
+type FighterAliasUpsertBulk struct {
+	create *FighterAliasCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.FighterAlias.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FighterAliasUpsertBulk) UpdateNewValues() *FighterAliasUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.FighterAlias.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *FighterAliasUpsertBulk) Ignore() *FighterAliasUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FighterAliasUpsertBulk) DoNothing() *FighterAliasUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FighterAliasCreateBulk.OnConflict
+// documentation for more info.
+func (u *FighterAliasUpsertBulk) Update(set func(*FighterAliasUpsert)) *FighterAliasUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FighterAliasUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAlias sets the "alias" field.
+func (u *FighterAliasUpsertBulk) SetAlias(v string) *FighterAliasUpsertBulk {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.SetAlias(v)
+	})
+}
+
+// UpdateAlias sets the "alias" field to the value that was provided on create.
+func (u *FighterAliasUpsertBulk) UpdateAlias() *FighterAliasUpsertBulk {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.UpdateAlias()
+	})
+}
+
+// Exec executes the query.
+func (u *FighterAliasUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FighterAliasCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FighterAliasCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FighterAliasUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -76,6 +76,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultMissedWeight holds the default value on creation for the "missed_weight" field.
+	DefaultMissedWeight bool
+)
+
 // Order defines the ordering method for the FighterResults queries.
 type Order func(*sql.Selector)
 

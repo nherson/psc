@@ -320,6 +320,10 @@ func (fu *FightUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
 			},
 		}
+		createE := &FighterResultsCreate{config: fu.config, mutation: newFighterResultsMutation(fu.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := fu.mutation.RemovedFightersIDs(); len(nodes) > 0 && !fu.mutation.FightersCleared() {
@@ -336,6 +340,10 @@ func (fu *FightUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		createE := &FighterResultsCreate{config: fu.config, mutation: newFighterResultsMutation(fu.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := fu.mutation.FightersIDs(); len(nodes) > 0 {
@@ -352,6 +360,10 @@ func (fu *FightUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		createE := &FighterResultsCreate{config: fu.config, mutation: newFighterResultsMutation(fu.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if fu.mutation.FighterResultsCleared() {
@@ -739,6 +751,10 @@ func (fuo *FightUpdateOne) sqlSave(ctx context.Context) (_node *Fight, err error
 				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
 			},
 		}
+		createE := &FighterResultsCreate{config: fuo.config, mutation: newFighterResultsMutation(fuo.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := fuo.mutation.RemovedFightersIDs(); len(nodes) > 0 && !fuo.mutation.FightersCleared() {
@@ -755,6 +771,10 @@ func (fuo *FightUpdateOne) sqlSave(ctx context.Context) (_node *Fight, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		createE := &FighterResultsCreate{config: fuo.config, mutation: newFighterResultsMutation(fuo.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := fuo.mutation.FightersIDs(); len(nodes) > 0 {
@@ -771,6 +791,10 @@ func (fuo *FightUpdateOne) sqlSave(ctx context.Context) (_node *Fight, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		createE := &FighterResultsCreate{config: fuo.config, mutation: newFighterResultsMutation(fuo.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if fuo.mutation.FighterResultsCleared() {

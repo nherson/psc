@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/fight"
@@ -19,6 +20,7 @@ type FighterResultsCreate struct {
 	config
 	mutation *FighterResultsMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetFighterID sets the "fighter_id" field.
@@ -75,6 +77,14 @@ func (frc *FighterResultsCreate) SetMissedWeight(b bool) *FighterResultsCreate {
 	return frc
 }
 
+// SetNillableMissedWeight sets the "missed_weight" field if the given value is not nil.
+func (frc *FighterResultsCreate) SetNillableMissedWeight(b *bool) *FighterResultsCreate {
+	if b != nil {
+		frc.SetMissedWeight(*b)
+	}
+	return frc
+}
+
 // SetFighter sets the "fighter" edge to the Fighter entity.
 func (frc *FighterResultsCreate) SetFighter(f *Fighter) *FighterResultsCreate {
 	return frc.SetFighterID(f.ID)
@@ -92,6 +102,7 @@ func (frc *FighterResultsCreate) Mutation() *FighterResultsMutation {
 
 // Save creates the FighterResults in the database.
 func (frc *FighterResultsCreate) Save(ctx context.Context) (*FighterResults, error) {
+	frc.defaults()
 	return withHooks[*FighterResults, FighterResultsMutation](ctx, frc.sqlSave, frc.mutation, frc.hooks)
 }
 
@@ -114,6 +125,14 @@ func (frc *FighterResultsCreate) Exec(ctx context.Context) error {
 func (frc *FighterResultsCreate) ExecX(ctx context.Context) {
 	if err := frc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (frc *FighterResultsCreate) defaults() {
+	if _, ok := frc.mutation.MissedWeight(); !ok {
+		v := fighterresults.DefaultMissedWeight
+		frc.mutation.SetMissedWeight(v)
 	}
 }
 
@@ -142,9 +161,6 @@ func (frc *FighterResultsCreate) check() error {
 	}
 	if _, ok := frc.mutation.LossByStoppage(); !ok {
 		return &ValidationError{Name: "loss_by_stoppage", err: errors.New(`ent: missing required field "FighterResults.loss_by_stoppage"`)}
-	}
-	if _, ok := frc.mutation.MissedWeight(); !ok {
-		return &ValidationError{Name: "missed_weight", err: errors.New(`ent: missing required field "FighterResults.missed_weight"`)}
 	}
 	if _, ok := frc.mutation.FighterID(); !ok {
 		return &ValidationError{Name: "fighter", err: errors.New(`ent: missing required edge "FighterResults.fighter"`)}
@@ -178,6 +194,7 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 		_node = &FighterResults{config: frc.config}
 		_spec = sqlgraph.NewCreateSpec(fighterresults.Table, sqlgraph.NewFieldSpec(fighterresults.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = frc.conflict
 	if value, ok := frc.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)
 		_node.SignificantStrikesLanded = value
@@ -243,10 +260,432 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.FighterResults.Create().
+//		SetFighterID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FighterResultsUpsert) {
+//			SetFighterID(v+v).
+//		}).
+//		Exec(ctx)
+func (frc *FighterResultsCreate) OnConflict(opts ...sql.ConflictOption) *FighterResultsUpsertOne {
+	frc.conflict = opts
+	return &FighterResultsUpsertOne{
+		create: frc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.FighterResults.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (frc *FighterResultsCreate) OnConflictColumns(columns ...string) *FighterResultsUpsertOne {
+	frc.conflict = append(frc.conflict, sql.ConflictColumns(columns...))
+	return &FighterResultsUpsertOne{
+		create: frc,
+	}
+}
+
+type (
+	// FighterResultsUpsertOne is the builder for "upsert"-ing
+	//  one FighterResults node.
+	FighterResultsUpsertOne struct {
+		create *FighterResultsCreate
+	}
+
+	// FighterResultsUpsert is the "OnConflict" setter.
+	FighterResultsUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetFighterID sets the "fighter_id" field.
+func (u *FighterResultsUpsert) SetFighterID(v int) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldFighterID, v)
+	return u
+}
+
+// UpdateFighterID sets the "fighter_id" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateFighterID() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldFighterID)
+	return u
+}
+
+// SetFightID sets the "fight_id" field.
+func (u *FighterResultsUpsert) SetFightID(v int) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldFightID, v)
+	return u
+}
+
+// UpdateFightID sets the "fight_id" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateFightID() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldFightID)
+	return u
+}
+
+// SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
+func (u *FighterResultsUpsert) SetSignificantStrikesLanded(v int) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldSignificantStrikesLanded, v)
+	return u
+}
+
+// UpdateSignificantStrikesLanded sets the "significant_strikes_landed" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateSignificantStrikesLanded() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldSignificantStrikesLanded)
+	return u
+}
+
+// AddSignificantStrikesLanded adds v to the "significant_strikes_landed" field.
+func (u *FighterResultsUpsert) AddSignificantStrikesLanded(v int) *FighterResultsUpsert {
+	u.Add(fighterresults.FieldSignificantStrikesLanded, v)
+	return u
+}
+
+// SetTakedowns sets the "takedowns" field.
+func (u *FighterResultsUpsert) SetTakedowns(v int) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldTakedowns, v)
+	return u
+}
+
+// UpdateTakedowns sets the "takedowns" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateTakedowns() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldTakedowns)
+	return u
+}
+
+// AddTakedowns adds v to the "takedowns" field.
+func (u *FighterResultsUpsert) AddTakedowns(v int) *FighterResultsUpsert {
+	u.Add(fighterresults.FieldTakedowns, v)
+	return u
+}
+
+// SetKnockdowns sets the "knockdowns" field.
+func (u *FighterResultsUpsert) SetKnockdowns(v int) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldKnockdowns, v)
+	return u
+}
+
+// UpdateKnockdowns sets the "knockdowns" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateKnockdowns() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldKnockdowns)
+	return u
+}
+
+// AddKnockdowns adds v to the "knockdowns" field.
+func (u *FighterResultsUpsert) AddKnockdowns(v int) *FighterResultsUpsert {
+	u.Add(fighterresults.FieldKnockdowns, v)
+	return u
+}
+
+// SetControlTimeSeconds sets the "control_time_seconds" field.
+func (u *FighterResultsUpsert) SetControlTimeSeconds(v int) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldControlTimeSeconds, v)
+	return u
+}
+
+// UpdateControlTimeSeconds sets the "control_time_seconds" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateControlTimeSeconds() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldControlTimeSeconds)
+	return u
+}
+
+// AddControlTimeSeconds adds v to the "control_time_seconds" field.
+func (u *FighterResultsUpsert) AddControlTimeSeconds(v int) *FighterResultsUpsert {
+	u.Add(fighterresults.FieldControlTimeSeconds, v)
+	return u
+}
+
+// SetWinByStoppage sets the "win_by_stoppage" field.
+func (u *FighterResultsUpsert) SetWinByStoppage(v bool) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldWinByStoppage, v)
+	return u
+}
+
+// UpdateWinByStoppage sets the "win_by_stoppage" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateWinByStoppage() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldWinByStoppage)
+	return u
+}
+
+// SetLossByStoppage sets the "loss_by_stoppage" field.
+func (u *FighterResultsUpsert) SetLossByStoppage(v bool) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldLossByStoppage, v)
+	return u
+}
+
+// UpdateLossByStoppage sets the "loss_by_stoppage" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateLossByStoppage() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldLossByStoppage)
+	return u
+}
+
+// SetMissedWeight sets the "missed_weight" field.
+func (u *FighterResultsUpsert) SetMissedWeight(v bool) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldMissedWeight, v)
+	return u
+}
+
+// UpdateMissedWeight sets the "missed_weight" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateMissedWeight() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldMissedWeight)
+	return u
+}
+
+// ClearMissedWeight clears the value of the "missed_weight" field.
+func (u *FighterResultsUpsert) ClearMissedWeight() *FighterResultsUpsert {
+	u.SetNull(fighterresults.FieldMissedWeight)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.FighterResults.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FighterResultsUpsertOne) UpdateNewValues() *FighterResultsUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.FighterResults.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *FighterResultsUpsertOne) Ignore() *FighterResultsUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FighterResultsUpsertOne) DoNothing() *FighterResultsUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FighterResultsCreate.OnConflict
+// documentation for more info.
+func (u *FighterResultsUpsertOne) Update(set func(*FighterResultsUpsert)) *FighterResultsUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FighterResultsUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetFighterID sets the "fighter_id" field.
+func (u *FighterResultsUpsertOne) SetFighterID(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetFighterID(v)
+	})
+}
+
+// UpdateFighterID sets the "fighter_id" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateFighterID() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateFighterID()
+	})
+}
+
+// SetFightID sets the "fight_id" field.
+func (u *FighterResultsUpsertOne) SetFightID(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetFightID(v)
+	})
+}
+
+// UpdateFightID sets the "fight_id" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateFightID() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateFightID()
+	})
+}
+
+// SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
+func (u *FighterResultsUpsertOne) SetSignificantStrikesLanded(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetSignificantStrikesLanded(v)
+	})
+}
+
+// AddSignificantStrikesLanded adds v to the "significant_strikes_landed" field.
+func (u *FighterResultsUpsertOne) AddSignificantStrikesLanded(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddSignificantStrikesLanded(v)
+	})
+}
+
+// UpdateSignificantStrikesLanded sets the "significant_strikes_landed" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateSignificantStrikesLanded() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateSignificantStrikesLanded()
+	})
+}
+
+// SetTakedowns sets the "takedowns" field.
+func (u *FighterResultsUpsertOne) SetTakedowns(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetTakedowns(v)
+	})
+}
+
+// AddTakedowns adds v to the "takedowns" field.
+func (u *FighterResultsUpsertOne) AddTakedowns(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddTakedowns(v)
+	})
+}
+
+// UpdateTakedowns sets the "takedowns" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateTakedowns() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateTakedowns()
+	})
+}
+
+// SetKnockdowns sets the "knockdowns" field.
+func (u *FighterResultsUpsertOne) SetKnockdowns(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetKnockdowns(v)
+	})
+}
+
+// AddKnockdowns adds v to the "knockdowns" field.
+func (u *FighterResultsUpsertOne) AddKnockdowns(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddKnockdowns(v)
+	})
+}
+
+// UpdateKnockdowns sets the "knockdowns" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateKnockdowns() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateKnockdowns()
+	})
+}
+
+// SetControlTimeSeconds sets the "control_time_seconds" field.
+func (u *FighterResultsUpsertOne) SetControlTimeSeconds(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetControlTimeSeconds(v)
+	})
+}
+
+// AddControlTimeSeconds adds v to the "control_time_seconds" field.
+func (u *FighterResultsUpsertOne) AddControlTimeSeconds(v int) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddControlTimeSeconds(v)
+	})
+}
+
+// UpdateControlTimeSeconds sets the "control_time_seconds" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateControlTimeSeconds() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateControlTimeSeconds()
+	})
+}
+
+// SetWinByStoppage sets the "win_by_stoppage" field.
+func (u *FighterResultsUpsertOne) SetWinByStoppage(v bool) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetWinByStoppage(v)
+	})
+}
+
+// UpdateWinByStoppage sets the "win_by_stoppage" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateWinByStoppage() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateWinByStoppage()
+	})
+}
+
+// SetLossByStoppage sets the "loss_by_stoppage" field.
+func (u *FighterResultsUpsertOne) SetLossByStoppage(v bool) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetLossByStoppage(v)
+	})
+}
+
+// UpdateLossByStoppage sets the "loss_by_stoppage" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateLossByStoppage() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateLossByStoppage()
+	})
+}
+
+// SetMissedWeight sets the "missed_weight" field.
+func (u *FighterResultsUpsertOne) SetMissedWeight(v bool) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetMissedWeight(v)
+	})
+}
+
+// UpdateMissedWeight sets the "missed_weight" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateMissedWeight() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateMissedWeight()
+	})
+}
+
+// ClearMissedWeight clears the value of the "missed_weight" field.
+func (u *FighterResultsUpsertOne) ClearMissedWeight() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.ClearMissedWeight()
+	})
+}
+
+// Exec executes the query.
+func (u *FighterResultsUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FighterResultsCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FighterResultsUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *FighterResultsUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *FighterResultsUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // FighterResultsCreateBulk is the builder for creating many FighterResults entities in bulk.
 type FighterResultsCreateBulk struct {
 	config
 	builders []*FighterResultsCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the FighterResults entities in the database.
@@ -257,6 +696,7 @@ func (frcb *FighterResultsCreateBulk) Save(ctx context.Context) ([]*FighterResul
 	for i := range frcb.builders {
 		func(i int, root context.Context) {
 			builder := frcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FighterResultsMutation)
 				if !ok {
@@ -272,6 +712,7 @@ func (frcb *FighterResultsCreateBulk) Save(ctx context.Context) ([]*FighterResul
 					_, err = mutators[i+1].Mutate(root, frcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = frcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, frcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -322,6 +763,268 @@ func (frcb *FighterResultsCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (frcb *FighterResultsCreateBulk) ExecX(ctx context.Context) {
 	if err := frcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.FighterResults.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FighterResultsUpsert) {
+//			SetFighterID(v+v).
+//		}).
+//		Exec(ctx)
+func (frcb *FighterResultsCreateBulk) OnConflict(opts ...sql.ConflictOption) *FighterResultsUpsertBulk {
+	frcb.conflict = opts
+	return &FighterResultsUpsertBulk{
+		create: frcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.FighterResults.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (frcb *FighterResultsCreateBulk) OnConflictColumns(columns ...string) *FighterResultsUpsertBulk {
+	frcb.conflict = append(frcb.conflict, sql.ConflictColumns(columns...))
+	return &FighterResultsUpsertBulk{
+		create: frcb,
+	}
+}
+
+// FighterResultsUpsertBulk is the builder for "upsert"-ing
+// a bulk of FighterResults nodes.
+type FighterResultsUpsertBulk struct {
+	create *FighterResultsCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.FighterResults.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FighterResultsUpsertBulk) UpdateNewValues() *FighterResultsUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.FighterResults.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *FighterResultsUpsertBulk) Ignore() *FighterResultsUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FighterResultsUpsertBulk) DoNothing() *FighterResultsUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FighterResultsCreateBulk.OnConflict
+// documentation for more info.
+func (u *FighterResultsUpsertBulk) Update(set func(*FighterResultsUpsert)) *FighterResultsUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FighterResultsUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetFighterID sets the "fighter_id" field.
+func (u *FighterResultsUpsertBulk) SetFighterID(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetFighterID(v)
+	})
+}
+
+// UpdateFighterID sets the "fighter_id" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateFighterID() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateFighterID()
+	})
+}
+
+// SetFightID sets the "fight_id" field.
+func (u *FighterResultsUpsertBulk) SetFightID(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetFightID(v)
+	})
+}
+
+// UpdateFightID sets the "fight_id" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateFightID() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateFightID()
+	})
+}
+
+// SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
+func (u *FighterResultsUpsertBulk) SetSignificantStrikesLanded(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetSignificantStrikesLanded(v)
+	})
+}
+
+// AddSignificantStrikesLanded adds v to the "significant_strikes_landed" field.
+func (u *FighterResultsUpsertBulk) AddSignificantStrikesLanded(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddSignificantStrikesLanded(v)
+	})
+}
+
+// UpdateSignificantStrikesLanded sets the "significant_strikes_landed" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateSignificantStrikesLanded() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateSignificantStrikesLanded()
+	})
+}
+
+// SetTakedowns sets the "takedowns" field.
+func (u *FighterResultsUpsertBulk) SetTakedowns(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetTakedowns(v)
+	})
+}
+
+// AddTakedowns adds v to the "takedowns" field.
+func (u *FighterResultsUpsertBulk) AddTakedowns(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddTakedowns(v)
+	})
+}
+
+// UpdateTakedowns sets the "takedowns" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateTakedowns() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateTakedowns()
+	})
+}
+
+// SetKnockdowns sets the "knockdowns" field.
+func (u *FighterResultsUpsertBulk) SetKnockdowns(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetKnockdowns(v)
+	})
+}
+
+// AddKnockdowns adds v to the "knockdowns" field.
+func (u *FighterResultsUpsertBulk) AddKnockdowns(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddKnockdowns(v)
+	})
+}
+
+// UpdateKnockdowns sets the "knockdowns" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateKnockdowns() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateKnockdowns()
+	})
+}
+
+// SetControlTimeSeconds sets the "control_time_seconds" field.
+func (u *FighterResultsUpsertBulk) SetControlTimeSeconds(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetControlTimeSeconds(v)
+	})
+}
+
+// AddControlTimeSeconds adds v to the "control_time_seconds" field.
+func (u *FighterResultsUpsertBulk) AddControlTimeSeconds(v int) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.AddControlTimeSeconds(v)
+	})
+}
+
+// UpdateControlTimeSeconds sets the "control_time_seconds" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateControlTimeSeconds() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateControlTimeSeconds()
+	})
+}
+
+// SetWinByStoppage sets the "win_by_stoppage" field.
+func (u *FighterResultsUpsertBulk) SetWinByStoppage(v bool) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetWinByStoppage(v)
+	})
+}
+
+// UpdateWinByStoppage sets the "win_by_stoppage" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateWinByStoppage() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateWinByStoppage()
+	})
+}
+
+// SetLossByStoppage sets the "loss_by_stoppage" field.
+func (u *FighterResultsUpsertBulk) SetLossByStoppage(v bool) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetLossByStoppage(v)
+	})
+}
+
+// UpdateLossByStoppage sets the "loss_by_stoppage" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateLossByStoppage() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateLossByStoppage()
+	})
+}
+
+// SetMissedWeight sets the "missed_weight" field.
+func (u *FighterResultsUpsertBulk) SetMissedWeight(v bool) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetMissedWeight(v)
+	})
+}
+
+// UpdateMissedWeight sets the "missed_weight" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateMissedWeight() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateMissedWeight()
+	})
+}
+
+// ClearMissedWeight clears the value of the "missed_weight" field.
+func (u *FighterResultsUpsertBulk) ClearMissedWeight() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.ClearMissedWeight()
+	})
+}
+
+// Exec executes the query.
+func (u *FighterResultsUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FighterResultsCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FighterResultsCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FighterResultsUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

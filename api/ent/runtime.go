@@ -5,7 +5,9 @@ package ent
 import (
 	"github.com/nherson/psc/api/ent/event"
 	"github.com/nherson/psc/api/ent/fight"
+	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/fighteralias"
+	"github.com/nherson/psc/api/ent/fighterresults"
 	"github.com/nherson/psc/api/ent/schema"
 )
 
@@ -41,10 +43,22 @@ func init() {
 	fightDescResultMethod := fightFields[3].Descriptor()
 	// fight.ResultMethodValidator is a validator for the "result_method" field. It is called by the builders before save.
 	fight.ResultMethodValidator = fightDescResultMethod.Validators[0].(func(string) error)
+	fighterFields := schema.Fighter{}.Fields()
+	_ = fighterFields
+	// fighterDescUfcFighterID is the schema descriptor for ufc_fighter_id field.
+	fighterDescUfcFighterID := fighterFields[0].Descriptor()
+	// fighter.UfcFighterIDValidator is a validator for the "ufc_fighter_id" field. It is called by the builders before save.
+	fighter.UfcFighterIDValidator = fighterDescUfcFighterID.Validators[0].(func(string) error)
 	fighteraliasFields := schema.FighterAlias{}.Fields()
 	_ = fighteraliasFields
 	// fighteraliasDescAlias is the schema descriptor for alias field.
 	fighteraliasDescAlias := fighteraliasFields[0].Descriptor()
 	// fighteralias.AliasValidator is a validator for the "alias" field. It is called by the builders before save.
 	fighteralias.AliasValidator = fighteraliasDescAlias.Validators[0].(func(string) error)
+	fighterresultsFields := schema.FighterResults{}.Fields()
+	_ = fighterresultsFields
+	// fighterresultsDescMissedWeight is the schema descriptor for missed_weight field.
+	fighterresultsDescMissedWeight := fighterresultsFields[8].Descriptor()
+	// fighterresults.DefaultMissedWeight holds the default value on creation for the missed_weight field.
+	fighterresults.DefaultMissedWeight = fighterresultsDescMissedWeight.Default.(bool)
 }

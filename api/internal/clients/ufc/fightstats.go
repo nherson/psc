@@ -9,3 +9,7 @@ type FighterStats struct {
 	TakedownsLanded  int    `json:"TakedownsLanded"`
 	ControlTime      string `json:"ControlTime"`
 }
+
+func (f *FighterStats) ControlTimeSeconds() int {
+	return timeStringToSeconds(f.ControlTime)
+}

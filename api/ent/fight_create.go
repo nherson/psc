@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/event"
@@ -20,6 +21,7 @@ type FightCreate struct {
 	config
 	mutation *FightMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetUfcFightID sets the "ufc_fight_id" field.
@@ -205,6 +207,7 @@ func (fc *FightCreate) createSpec() (*Fight, *sqlgraph.CreateSpec) {
 		_node = &Fight{config: fc.config}
 		_spec = sqlgraph.NewCreateSpec(fight.Table, sqlgraph.NewFieldSpec(fight.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = fc.conflict
 	if value, ok := fc.mutation.UfcFightID(); ok {
 		_spec.SetField(fight.FieldUfcFightID, field.TypeString, value)
 		_node.UfcFightID = value
@@ -260,6 +263,10 @@ func (fc *FightCreate) createSpec() (*Fight, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		createE := &FighterResultsCreate{config: fc.config, mutation: newFighterResultsMutation(fc.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := fc.mutation.FighterResultsIDs(); len(nodes) > 0 {
@@ -281,10 +288,328 @@ func (fc *FightCreate) createSpec() (*Fight, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Fight.Create().
+//		SetUfcFightID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FightUpsert) {
+//			SetUfcFightID(v+v).
+//		}).
+//		Exec(ctx)
+func (fc *FightCreate) OnConflict(opts ...sql.ConflictOption) *FightUpsertOne {
+	fc.conflict = opts
+	return &FightUpsertOne{
+		create: fc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Fight.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (fc *FightCreate) OnConflictColumns(columns ...string) *FightUpsertOne {
+	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
+	return &FightUpsertOne{
+		create: fc,
+	}
+}
+
+type (
+	// FightUpsertOne is the builder for "upsert"-ing
+	//  one Fight node.
+	FightUpsertOne struct {
+		create *FightCreate
+	}
+
+	// FightUpsert is the "OnConflict" setter.
+	FightUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUfcFightID sets the "ufc_fight_id" field.
+func (u *FightUpsert) SetUfcFightID(v string) *FightUpsert {
+	u.Set(fight.FieldUfcFightID, v)
+	return u
+}
+
+// UpdateUfcFightID sets the "ufc_fight_id" field to the value that was provided on create.
+func (u *FightUpsert) UpdateUfcFightID() *FightUpsert {
+	u.SetExcluded(fight.FieldUfcFightID)
+	return u
+}
+
+// SetCardOrder sets the "card_order" field.
+func (u *FightUpsert) SetCardOrder(v int) *FightUpsert {
+	u.Set(fight.FieldCardOrder, v)
+	return u
+}
+
+// UpdateCardOrder sets the "card_order" field to the value that was provided on create.
+func (u *FightUpsert) UpdateCardOrder() *FightUpsert {
+	u.SetExcluded(fight.FieldCardOrder)
+	return u
+}
+
+// AddCardOrder adds v to the "card_order" field.
+func (u *FightUpsert) AddCardOrder(v int) *FightUpsert {
+	u.Add(fight.FieldCardOrder, v)
+	return u
+}
+
+// SetCardSegment sets the "card_segment" field.
+func (u *FightUpsert) SetCardSegment(v string) *FightUpsert {
+	u.Set(fight.FieldCardSegment, v)
+	return u
+}
+
+// UpdateCardSegment sets the "card_segment" field to the value that was provided on create.
+func (u *FightUpsert) UpdateCardSegment() *FightUpsert {
+	u.SetExcluded(fight.FieldCardSegment)
+	return u
+}
+
+// SetResultMethod sets the "result_method" field.
+func (u *FightUpsert) SetResultMethod(v string) *FightUpsert {
+	u.Set(fight.FieldResultMethod, v)
+	return u
+}
+
+// UpdateResultMethod sets the "result_method" field to the value that was provided on create.
+func (u *FightUpsert) UpdateResultMethod() *FightUpsert {
+	u.SetExcluded(fight.FieldResultMethod)
+	return u
+}
+
+// SetResultEndingRound sets the "result_ending_round" field.
+func (u *FightUpsert) SetResultEndingRound(v int) *FightUpsert {
+	u.Set(fight.FieldResultEndingRound, v)
+	return u
+}
+
+// UpdateResultEndingRound sets the "result_ending_round" field to the value that was provided on create.
+func (u *FightUpsert) UpdateResultEndingRound() *FightUpsert {
+	u.SetExcluded(fight.FieldResultEndingRound)
+	return u
+}
+
+// AddResultEndingRound adds v to the "result_ending_round" field.
+func (u *FightUpsert) AddResultEndingRound(v int) *FightUpsert {
+	u.Add(fight.FieldResultEndingRound, v)
+	return u
+}
+
+// SetResultEndingTimeSeconds sets the "result_ending_time_seconds" field.
+func (u *FightUpsert) SetResultEndingTimeSeconds(v int) *FightUpsert {
+	u.Set(fight.FieldResultEndingTimeSeconds, v)
+	return u
+}
+
+// UpdateResultEndingTimeSeconds sets the "result_ending_time_seconds" field to the value that was provided on create.
+func (u *FightUpsert) UpdateResultEndingTimeSeconds() *FightUpsert {
+	u.SetExcluded(fight.FieldResultEndingTimeSeconds)
+	return u
+}
+
+// AddResultEndingTimeSeconds adds v to the "result_ending_time_seconds" field.
+func (u *FightUpsert) AddResultEndingTimeSeconds(v int) *FightUpsert {
+	u.Add(fight.FieldResultEndingTimeSeconds, v)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.Fight.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FightUpsertOne) UpdateNewValues() *FightUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Fight.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *FightUpsertOne) Ignore() *FightUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FightUpsertOne) DoNothing() *FightUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FightCreate.OnConflict
+// documentation for more info.
+func (u *FightUpsertOne) Update(set func(*FightUpsert)) *FightUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FightUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUfcFightID sets the "ufc_fight_id" field.
+func (u *FightUpsertOne) SetUfcFightID(v string) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.SetUfcFightID(v)
+	})
+}
+
+// UpdateUfcFightID sets the "ufc_fight_id" field to the value that was provided on create.
+func (u *FightUpsertOne) UpdateUfcFightID() *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateUfcFightID()
+	})
+}
+
+// SetCardOrder sets the "card_order" field.
+func (u *FightUpsertOne) SetCardOrder(v int) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.SetCardOrder(v)
+	})
+}
+
+// AddCardOrder adds v to the "card_order" field.
+func (u *FightUpsertOne) AddCardOrder(v int) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.AddCardOrder(v)
+	})
+}
+
+// UpdateCardOrder sets the "card_order" field to the value that was provided on create.
+func (u *FightUpsertOne) UpdateCardOrder() *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateCardOrder()
+	})
+}
+
+// SetCardSegment sets the "card_segment" field.
+func (u *FightUpsertOne) SetCardSegment(v string) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.SetCardSegment(v)
+	})
+}
+
+// UpdateCardSegment sets the "card_segment" field to the value that was provided on create.
+func (u *FightUpsertOne) UpdateCardSegment() *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateCardSegment()
+	})
+}
+
+// SetResultMethod sets the "result_method" field.
+func (u *FightUpsertOne) SetResultMethod(v string) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.SetResultMethod(v)
+	})
+}
+
+// UpdateResultMethod sets the "result_method" field to the value that was provided on create.
+func (u *FightUpsertOne) UpdateResultMethod() *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateResultMethod()
+	})
+}
+
+// SetResultEndingRound sets the "result_ending_round" field.
+func (u *FightUpsertOne) SetResultEndingRound(v int) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.SetResultEndingRound(v)
+	})
+}
+
+// AddResultEndingRound adds v to the "result_ending_round" field.
+func (u *FightUpsertOne) AddResultEndingRound(v int) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.AddResultEndingRound(v)
+	})
+}
+
+// UpdateResultEndingRound sets the "result_ending_round" field to the value that was provided on create.
+func (u *FightUpsertOne) UpdateResultEndingRound() *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateResultEndingRound()
+	})
+}
+
+// SetResultEndingTimeSeconds sets the "result_ending_time_seconds" field.
+func (u *FightUpsertOne) SetResultEndingTimeSeconds(v int) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.SetResultEndingTimeSeconds(v)
+	})
+}
+
+// AddResultEndingTimeSeconds adds v to the "result_ending_time_seconds" field.
+func (u *FightUpsertOne) AddResultEndingTimeSeconds(v int) *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.AddResultEndingTimeSeconds(v)
+	})
+}
+
+// UpdateResultEndingTimeSeconds sets the "result_ending_time_seconds" field to the value that was provided on create.
+func (u *FightUpsertOne) UpdateResultEndingTimeSeconds() *FightUpsertOne {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateResultEndingTimeSeconds()
+	})
+}
+
+// Exec executes the query.
+func (u *FightUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FightCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FightUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *FightUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *FightUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // FightCreateBulk is the builder for creating many Fight entities in bulk.
 type FightCreateBulk struct {
 	config
 	builders []*FightCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Fight entities in the database.
@@ -310,6 +635,7 @@ func (fcb *FightCreateBulk) Save(ctx context.Context) ([]*Fight, error) {
 					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = fcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, fcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -360,6 +686,212 @@ func (fcb *FightCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (fcb *FightCreateBulk) ExecX(ctx context.Context) {
 	if err := fcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Fight.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FightUpsert) {
+//			SetUfcFightID(v+v).
+//		}).
+//		Exec(ctx)
+func (fcb *FightCreateBulk) OnConflict(opts ...sql.ConflictOption) *FightUpsertBulk {
+	fcb.conflict = opts
+	return &FightUpsertBulk{
+		create: fcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Fight.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (fcb *FightCreateBulk) OnConflictColumns(columns ...string) *FightUpsertBulk {
+	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
+	return &FightUpsertBulk{
+		create: fcb,
+	}
+}
+
+// FightUpsertBulk is the builder for "upsert"-ing
+// a bulk of Fight nodes.
+type FightUpsertBulk struct {
+	create *FightCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Fight.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FightUpsertBulk) UpdateNewValues() *FightUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Fight.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *FightUpsertBulk) Ignore() *FightUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FightUpsertBulk) DoNothing() *FightUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FightCreateBulk.OnConflict
+// documentation for more info.
+func (u *FightUpsertBulk) Update(set func(*FightUpsert)) *FightUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FightUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUfcFightID sets the "ufc_fight_id" field.
+func (u *FightUpsertBulk) SetUfcFightID(v string) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.SetUfcFightID(v)
+	})
+}
+
+// UpdateUfcFightID sets the "ufc_fight_id" field to the value that was provided on create.
+func (u *FightUpsertBulk) UpdateUfcFightID() *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateUfcFightID()
+	})
+}
+
+// SetCardOrder sets the "card_order" field.
+func (u *FightUpsertBulk) SetCardOrder(v int) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.SetCardOrder(v)
+	})
+}
+
+// AddCardOrder adds v to the "card_order" field.
+func (u *FightUpsertBulk) AddCardOrder(v int) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.AddCardOrder(v)
+	})
+}
+
+// UpdateCardOrder sets the "card_order" field to the value that was provided on create.
+func (u *FightUpsertBulk) UpdateCardOrder() *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateCardOrder()
+	})
+}
+
+// SetCardSegment sets the "card_segment" field.
+func (u *FightUpsertBulk) SetCardSegment(v string) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.SetCardSegment(v)
+	})
+}
+
+// UpdateCardSegment sets the "card_segment" field to the value that was provided on create.
+func (u *FightUpsertBulk) UpdateCardSegment() *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateCardSegment()
+	})
+}
+
+// SetResultMethod sets the "result_method" field.
+func (u *FightUpsertBulk) SetResultMethod(v string) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.SetResultMethod(v)
+	})
+}
+
+// UpdateResultMethod sets the "result_method" field to the value that was provided on create.
+func (u *FightUpsertBulk) UpdateResultMethod() *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateResultMethod()
+	})
+}
+
+// SetResultEndingRound sets the "result_ending_round" field.
+func (u *FightUpsertBulk) SetResultEndingRound(v int) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.SetResultEndingRound(v)
+	})
+}
+
+// AddResultEndingRound adds v to the "result_ending_round" field.
+func (u *FightUpsertBulk) AddResultEndingRound(v int) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.AddResultEndingRound(v)
+	})
+}
+
+// UpdateResultEndingRound sets the "result_ending_round" field to the value that was provided on create.
+func (u *FightUpsertBulk) UpdateResultEndingRound() *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateResultEndingRound()
+	})
+}
+
+// SetResultEndingTimeSeconds sets the "result_ending_time_seconds" field.
+func (u *FightUpsertBulk) SetResultEndingTimeSeconds(v int) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.SetResultEndingTimeSeconds(v)
+	})
+}
+
+// AddResultEndingTimeSeconds adds v to the "result_ending_time_seconds" field.
+func (u *FightUpsertBulk) AddResultEndingTimeSeconds(v int) *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.AddResultEndingTimeSeconds(v)
+	})
+}
+
+// UpdateResultEndingTimeSeconds sets the "result_ending_time_seconds" field to the value that was provided on create.
+func (u *FightUpsertBulk) UpdateResultEndingTimeSeconds() *FightUpsertBulk {
+	return u.Update(func(s *FightUpsert) {
+		s.UpdateResultEndingTimeSeconds()
+	})
+}
+
+// Exec executes the query.
+func (u *FightUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FightCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FightCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FightUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

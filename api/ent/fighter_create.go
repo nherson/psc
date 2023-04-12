@@ -4,8 +4,10 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/fight"
@@ -19,6 +21,37 @@ type FighterCreate struct {
 	config
 	mutation *FighterMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
+}
+
+// SetUfcFighterID sets the "ufc_fighter_id" field.
+func (fc *FighterCreate) SetUfcFighterID(s string) *FighterCreate {
+	fc.mutation.SetUfcFighterID(s)
+	return fc
+}
+
+// SetMmaID sets the "mma_id" field.
+func (fc *FighterCreate) SetMmaID(i int) *FighterCreate {
+	fc.mutation.SetMmaID(i)
+	return fc
+}
+
+// SetFirstName sets the "first_name" field.
+func (fc *FighterCreate) SetFirstName(s string) *FighterCreate {
+	fc.mutation.SetFirstName(s)
+	return fc
+}
+
+// SetLastName sets the "last_name" field.
+func (fc *FighterCreate) SetLastName(s string) *FighterCreate {
+	fc.mutation.SetLastName(s)
+	return fc
+}
+
+// SetNickName sets the "nick_name" field.
+func (fc *FighterCreate) SetNickName(s string) *FighterCreate {
+	fc.mutation.SetNickName(s)
+	return fc
 }
 
 // AddFightIDs adds the "fights" edge to the Fight entity by IDs.
@@ -100,6 +133,26 @@ func (fc *FighterCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FighterCreate) check() error {
+	if _, ok := fc.mutation.UfcFighterID(); !ok {
+		return &ValidationError{Name: "ufc_fighter_id", err: errors.New(`ent: missing required field "Fighter.ufc_fighter_id"`)}
+	}
+	if v, ok := fc.mutation.UfcFighterID(); ok {
+		if err := fighter.UfcFighterIDValidator(v); err != nil {
+			return &ValidationError{Name: "ufc_fighter_id", err: fmt.Errorf(`ent: validator failed for field "Fighter.ufc_fighter_id": %w`, err)}
+		}
+	}
+	if _, ok := fc.mutation.MmaID(); !ok {
+		return &ValidationError{Name: "mma_id", err: errors.New(`ent: missing required field "Fighter.mma_id"`)}
+	}
+	if _, ok := fc.mutation.FirstName(); !ok {
+		return &ValidationError{Name: "first_name", err: errors.New(`ent: missing required field "Fighter.first_name"`)}
+	}
+	if _, ok := fc.mutation.LastName(); !ok {
+		return &ValidationError{Name: "last_name", err: errors.New(`ent: missing required field "Fighter.last_name"`)}
+	}
+	if _, ok := fc.mutation.NickName(); !ok {
+		return &ValidationError{Name: "nick_name", err: errors.New(`ent: missing required field "Fighter.nick_name"`)}
+	}
 	return nil
 }
 
@@ -126,6 +179,27 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 		_node = &Fighter{config: fc.config}
 		_spec = sqlgraph.NewCreateSpec(fighter.Table, sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = fc.conflict
+	if value, ok := fc.mutation.UfcFighterID(); ok {
+		_spec.SetField(fighter.FieldUfcFighterID, field.TypeString, value)
+		_node.UfcFighterID = value
+	}
+	if value, ok := fc.mutation.MmaID(); ok {
+		_spec.SetField(fighter.FieldMmaID, field.TypeInt, value)
+		_node.MmaID = value
+	}
+	if value, ok := fc.mutation.FirstName(); ok {
+		_spec.SetField(fighter.FieldFirstName, field.TypeString, value)
+		_node.FirstName = value
+	}
+	if value, ok := fc.mutation.LastName(); ok {
+		_spec.SetField(fighter.FieldLastName, field.TypeString, value)
+		_node.LastName = value
+	}
+	if value, ok := fc.mutation.NickName(); ok {
+		_spec.SetField(fighter.FieldNickName, field.TypeString, value)
+		_node.NickName = value
+	}
 	if nodes := fc.mutation.FightsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -140,6 +214,10 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		createE := &FighterResultsCreate{config: fc.config, mutation: newFighterResultsMutation(fc.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := fc.mutation.FighterAliasesIDs(); len(nodes) > 0 {
@@ -177,10 +255,276 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Fighter.Create().
+//		SetUfcFighterID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FighterUpsert) {
+//			SetUfcFighterID(v+v).
+//		}).
+//		Exec(ctx)
+func (fc *FighterCreate) OnConflict(opts ...sql.ConflictOption) *FighterUpsertOne {
+	fc.conflict = opts
+	return &FighterUpsertOne{
+		create: fc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Fighter.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (fc *FighterCreate) OnConflictColumns(columns ...string) *FighterUpsertOne {
+	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
+	return &FighterUpsertOne{
+		create: fc,
+	}
+}
+
+type (
+	// FighterUpsertOne is the builder for "upsert"-ing
+	//  one Fighter node.
+	FighterUpsertOne struct {
+		create *FighterCreate
+	}
+
+	// FighterUpsert is the "OnConflict" setter.
+	FighterUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUfcFighterID sets the "ufc_fighter_id" field.
+func (u *FighterUpsert) SetUfcFighterID(v string) *FighterUpsert {
+	u.Set(fighter.FieldUfcFighterID, v)
+	return u
+}
+
+// UpdateUfcFighterID sets the "ufc_fighter_id" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateUfcFighterID() *FighterUpsert {
+	u.SetExcluded(fighter.FieldUfcFighterID)
+	return u
+}
+
+// SetMmaID sets the "mma_id" field.
+func (u *FighterUpsert) SetMmaID(v int) *FighterUpsert {
+	u.Set(fighter.FieldMmaID, v)
+	return u
+}
+
+// UpdateMmaID sets the "mma_id" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateMmaID() *FighterUpsert {
+	u.SetExcluded(fighter.FieldMmaID)
+	return u
+}
+
+// AddMmaID adds v to the "mma_id" field.
+func (u *FighterUpsert) AddMmaID(v int) *FighterUpsert {
+	u.Add(fighter.FieldMmaID, v)
+	return u
+}
+
+// SetFirstName sets the "first_name" field.
+func (u *FighterUpsert) SetFirstName(v string) *FighterUpsert {
+	u.Set(fighter.FieldFirstName, v)
+	return u
+}
+
+// UpdateFirstName sets the "first_name" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateFirstName() *FighterUpsert {
+	u.SetExcluded(fighter.FieldFirstName)
+	return u
+}
+
+// SetLastName sets the "last_name" field.
+func (u *FighterUpsert) SetLastName(v string) *FighterUpsert {
+	u.Set(fighter.FieldLastName, v)
+	return u
+}
+
+// UpdateLastName sets the "last_name" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateLastName() *FighterUpsert {
+	u.SetExcluded(fighter.FieldLastName)
+	return u
+}
+
+// SetNickName sets the "nick_name" field.
+func (u *FighterUpsert) SetNickName(v string) *FighterUpsert {
+	u.Set(fighter.FieldNickName, v)
+	return u
+}
+
+// UpdateNickName sets the "nick_name" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateNickName() *FighterUpsert {
+	u.SetExcluded(fighter.FieldNickName)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.Fighter.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FighterUpsertOne) UpdateNewValues() *FighterUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Fighter.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *FighterUpsertOne) Ignore() *FighterUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FighterUpsertOne) DoNothing() *FighterUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FighterCreate.OnConflict
+// documentation for more info.
+func (u *FighterUpsertOne) Update(set func(*FighterUpsert)) *FighterUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FighterUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUfcFighterID sets the "ufc_fighter_id" field.
+func (u *FighterUpsertOne) SetUfcFighterID(v string) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetUfcFighterID(v)
+	})
+}
+
+// UpdateUfcFighterID sets the "ufc_fighter_id" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateUfcFighterID() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateUfcFighterID()
+	})
+}
+
+// SetMmaID sets the "mma_id" field.
+func (u *FighterUpsertOne) SetMmaID(v int) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetMmaID(v)
+	})
+}
+
+// AddMmaID adds v to the "mma_id" field.
+func (u *FighterUpsertOne) AddMmaID(v int) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.AddMmaID(v)
+	})
+}
+
+// UpdateMmaID sets the "mma_id" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateMmaID() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateMmaID()
+	})
+}
+
+// SetFirstName sets the "first_name" field.
+func (u *FighterUpsertOne) SetFirstName(v string) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetFirstName(v)
+	})
+}
+
+// UpdateFirstName sets the "first_name" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateFirstName() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateFirstName()
+	})
+}
+
+// SetLastName sets the "last_name" field.
+func (u *FighterUpsertOne) SetLastName(v string) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetLastName(v)
+	})
+}
+
+// UpdateLastName sets the "last_name" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateLastName() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateLastName()
+	})
+}
+
+// SetNickName sets the "nick_name" field.
+func (u *FighterUpsertOne) SetNickName(v string) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetNickName(v)
+	})
+}
+
+// UpdateNickName sets the "nick_name" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateNickName() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateNickName()
+	})
+}
+
+// Exec executes the query.
+func (u *FighterUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FighterCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FighterUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *FighterUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *FighterUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // FighterCreateBulk is the builder for creating many Fighter entities in bulk.
 type FighterCreateBulk struct {
 	config
 	builders []*FighterCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Fighter entities in the database.
@@ -206,6 +550,7 @@ func (fcb *FighterCreateBulk) Save(ctx context.Context) ([]*Fighter, error) {
 					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = fcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, fcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -256,6 +601,184 @@ func (fcb *FighterCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (fcb *FighterCreateBulk) ExecX(ctx context.Context) {
 	if err := fcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Fighter.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FighterUpsert) {
+//			SetUfcFighterID(v+v).
+//		}).
+//		Exec(ctx)
+func (fcb *FighterCreateBulk) OnConflict(opts ...sql.ConflictOption) *FighterUpsertBulk {
+	fcb.conflict = opts
+	return &FighterUpsertBulk{
+		create: fcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Fighter.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (fcb *FighterCreateBulk) OnConflictColumns(columns ...string) *FighterUpsertBulk {
+	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
+	return &FighterUpsertBulk{
+		create: fcb,
+	}
+}
+
+// FighterUpsertBulk is the builder for "upsert"-ing
+// a bulk of Fighter nodes.
+type FighterUpsertBulk struct {
+	create *FighterCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Fighter.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *FighterUpsertBulk) UpdateNewValues() *FighterUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Fighter.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *FighterUpsertBulk) Ignore() *FighterUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FighterUpsertBulk) DoNothing() *FighterUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FighterCreateBulk.OnConflict
+// documentation for more info.
+func (u *FighterUpsertBulk) Update(set func(*FighterUpsert)) *FighterUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FighterUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUfcFighterID sets the "ufc_fighter_id" field.
+func (u *FighterUpsertBulk) SetUfcFighterID(v string) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetUfcFighterID(v)
+	})
+}
+
+// UpdateUfcFighterID sets the "ufc_fighter_id" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateUfcFighterID() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateUfcFighterID()
+	})
+}
+
+// SetMmaID sets the "mma_id" field.
+func (u *FighterUpsertBulk) SetMmaID(v int) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetMmaID(v)
+	})
+}
+
+// AddMmaID adds v to the "mma_id" field.
+func (u *FighterUpsertBulk) AddMmaID(v int) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.AddMmaID(v)
+	})
+}
+
+// UpdateMmaID sets the "mma_id" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateMmaID() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateMmaID()
+	})
+}
+
+// SetFirstName sets the "first_name" field.
+func (u *FighterUpsertBulk) SetFirstName(v string) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetFirstName(v)
+	})
+}
+
+// UpdateFirstName sets the "first_name" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateFirstName() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateFirstName()
+	})
+}
+
+// SetLastName sets the "last_name" field.
+func (u *FighterUpsertBulk) SetLastName(v string) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetLastName(v)
+	})
+}
+
+// UpdateLastName sets the "last_name" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateLastName() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateLastName()
+	})
+}
+
+// SetNickName sets the "nick_name" field.
+func (u *FighterUpsertBulk) SetNickName(v string) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetNickName(v)
+	})
+}
+
+// UpdateNickName sets the "nick_name" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateNickName() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateNickName()
+	})
+}
+
+// Exec executes the query.
+func (u *FighterUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FighterCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FighterCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FighterUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

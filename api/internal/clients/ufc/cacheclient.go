@@ -32,9 +32,11 @@ func (c *CacheClient) EventByID(id int) (Event, error) {
 	}
 
 	if b != nil {
+		log.Printf("found cache entry for event %d\n", id)
 		err = json.Unmarshal(b, &payload)
 		event = payload.Event
 	} else {
+		log.Printf("cache miss for fight %d\n", id)
 		event, err = c.client.EventByID(id)
 		cacheErr := c.cacheResponse(path, c.client.eventURL(id))
 		if cacheErr != nil {
@@ -56,9 +58,11 @@ func (c *CacheClient) FightByID(id int) (Fight, error) {
 	}
 
 	if b != nil {
+		log.Printf("found cache entry for fight %d\n", id)
 		err = json.Unmarshal(b, &payload)
 		fight = payload.Fight
 	} else {
+		log.Printf("cache miss for fight %d\n", id)
 		fight, err = c.client.FightByID(id)
 		cacheErr := c.cacheResponse(path, c.client.fightURL(id))
 		if cacheErr != nil {

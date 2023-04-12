@@ -53,6 +53,331 @@ func IDLTE(id int) predicate.Fighter {
 	return predicate.Fighter(sql.FieldLTE(FieldID, id))
 }
 
+// UfcFighterID applies equality check predicate on the "ufc_fighter_id" field. It's identical to UfcFighterIDEQ.
+func UfcFighterID(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldUfcFighterID, v))
+}
+
+// MmaID applies equality check predicate on the "mma_id" field. It's identical to MmaIDEQ.
+func MmaID(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldMmaID, v))
+}
+
+// FirstName applies equality check predicate on the "first_name" field. It's identical to FirstNameEQ.
+func FirstName(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldFirstName, v))
+}
+
+// LastName applies equality check predicate on the "last_name" field. It's identical to LastNameEQ.
+func LastName(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldLastName, v))
+}
+
+// NickName applies equality check predicate on the "nick_name" field. It's identical to NickNameEQ.
+func NickName(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldNickName, v))
+}
+
+// UfcFighterIDEQ applies the EQ predicate on the "ufc_fighter_id" field.
+func UfcFighterIDEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDNEQ applies the NEQ predicate on the "ufc_fighter_id" field.
+func UfcFighterIDNEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDIn applies the In predicate on the "ufc_fighter_id" field.
+func UfcFighterIDIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldUfcFighterID, vs...))
+}
+
+// UfcFighterIDNotIn applies the NotIn predicate on the "ufc_fighter_id" field.
+func UfcFighterIDNotIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldUfcFighterID, vs...))
+}
+
+// UfcFighterIDGT applies the GT predicate on the "ufc_fighter_id" field.
+func UfcFighterIDGT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDGTE applies the GTE predicate on the "ufc_fighter_id" field.
+func UfcFighterIDGTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDLT applies the LT predicate on the "ufc_fighter_id" field.
+func UfcFighterIDLT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDLTE applies the LTE predicate on the "ufc_fighter_id" field.
+func UfcFighterIDLTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDContains applies the Contains predicate on the "ufc_fighter_id" field.
+func UfcFighterIDContains(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContains(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDHasPrefix applies the HasPrefix predicate on the "ufc_fighter_id" field.
+func UfcFighterIDHasPrefix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasPrefix(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDHasSuffix applies the HasSuffix predicate on the "ufc_fighter_id" field.
+func UfcFighterIDHasSuffix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasSuffix(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDEqualFold applies the EqualFold predicate on the "ufc_fighter_id" field.
+func UfcFighterIDEqualFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEqualFold(FieldUfcFighterID, v))
+}
+
+// UfcFighterIDContainsFold applies the ContainsFold predicate on the "ufc_fighter_id" field.
+func UfcFighterIDContainsFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContainsFold(FieldUfcFighterID, v))
+}
+
+// MmaIDEQ applies the EQ predicate on the "mma_id" field.
+func MmaIDEQ(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldMmaID, v))
+}
+
+// MmaIDNEQ applies the NEQ predicate on the "mma_id" field.
+func MmaIDNEQ(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldMmaID, v))
+}
+
+// MmaIDIn applies the In predicate on the "mma_id" field.
+func MmaIDIn(vs ...int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldMmaID, vs...))
+}
+
+// MmaIDNotIn applies the NotIn predicate on the "mma_id" field.
+func MmaIDNotIn(vs ...int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldMmaID, vs...))
+}
+
+// MmaIDGT applies the GT predicate on the "mma_id" field.
+func MmaIDGT(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldMmaID, v))
+}
+
+// MmaIDGTE applies the GTE predicate on the "mma_id" field.
+func MmaIDGTE(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldMmaID, v))
+}
+
+// MmaIDLT applies the LT predicate on the "mma_id" field.
+func MmaIDLT(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldMmaID, v))
+}
+
+// MmaIDLTE applies the LTE predicate on the "mma_id" field.
+func MmaIDLTE(v int) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldMmaID, v))
+}
+
+// FirstNameEQ applies the EQ predicate on the "first_name" field.
+func FirstNameEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldFirstName, v))
+}
+
+// FirstNameNEQ applies the NEQ predicate on the "first_name" field.
+func FirstNameNEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldFirstName, v))
+}
+
+// FirstNameIn applies the In predicate on the "first_name" field.
+func FirstNameIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldFirstName, vs...))
+}
+
+// FirstNameNotIn applies the NotIn predicate on the "first_name" field.
+func FirstNameNotIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldFirstName, vs...))
+}
+
+// FirstNameGT applies the GT predicate on the "first_name" field.
+func FirstNameGT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldFirstName, v))
+}
+
+// FirstNameGTE applies the GTE predicate on the "first_name" field.
+func FirstNameGTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldFirstName, v))
+}
+
+// FirstNameLT applies the LT predicate on the "first_name" field.
+func FirstNameLT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldFirstName, v))
+}
+
+// FirstNameLTE applies the LTE predicate on the "first_name" field.
+func FirstNameLTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldFirstName, v))
+}
+
+// FirstNameContains applies the Contains predicate on the "first_name" field.
+func FirstNameContains(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContains(FieldFirstName, v))
+}
+
+// FirstNameHasPrefix applies the HasPrefix predicate on the "first_name" field.
+func FirstNameHasPrefix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasPrefix(FieldFirstName, v))
+}
+
+// FirstNameHasSuffix applies the HasSuffix predicate on the "first_name" field.
+func FirstNameHasSuffix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasSuffix(FieldFirstName, v))
+}
+
+// FirstNameEqualFold applies the EqualFold predicate on the "first_name" field.
+func FirstNameEqualFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEqualFold(FieldFirstName, v))
+}
+
+// FirstNameContainsFold applies the ContainsFold predicate on the "first_name" field.
+func FirstNameContainsFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContainsFold(FieldFirstName, v))
+}
+
+// LastNameEQ applies the EQ predicate on the "last_name" field.
+func LastNameEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldLastName, v))
+}
+
+// LastNameNEQ applies the NEQ predicate on the "last_name" field.
+func LastNameNEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldLastName, v))
+}
+
+// LastNameIn applies the In predicate on the "last_name" field.
+func LastNameIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldLastName, vs...))
+}
+
+// LastNameNotIn applies the NotIn predicate on the "last_name" field.
+func LastNameNotIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldLastName, vs...))
+}
+
+// LastNameGT applies the GT predicate on the "last_name" field.
+func LastNameGT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldLastName, v))
+}
+
+// LastNameGTE applies the GTE predicate on the "last_name" field.
+func LastNameGTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldLastName, v))
+}
+
+// LastNameLT applies the LT predicate on the "last_name" field.
+func LastNameLT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldLastName, v))
+}
+
+// LastNameLTE applies the LTE predicate on the "last_name" field.
+func LastNameLTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldLastName, v))
+}
+
+// LastNameContains applies the Contains predicate on the "last_name" field.
+func LastNameContains(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContains(FieldLastName, v))
+}
+
+// LastNameHasPrefix applies the HasPrefix predicate on the "last_name" field.
+func LastNameHasPrefix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasPrefix(FieldLastName, v))
+}
+
+// LastNameHasSuffix applies the HasSuffix predicate on the "last_name" field.
+func LastNameHasSuffix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasSuffix(FieldLastName, v))
+}
+
+// LastNameEqualFold applies the EqualFold predicate on the "last_name" field.
+func LastNameEqualFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEqualFold(FieldLastName, v))
+}
+
+// LastNameContainsFold applies the ContainsFold predicate on the "last_name" field.
+func LastNameContainsFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContainsFold(FieldLastName, v))
+}
+
+// NickNameEQ applies the EQ predicate on the "nick_name" field.
+func NickNameEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldNickName, v))
+}
+
+// NickNameNEQ applies the NEQ predicate on the "nick_name" field.
+func NickNameNEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldNickName, v))
+}
+
+// NickNameIn applies the In predicate on the "nick_name" field.
+func NickNameIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldNickName, vs...))
+}
+
+// NickNameNotIn applies the NotIn predicate on the "nick_name" field.
+func NickNameNotIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldNickName, vs...))
+}
+
+// NickNameGT applies the GT predicate on the "nick_name" field.
+func NickNameGT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldNickName, v))
+}
+
+// NickNameGTE applies the GTE predicate on the "nick_name" field.
+func NickNameGTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldNickName, v))
+}
+
+// NickNameLT applies the LT predicate on the "nick_name" field.
+func NickNameLT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldNickName, v))
+}
+
+// NickNameLTE applies the LTE predicate on the "nick_name" field.
+func NickNameLTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldNickName, v))
+}
+
+// NickNameContains applies the Contains predicate on the "nick_name" field.
+func NickNameContains(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContains(FieldNickName, v))
+}
+
+// NickNameHasPrefix applies the HasPrefix predicate on the "nick_name" field.
+func NickNameHasPrefix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasPrefix(FieldNickName, v))
+}
+
+// NickNameHasSuffix applies the HasSuffix predicate on the "nick_name" field.
+func NickNameHasSuffix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasSuffix(FieldNickName, v))
+}
+
+// NickNameEqualFold applies the EqualFold predicate on the "nick_name" field.
+func NickNameEqualFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEqualFold(FieldNickName, v))
+}
+
+// NickNameContainsFold applies the ContainsFold predicate on the "nick_name" field.
+func NickNameContainsFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContainsFold(FieldNickName, v))
+}
+
 // HasFights applies the HasEdge predicate on the "fights" edge.
 func HasFights() predicate.Fighter {
 	return predicate.Fighter(func(s *sql.Selector) {

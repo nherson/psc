@@ -13,9 +13,19 @@ import (
 
 // Fighter is the model entity for the Fighter schema.
 type Fighter struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// The fighter identifier as assigned by UFC
+	UfcFighterID string `json:"ufc_fighter_id,omitempty"`
+	// MmaID holds the value of the "mma_id" field.
+	MmaID int `json:"mma_id,omitempty"`
+	// FirstName holds the value of the "first_name" field.
+	FirstName string `json:"first_name,omitempty"`
+	// LastName holds the value of the "last_name" field.
+	LastName string `json:"last_name,omitempty"`
+	// NickName holds the value of the "nick_name" field.
+	NickName string `json:"nick_name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FighterQuery when eager-loading is set.
 	Edges        FighterEdges `json:"edges"`
@@ -67,8 +77,10 @@ func (*Fighter) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fighter.FieldID:
+		case fighter.FieldID, fighter.FieldMmaID:
 			values[i] = new(sql.NullInt64)
+		case fighter.FieldUfcFighterID, fighter.FieldFirstName, fighter.FieldLastName, fighter.FieldNickName:
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -90,6 +102,36 @@ func (f *Fighter) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			f.ID = int(value.Int64)
+		case fighter.FieldUfcFighterID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ufc_fighter_id", values[i])
+			} else if value.Valid {
+				f.UfcFighterID = value.String
+			}
+		case fighter.FieldMmaID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field mma_id", values[i])
+			} else if value.Valid {
+				f.MmaID = int(value.Int64)
+			}
+		case fighter.FieldFirstName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field first_name", values[i])
+			} else if value.Valid {
+				f.FirstName = value.String
+			}
+		case fighter.FieldLastName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_name", values[i])
+			} else if value.Valid {
+				f.LastName = value.String
+			}
+		case fighter.FieldNickName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nick_name", values[i])
+			} else if value.Valid {
+				f.NickName = value.String
+			}
 		default:
 			f.selectValues.Set(columns[i], values[i])
 		}
@@ -140,7 +182,21 @@ func (f *Fighter) Unwrap() *Fighter {
 func (f *Fighter) String() string {
 	var builder strings.Builder
 	builder.WriteString("Fighter(")
-	builder.WriteString(fmt.Sprintf("id=%v", f.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("ufc_fighter_id=")
+	builder.WriteString(f.UfcFighterID)
+	builder.WriteString(", ")
+	builder.WriteString("mma_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.MmaID))
+	builder.WriteString(", ")
+	builder.WriteString("first_name=")
+	builder.WriteString(f.FirstName)
+	builder.WriteString(", ")
+	builder.WriteString("last_name=")
+	builder.WriteString(f.LastName)
+	builder.WriteString(", ")
+	builder.WriteString("nick_name=")
+	builder.WriteString(f.NickName)
 	builder.WriteByte(')')
 	return builder.String()
 }

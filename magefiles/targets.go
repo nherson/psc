@@ -1,5 +1,3 @@
-//go:build mage
-
 package main
 
 import (
@@ -9,6 +7,9 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+
+	//mage:import data
+	_ "github.com/nherson/psc/api/magefiles/data"
 )
 
 type Ent mg.Namespace
@@ -45,12 +46,6 @@ func (Proto) Generate() error {
 func (Proto) Format() error {
 	return sh.Run("gofmt", "-w", "api/internal/proto/api/v1")
 }
-
-type Go mg.Namespace
-
-// func (Go) Format() error {
-
-// }
 
 func Deploy() error {
 	return sh.Run("flyctl", "deploy")

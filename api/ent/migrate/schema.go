@@ -48,6 +48,11 @@ var (
 	// FightersColumns holds the columns for the "fighters" table.
 	FightersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "ufc_fighter_id", Type: field.TypeString, Unique: true},
+		{Name: "mma_id", Type: field.TypeInt},
+		{Name: "first_name", Type: field.TypeString},
+		{Name: "last_name", Type: field.TypeString},
+		{Name: "nick_name", Type: field.TypeString},
 	}
 	// FightersTable holds the schema information for the "fighters" table.
 	FightersTable = &schema.Table{
@@ -84,7 +89,7 @@ var (
 		{Name: "control_time_seconds", Type: field.TypeInt},
 		{Name: "win_by_stoppage", Type: field.TypeBool},
 		{Name: "loss_by_stoppage", Type: field.TypeBool},
-		{Name: "missed_weight", Type: field.TypeBool},
+		{Name: "missed_weight", Type: field.TypeBool, Nullable: true, Default: false},
 		{Name: "fighter_id", Type: field.TypeInt},
 		{Name: "fight_id", Type: field.TypeInt},
 	}
@@ -109,9 +114,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "fighterresults_fight_id_fighter_id",
+				Name:    "fighterresults_fighter_id_fight_id",
 				Unique:  true,
-				Columns: []*schema.Column{FighterResultsColumns[9], FighterResultsColumns[8]},
+				Columns: []*schema.Column{FighterResultsColumns[8], FighterResultsColumns[9]},
 			},
 		},
 	}

@@ -5,6 +5,7 @@ Base work
 * Bulk upsert of historical data (mage target)
 * API: upcoming
 * Mage: historical import (import:all and import:event XXXX)
+* Add timestamps to events for when they happened
 
 Monthly process
 ---

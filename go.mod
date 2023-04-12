@@ -7,6 +7,7 @@ require (
 	github.com/bufbuild/connect-go v1.6.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.7
 	github.com/magefile/mage v1.14.0
 	github.com/pkg/errors v0.9.1
 	github.com/twitchtv/twirp v8.1.3+incompatible
