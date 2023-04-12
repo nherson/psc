@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"log"
+	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -23,6 +26,28 @@ import (
 type Import mg.Namespace
 
 func (Import) Event(idString string) error {
+	return importEvent(idString)
+}
+
+// All imports cached UFC stats found locally on disk. Idempotent.
+func (Import) All() error {
+	r := regexp.MustCompile(`^data\/final\/events\/event-([0-9]+)\.json`)
+	return filepath.Walk("data/final/events",
+		func(path string, info os.FileInfo, err error) error {
+			if path == "data/final/events" {
+				return nil
+			}
+
+			matches := r.FindStringSubmatch(path)
+			if len(matches) != 2 {
+				return errors.New("bad file name " + path)
+			}
+
+			return importEvent(matches[1])
+		})
+}
+
+func importEvent(idString string) error {
 	ctx := context.Background()
 
 	id64, err := strconv.ParseInt(idString, 10, 32)
@@ -51,7 +76,15 @@ func (Import) Event(idString string) error {
 		return err
 	}
 
-	var fightIDs []int
+	eventID, err := tx.Event.Create().
+		SetUfcEventID(strconv.Itoa(eventData.EventID)).
+		SetName(eventData.Name).
+		OnConflictColumns(event.FieldUfcEventID).
+		UpdateNewValues().
+		ID(ctx)
+	if err != nil {
+		return db.Rollback(tx, err)
+	}
 
 	// For each fight, upsert both fighters, upsert the fight, link them together
 	for _, eventFightData := range eventData.FightCard {
@@ -74,15 +107,13 @@ func (Import) Event(idString string) error {
 			SetResultEndingRound(eventFightData.Result.EndingRound).
 			SetResultEndingTimeSeconds(eventFightData.Result.EndingTimeSeconds()).
 			SetResultMethod(eventFightData.Result.Method).
+			SetEventID(eventID).
 			OnConflictColumns(fight.FieldUfcFightID).
 			UpdateNewValues().
 			ID(ctx)
 		if err != nil {
 			return db.Rollback(tx, err)
 		}
-		fightIDs = append(fightIDs, fightID)
-
-		// var fighterIDs []int
 
 		if len(eventFightData.Fighters) != 2 {
 			// Should never happen
@@ -105,7 +136,6 @@ func (Import) Event(idString string) error {
 			if err != nil {
 				return db.Rollback(tx, err)
 			}
-			// fighterIDs = append(fighterIDs, fighterID)
 
 			// Determine the fight outcome for this fighter
 			var stoppage bool
@@ -155,20 +185,5 @@ func (Import) Event(idString string) error {
 
 	}
 
-	err = tx.Event.Create().
-		SetUfcEventID(strconv.Itoa(eventData.EventID)).
-		SetName(eventData.Name).
-		AddFightIDs(fightIDs...).
-		OnConflictColumns(event.FieldUfcEventID).
-		UpdateNewValues().
-		Exec(ctx)
-	if err != nil {
-		return db.Rollback(tx, err)
-	}
-
 	return tx.Commit()
-}
-
-func (Import) All() error {
-	return errors.New("not implemented")
 }
