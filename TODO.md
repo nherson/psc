@@ -6,10 +6,11 @@ Base work
 * API: upcoming
 * ~~Mage: historical import (import:all and import:event XXXX)~~
 * ~~Add timestamps to events for when they happened~~
+* Clean up multiple connection functions (and rollback function)
 
 Monthly process
 ---
-* Load in data from previous month (TODO: mage target)
+* ~~Load in data from previous month (TODO: mage target)~~
 * Delete UpcomingFights and UpcomingEvents (TODO: mage target)
 * Handle upcoming events and fights
   <!-- * Create new fighter nodes (TODO: make mage target for this) -->

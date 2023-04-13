@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/magefile/mage/mg"
 	"github.com/pkg/errors"
@@ -20,8 +21,8 @@ import (
 	"github.com/nherson/psc/api/ent/fight"
 	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/fighterresults"
+	"github.com/nherson/psc/api/internal/clients/db"
 	"github.com/nherson/psc/api/internal/clients/ufc"
-	"github.com/nherson/psc/api/magefiles/internal/db"
 )
 
 const timestampFormat = "2006-01-02T15:04Z"
@@ -29,11 +30,17 @@ const timestampFormat = "2006-01-02T15:04Z"
 type Import mg.Namespace
 
 func (Import) Event(idString string) error {
-	return importEvent(idString)
+	loadEnv()
+	dbClient := db.MustFromEnv()
+
+	return importEvent(dbClient, idString)
 }
 
 // All imports cached UFC stats found locally on disk. Idempotent.
 func (Import) All() error {
+	loadEnv()
+	dbClient := db.MustFromEnv()
+
 	r := regexp.MustCompile(`^data\/final\/events\/event-([0-9]+)\.json`)
 	return filepath.Walk("data/final/events",
 		func(path string, info os.FileInfo, err error) error {
@@ -46,11 +53,11 @@ func (Import) All() error {
 				return errors.New("bad file name " + path)
 			}
 
-			return importEvent(matches[1])
+			return importEvent(dbClient, matches[1])
 		})
 }
 
-func importEvent(idString string) error {
+func importEvent(dbClient *ent.Client, idString string) error {
 	ctx := context.Background()
 
 	id64, err := strconv.ParseInt(idString, 10, 32)
@@ -63,13 +70,6 @@ func importEvent(idString string) error {
 
 	client := ufc.NewCacheClient()
 	eventData, err := client.EventByID(id)
-	if err != nil {
-		return err
-	}
-
-	connString := db.ConnectionString()
-
-	dbClient, err := ent.Open("postgres", connString)
 	if err != nil {
 		return err
 	}
@@ -196,4 +196,11 @@ func importEvent(idString string) error {
 	}
 
 	return tx.Commit()
+}
+
+func loadEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("could not pull db creds from .env file")
+	}
 }
