@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -13,9 +14,13 @@ import (
 
 // UpcomingFight is the model entity for the UpcomingFight schema.
 type UpcomingFight struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID           int `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -26,6 +31,8 @@ func (*UpcomingFight) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case upcomingfight.FieldID:
 			values[i] = new(sql.NullInt64)
+		case upcomingfight.FieldCreatedAt, upcomingfight.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -47,6 +54,18 @@ func (uf *UpcomingFight) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			uf.ID = int(value.Int64)
+		case upcomingfight.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				uf.CreatedAt = value.Time
+			}
+		case upcomingfight.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				uf.UpdatedAt = value.Time
+			}
 		default:
 			uf.selectValues.Set(columns[i], values[i])
 		}
@@ -82,7 +101,12 @@ func (uf *UpcomingFight) Unwrap() *UpcomingFight {
 func (uf *UpcomingFight) String() string {
 	var builder strings.Builder
 	builder.WriteString("UpcomingFight(")
-	builder.WriteString(fmt.Sprintf("id=%v", uf.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", uf.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(uf.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(uf.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

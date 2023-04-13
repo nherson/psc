@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,6 +18,10 @@ type FighterAlias struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// This is some other name a fighter may be known by. No promises about how entries are cased, so program defensively!
 	Alias string `json:"alias,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -57,6 +62,8 @@ func (*FighterAlias) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case fighteralias.FieldAlias:
 			values[i] = new(sql.NullString)
+		case fighteralias.FieldCreatedAt, fighteralias.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		case fighteralias.ForeignKeys[0]: // fighter_fighter_aliases
 			values[i] = new(sql.NullInt64)
 		default:
@@ -80,6 +87,18 @@ func (fa *FighterAlias) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			fa.ID = int(value.Int64)
+		case fighteralias.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				fa.CreatedAt = value.Time
+			}
+		case fighteralias.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				fa.UpdatedAt = value.Time
+			}
 		case fighteralias.FieldAlias:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field alias", values[i])
@@ -134,6 +153,12 @@ func (fa *FighterAlias) String() string {
 	var builder strings.Builder
 	builder.WriteString("FighterAlias(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", fa.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(fa.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(fa.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("alias=")
 	builder.WriteString(fa.Alias)
 	builder.WriteByte(')')

@@ -257,6 +257,18 @@ func (ueq *UpcomingEventQuery) Clone() *UpcomingEventQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.UpcomingEvent.Query().
+//		GroupBy(upcomingevent.FieldCreatedAt).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (ueq *UpcomingEventQuery) GroupBy(field string, fields ...string) *UpcomingEventGroupBy {
 	ueq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &UpcomingEventGroupBy{build: ueq}
@@ -268,6 +280,16 @@ func (ueq *UpcomingEventQuery) GroupBy(field string, fields ...string) *Upcoming
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		CreatedAt time.Time `json:"created_at,omitempty"`
+//	}
+//
+//	client.UpcomingEvent.Query().
+//		Select(upcomingevent.FieldCreatedAt).
+//		Scan(ctx, &v)
 func (ueq *UpcomingEventQuery) Select(fields ...string) *UpcomingEventSelect {
 	ueq.ctx.Fields = append(ueq.ctx.Fields, fields...)
 	sbuild := &UpcomingEventSelect{UpcomingEventQuery: ueq}

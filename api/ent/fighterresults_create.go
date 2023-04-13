@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,6 +22,34 @@ type FighterResultsCreate struct {
 	mutation *FighterResultsMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (frc *FighterResultsCreate) SetCreatedAt(t time.Time) *FighterResultsCreate {
+	frc.mutation.SetCreatedAt(t)
+	return frc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (frc *FighterResultsCreate) SetNillableCreatedAt(t *time.Time) *FighterResultsCreate {
+	if t != nil {
+		frc.SetCreatedAt(*t)
+	}
+	return frc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (frc *FighterResultsCreate) SetUpdatedAt(t time.Time) *FighterResultsCreate {
+	frc.mutation.SetUpdatedAt(t)
+	return frc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (frc *FighterResultsCreate) SetNillableUpdatedAt(t *time.Time) *FighterResultsCreate {
+	if t != nil {
+		frc.SetUpdatedAt(*t)
+	}
+	return frc
 }
 
 // SetFighterID sets the "fighter_id" field.
@@ -130,6 +159,14 @@ func (frc *FighterResultsCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (frc *FighterResultsCreate) defaults() {
+	if _, ok := frc.mutation.CreatedAt(); !ok {
+		v := fighterresults.DefaultCreatedAt()
+		frc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := frc.mutation.UpdatedAt(); !ok {
+		v := fighterresults.DefaultUpdatedAt()
+		frc.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := frc.mutation.MissedWeight(); !ok {
 		v := fighterresults.DefaultMissedWeight
 		frc.mutation.SetMissedWeight(v)
@@ -138,6 +175,12 @@ func (frc *FighterResultsCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (frc *FighterResultsCreate) check() error {
+	if _, ok := frc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "FighterResults.created_at"`)}
+	}
+	if _, ok := frc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "FighterResults.updated_at"`)}
+	}
 	if _, ok := frc.mutation.FighterID(); !ok {
 		return &ValidationError{Name: "fighter_id", err: errors.New(`ent: missing required field "FighterResults.fighter_id"`)}
 	}
@@ -195,6 +238,14 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 		_spec = sqlgraph.NewCreateSpec(fighterresults.Table, sqlgraph.NewFieldSpec(fighterresults.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = frc.conflict
+	if value, ok := frc.mutation.CreatedAt(); ok {
+		_spec.SetField(fighterresults.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := frc.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighterresults.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := frc.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)
 		_node.SignificantStrikesLanded = value
@@ -264,7 +315,7 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 // of the `INSERT` statement. For example:
 //
 //	client.FighterResults.Create().
-//		SetFighterID(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -273,7 +324,7 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FighterResultsUpsert) {
-//			SetFighterID(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (frc *FighterResultsCreate) OnConflict(opts ...sql.ConflictOption) *FighterResultsUpsertOne {
@@ -308,6 +359,18 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *FighterResultsUpsert) SetUpdatedAt(v time.Time) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateUpdatedAt() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldUpdatedAt)
+	return u
+}
 
 // SetFighterID sets the "fighter_id" field.
 func (u *FighterResultsUpsert) SetFighterID(v int) *FighterResultsUpsert {
@@ -457,6 +520,11 @@ func (u *FighterResultsUpsert) ClearMissedWeight() *FighterResultsUpsert {
 //		Exec(ctx)
 func (u *FighterResultsUpsertOne) UpdateNewValues() *FighterResultsUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(fighterresults.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -485,6 +553,20 @@ func (u *FighterResultsUpsertOne) Update(set func(*FighterResultsUpsert)) *Fight
 		set(&FighterResultsUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *FighterResultsUpsertOne) SetUpdatedAt(v time.Time) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateUpdatedAt() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetFighterID sets the "fighter_id" field.
@@ -779,7 +861,7 @@ func (frcb *FighterResultsCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FighterResultsUpsert) {
-//			SetFighterID(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (frcb *FighterResultsCreateBulk) OnConflict(opts ...sql.ConflictOption) *FighterResultsUpsertBulk {
@@ -818,6 +900,13 @@ type FighterResultsUpsertBulk struct {
 //		Exec(ctx)
 func (u *FighterResultsUpsertBulk) UpdateNewValues() *FighterResultsUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(fighterresults.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -846,6 +935,20 @@ func (u *FighterResultsUpsertBulk) Update(set func(*FighterResultsUpsert)) *Figh
 		set(&FighterResultsUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *FighterResultsUpsertBulk) SetUpdatedAt(v time.Time) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateUpdatedAt() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetFighterID sets the "fighter_id" field.

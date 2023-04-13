@@ -1,10 +1,10 @@
 Base work
 ---
 * ~~Ent models~~
-* Conversion from ufc struct to Ent model
-* Bulk upsert of historical data (mage target)
+* ~~Conversion from ufc struct to Ent model~~
+* ~~Bulk upsert of historical data (mage target)~~
 * API: upcoming
-* Mage: historical import (import:all and import:event XXXX)
+* ~~Mage: historical import (import:all and import:event XXXX)~~
 * Add timestamps to events for when they happened
 
 Monthly process

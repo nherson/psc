@@ -257,6 +257,18 @@ func (ufq *UpcomingFightQuery) Clone() *UpcomingFightQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.UpcomingFight.Query().
+//		GroupBy(upcomingfight.FieldCreatedAt).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (ufq *UpcomingFightQuery) GroupBy(field string, fields ...string) *UpcomingFightGroupBy {
 	ufq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &UpcomingFightGroupBy{build: ufq}
@@ -268,6 +280,16 @@ func (ufq *UpcomingFightQuery) GroupBy(field string, fields ...string) *Upcoming
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		CreatedAt time.Time `json:"created_at,omitempty"`
+//	}
+//
+//	client.UpcomingFight.Query().
+//		Select(upcomingfight.FieldCreatedAt).
+//		Scan(ctx, &v)
 func (ufq *UpcomingFightQuery) Select(fields ...string) *UpcomingFightSelect {
 	ufq.ctx.Fields = append(ufq.ctx.Fields, fields...)
 	sbuild := &UpcomingFightSelect{UpcomingFightQuery: ufq}

@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,6 +19,10 @@ type FighterResults struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Required for M2M relationship between Fights and Fighters. NOT UFC assigned identifier!
 	FighterID int `json:"fighter_id,omitempty"`
 	// Required for M2M relationship between Fights and Fighters. NOT UFC assigned identifier!
@@ -88,6 +93,8 @@ func (*FighterResults) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case fighterresults.FieldID, fighterresults.FieldFighterID, fighterresults.FieldFightID, fighterresults.FieldSignificantStrikesLanded, fighterresults.FieldTakedowns, fighterresults.FieldKnockdowns, fighterresults.FieldControlTimeSeconds:
 			values[i] = new(sql.NullInt64)
+		case fighterresults.FieldCreatedAt, fighterresults.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -109,6 +116,18 @@ func (fr *FighterResults) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			fr.ID = int(value.Int64)
+		case fighterresults.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				fr.CreatedAt = value.Time
+			}
+		case fighterresults.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				fr.UpdatedAt = value.Time
+			}
 		case fighterresults.FieldFighterID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field fighter_id", values[i])
@@ -209,6 +228,12 @@ func (fr *FighterResults) String() string {
 	var builder strings.Builder
 	builder.WriteString("FighterResults(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", fr.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(fr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(fr.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("fighter_id=")
 	builder.WriteString(fmt.Sprintf("%v", fr.FighterID))
 	builder.WriteString(", ")

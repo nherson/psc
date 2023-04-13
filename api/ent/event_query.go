@@ -298,12 +298,12 @@ func (eq *EventQuery) WithFights(opts ...func(*FightQuery)) *EventQuery {
 // Example:
 //
 //	var v []struct {
-//		UfcEventID string `json:"ufc_event_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Event.Query().
-//		GroupBy(event.FieldUfcEventID).
+//		GroupBy(event.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (eq *EventQuery) GroupBy(field string, fields ...string) *EventGroupBy {
@@ -321,11 +321,11 @@ func (eq *EventQuery) GroupBy(field string, fields ...string) *EventGroupBy {
 // Example:
 //
 //	var v []struct {
-//		UfcEventID string `json:"ufc_event_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Event.Query().
-//		Select(event.FieldUfcEventID).
+//		Select(event.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (eq *EventQuery) Select(fields ...string) *EventSelect {
 	eq.ctx.Fields = append(eq.ctx.Fields, fields...)

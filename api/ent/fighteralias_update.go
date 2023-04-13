@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -25,6 +26,12 @@ type FighterAliasUpdate struct {
 // Where appends a list predicates to the FighterAliasUpdate builder.
 func (fau *FighterAliasUpdate) Where(ps ...predicate.FighterAlias) *FighterAliasUpdate {
 	fau.mutation.Where(ps...)
+	return fau
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (fau *FighterAliasUpdate) SetUpdatedAt(t time.Time) *FighterAliasUpdate {
+	fau.mutation.SetUpdatedAt(t)
 	return fau
 }
 
@@ -66,6 +73,7 @@ func (fau *FighterAliasUpdate) ClearFighter() *FighterAliasUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fau *FighterAliasUpdate) Save(ctx context.Context) (int, error) {
+	fau.defaults()
 	return withHooks[int, FighterAliasMutation](ctx, fau.sqlSave, fau.mutation, fau.hooks)
 }
 
@@ -91,6 +99,14 @@ func (fau *FighterAliasUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (fau *FighterAliasUpdate) defaults() {
+	if _, ok := fau.mutation.UpdatedAt(); !ok {
+		v := fighteralias.UpdateDefaultUpdatedAt()
+		fau.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (fau *FighterAliasUpdate) check() error {
 	if v, ok := fau.mutation.Alias(); ok {
@@ -112,6 +128,9 @@ func (fau *FighterAliasUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fau.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighteralias.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := fau.mutation.Alias(); ok {
 		_spec.SetField(fighteralias.FieldAlias, field.TypeString, value)
@@ -165,6 +184,12 @@ type FighterAliasUpdateOne struct {
 	mutation *FighterAliasMutation
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (fauo *FighterAliasUpdateOne) SetUpdatedAt(t time.Time) *FighterAliasUpdateOne {
+	fauo.mutation.SetUpdatedAt(t)
+	return fauo
+}
+
 // SetAlias sets the "alias" field.
 func (fauo *FighterAliasUpdateOne) SetAlias(s string) *FighterAliasUpdateOne {
 	fauo.mutation.SetAlias(s)
@@ -216,6 +241,7 @@ func (fauo *FighterAliasUpdateOne) Select(field string, fields ...string) *Fight
 
 // Save executes the query and returns the updated FighterAlias entity.
 func (fauo *FighterAliasUpdateOne) Save(ctx context.Context) (*FighterAlias, error) {
+	fauo.defaults()
 	return withHooks[*FighterAlias, FighterAliasMutation](ctx, fauo.sqlSave, fauo.mutation, fauo.hooks)
 }
 
@@ -238,6 +264,14 @@ func (fauo *FighterAliasUpdateOne) Exec(ctx context.Context) error {
 func (fauo *FighterAliasUpdateOne) ExecX(ctx context.Context) {
 	if err := fauo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (fauo *FighterAliasUpdateOne) defaults() {
+	if _, ok := fauo.mutation.UpdatedAt(); !ok {
+		v := fighteralias.UpdateDefaultUpdatedAt()
+		fauo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -279,6 +313,9 @@ func (fauo *FighterAliasUpdateOne) sqlSave(ctx context.Context) (_node *FighterA
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fauo.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighteralias.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := fauo.mutation.Alias(); ok {
 		_spec.SetField(fighteralias.FieldAlias, field.TypeString, value)

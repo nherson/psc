@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,6 +22,34 @@ type UpcomingFightCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (ufc *UpcomingFightCreate) SetCreatedAt(t time.Time) *UpcomingFightCreate {
+	ufc.mutation.SetCreatedAt(t)
+	return ufc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ufc *UpcomingFightCreate) SetNillableCreatedAt(t *time.Time) *UpcomingFightCreate {
+	if t != nil {
+		ufc.SetCreatedAt(*t)
+	}
+	return ufc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ufc *UpcomingFightCreate) SetUpdatedAt(t time.Time) *UpcomingFightCreate {
+	ufc.mutation.SetUpdatedAt(t)
+	return ufc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ufc *UpcomingFightCreate) SetNillableUpdatedAt(t *time.Time) *UpcomingFightCreate {
+	if t != nil {
+		ufc.SetUpdatedAt(*t)
+	}
+	return ufc
+}
+
 // Mutation returns the UpcomingFightMutation object of the builder.
 func (ufc *UpcomingFightCreate) Mutation() *UpcomingFightMutation {
 	return ufc.mutation
@@ -28,6 +57,7 @@ func (ufc *UpcomingFightCreate) Mutation() *UpcomingFightMutation {
 
 // Save creates the UpcomingFight in the database.
 func (ufc *UpcomingFightCreate) Save(ctx context.Context) (*UpcomingFight, error) {
+	ufc.defaults()
 	return withHooks[*UpcomingFight, UpcomingFightMutation](ctx, ufc.sqlSave, ufc.mutation, ufc.hooks)
 }
 
@@ -53,8 +83,26 @@ func (ufc *UpcomingFightCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ufc *UpcomingFightCreate) defaults() {
+	if _, ok := ufc.mutation.CreatedAt(); !ok {
+		v := upcomingfight.DefaultCreatedAt()
+		ufc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ufc.mutation.UpdatedAt(); !ok {
+		v := upcomingfight.DefaultUpdatedAt()
+		ufc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ufc *UpcomingFightCreate) check() error {
+	if _, ok := ufc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UpcomingFight.created_at"`)}
+	}
+	if _, ok := ufc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "UpcomingFight.updated_at"`)}
+	}
 	return nil
 }
 
@@ -82,6 +130,14 @@ func (ufc *UpcomingFightCreate) createSpec() (*UpcomingFight, *sqlgraph.CreateSp
 		_spec = sqlgraph.NewCreateSpec(upcomingfight.Table, sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ufc.conflict
+	if value, ok := ufc.mutation.CreatedAt(); ok {
+		_spec.SetField(upcomingfight.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := ufc.mutation.UpdatedAt(); ok {
+		_spec.SetField(upcomingfight.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -89,11 +145,17 @@ func (ufc *UpcomingFightCreate) createSpec() (*UpcomingFight, *sqlgraph.CreateSp
 // of the `INSERT` statement. For example:
 //
 //	client.UpcomingFight.Create().
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.UpcomingFightUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
 func (ufc *UpcomingFightCreate) OnConflict(opts ...sql.ConflictOption) *UpcomingFightUpsertOne {
 	ufc.conflict = opts
@@ -128,6 +190,18 @@ type (
 	}
 )
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *UpcomingFightUpsert) SetUpdatedAt(v time.Time) *UpcomingFightUpsert {
+	u.Set(upcomingfight.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *UpcomingFightUpsert) UpdateUpdatedAt() *UpcomingFightUpsert {
+	u.SetExcluded(upcomingfight.FieldUpdatedAt)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -138,6 +212,11 @@ type (
 //		Exec(ctx)
 func (u *UpcomingFightUpsertOne) UpdateNewValues() *UpcomingFightUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(upcomingfight.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -166,6 +245,20 @@ func (u *UpcomingFightUpsertOne) Update(set func(*UpcomingFightUpsert)) *Upcomin
 		set(&UpcomingFightUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *UpcomingFightUpsertOne) SetUpdatedAt(v time.Time) *UpcomingFightUpsertOne {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *UpcomingFightUpsertOne) UpdateUpdatedAt() *UpcomingFightUpsertOne {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // Exec executes the query.
@@ -216,6 +309,7 @@ func (ufcb *UpcomingFightCreateBulk) Save(ctx context.Context) ([]*UpcomingFight
 	for i := range ufcb.builders {
 		func(i int, root context.Context) {
 			builder := ufcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UpcomingFightMutation)
 				if !ok {
@@ -295,6 +389,11 @@ func (ufcb *UpcomingFightCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.UpcomingFightUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
 func (ufcb *UpcomingFightCreateBulk) OnConflict(opts ...sql.ConflictOption) *UpcomingFightUpsertBulk {
 	ufcb.conflict = opts
@@ -332,6 +431,13 @@ type UpcomingFightUpsertBulk struct {
 //		Exec(ctx)
 func (u *UpcomingFightUpsertBulk) UpdateNewValues() *UpcomingFightUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(upcomingfight.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -360,6 +466,20 @@ func (u *UpcomingFightUpsertBulk) Update(set func(*UpcomingFightUpsert)) *Upcomi
 		set(&UpcomingFightUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *UpcomingFightUpsertBulk) SetUpdatedAt(v time.Time) *UpcomingFightUpsertBulk {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *UpcomingFightUpsertBulk) UpdateUpdatedAt() *UpcomingFightUpsertBulk {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // Exec executes the query.

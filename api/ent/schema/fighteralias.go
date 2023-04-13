@@ -12,7 +12,7 @@ type FighterAlias struct {
 	ent.Schema
 }
 
-func (FighterAlias) Mixins() []ent.Mixin {
+func (FighterAlias) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.TimeMixin{},
 	}

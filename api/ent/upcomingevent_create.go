@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,6 +22,34 @@ type UpcomingEventCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (uec *UpcomingEventCreate) SetCreatedAt(t time.Time) *UpcomingEventCreate {
+	uec.mutation.SetCreatedAt(t)
+	return uec
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uec *UpcomingEventCreate) SetNillableCreatedAt(t *time.Time) *UpcomingEventCreate {
+	if t != nil {
+		uec.SetCreatedAt(*t)
+	}
+	return uec
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (uec *UpcomingEventCreate) SetUpdatedAt(t time.Time) *UpcomingEventCreate {
+	uec.mutation.SetUpdatedAt(t)
+	return uec
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (uec *UpcomingEventCreate) SetNillableUpdatedAt(t *time.Time) *UpcomingEventCreate {
+	if t != nil {
+		uec.SetUpdatedAt(*t)
+	}
+	return uec
+}
+
 // Mutation returns the UpcomingEventMutation object of the builder.
 func (uec *UpcomingEventCreate) Mutation() *UpcomingEventMutation {
 	return uec.mutation
@@ -28,6 +57,7 @@ func (uec *UpcomingEventCreate) Mutation() *UpcomingEventMutation {
 
 // Save creates the UpcomingEvent in the database.
 func (uec *UpcomingEventCreate) Save(ctx context.Context) (*UpcomingEvent, error) {
+	uec.defaults()
 	return withHooks[*UpcomingEvent, UpcomingEventMutation](ctx, uec.sqlSave, uec.mutation, uec.hooks)
 }
 
@@ -53,8 +83,26 @@ func (uec *UpcomingEventCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uec *UpcomingEventCreate) defaults() {
+	if _, ok := uec.mutation.CreatedAt(); !ok {
+		v := upcomingevent.DefaultCreatedAt()
+		uec.mutation.SetCreatedAt(v)
+	}
+	if _, ok := uec.mutation.UpdatedAt(); !ok {
+		v := upcomingevent.DefaultUpdatedAt()
+		uec.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uec *UpcomingEventCreate) check() error {
+	if _, ok := uec.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UpcomingEvent.created_at"`)}
+	}
+	if _, ok := uec.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "UpcomingEvent.updated_at"`)}
+	}
 	return nil
 }
 
@@ -82,6 +130,14 @@ func (uec *UpcomingEventCreate) createSpec() (*UpcomingEvent, *sqlgraph.CreateSp
 		_spec = sqlgraph.NewCreateSpec(upcomingevent.Table, sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = uec.conflict
+	if value, ok := uec.mutation.CreatedAt(); ok {
+		_spec.SetField(upcomingevent.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := uec.mutation.UpdatedAt(); ok {
+		_spec.SetField(upcomingevent.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -89,11 +145,17 @@ func (uec *UpcomingEventCreate) createSpec() (*UpcomingEvent, *sqlgraph.CreateSp
 // of the `INSERT` statement. For example:
 //
 //	client.UpcomingEvent.Create().
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.UpcomingEventUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
 func (uec *UpcomingEventCreate) OnConflict(opts ...sql.ConflictOption) *UpcomingEventUpsertOne {
 	uec.conflict = opts
@@ -128,6 +190,18 @@ type (
 	}
 )
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *UpcomingEventUpsert) SetUpdatedAt(v time.Time) *UpcomingEventUpsert {
+	u.Set(upcomingevent.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *UpcomingEventUpsert) UpdateUpdatedAt() *UpcomingEventUpsert {
+	u.SetExcluded(upcomingevent.FieldUpdatedAt)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -138,6 +212,11 @@ type (
 //		Exec(ctx)
 func (u *UpcomingEventUpsertOne) UpdateNewValues() *UpcomingEventUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(upcomingevent.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -166,6 +245,20 @@ func (u *UpcomingEventUpsertOne) Update(set func(*UpcomingEventUpsert)) *Upcomin
 		set(&UpcomingEventUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *UpcomingEventUpsertOne) SetUpdatedAt(v time.Time) *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *UpcomingEventUpsertOne) UpdateUpdatedAt() *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // Exec executes the query.
@@ -216,6 +309,7 @@ func (uecb *UpcomingEventCreateBulk) Save(ctx context.Context) ([]*UpcomingEvent
 	for i := range uecb.builders {
 		func(i int, root context.Context) {
 			builder := uecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UpcomingEventMutation)
 				if !ok {
@@ -295,6 +389,11 @@ func (uecb *UpcomingEventCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.UpcomingEventUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
 func (uecb *UpcomingEventCreateBulk) OnConflict(opts ...sql.ConflictOption) *UpcomingEventUpsertBulk {
 	uecb.conflict = opts
@@ -332,6 +431,13 @@ type UpcomingEventUpsertBulk struct {
 //		Exec(ctx)
 func (u *UpcomingEventUpsertBulk) UpdateNewValues() *UpcomingEventUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(upcomingevent.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -360,6 +466,20 @@ func (u *UpcomingEventUpsertBulk) Update(set func(*UpcomingEventUpsert)) *Upcomi
 		set(&UpcomingEventUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *UpcomingEventUpsertBulk) SetUpdatedAt(v time.Time) *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *UpcomingEventUpsertBulk) UpdateUpdatedAt() *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // Exec executes the query.

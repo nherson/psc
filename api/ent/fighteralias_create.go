@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -20,6 +21,34 @@ type FighterAliasCreate struct {
 	mutation *FighterAliasMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (fac *FighterAliasCreate) SetCreatedAt(t time.Time) *FighterAliasCreate {
+	fac.mutation.SetCreatedAt(t)
+	return fac
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (fac *FighterAliasCreate) SetNillableCreatedAt(t *time.Time) *FighterAliasCreate {
+	if t != nil {
+		fac.SetCreatedAt(*t)
+	}
+	return fac
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (fac *FighterAliasCreate) SetUpdatedAt(t time.Time) *FighterAliasCreate {
+	fac.mutation.SetUpdatedAt(t)
+	return fac
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (fac *FighterAliasCreate) SetNillableUpdatedAt(t *time.Time) *FighterAliasCreate {
+	if t != nil {
+		fac.SetUpdatedAt(*t)
+	}
+	return fac
 }
 
 // SetAlias sets the "alias" field.
@@ -54,6 +83,7 @@ func (fac *FighterAliasCreate) Mutation() *FighterAliasMutation {
 
 // Save creates the FighterAlias in the database.
 func (fac *FighterAliasCreate) Save(ctx context.Context) (*FighterAlias, error) {
+	fac.defaults()
 	return withHooks[*FighterAlias, FighterAliasMutation](ctx, fac.sqlSave, fac.mutation, fac.hooks)
 }
 
@@ -79,8 +109,26 @@ func (fac *FighterAliasCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (fac *FighterAliasCreate) defaults() {
+	if _, ok := fac.mutation.CreatedAt(); !ok {
+		v := fighteralias.DefaultCreatedAt()
+		fac.mutation.SetCreatedAt(v)
+	}
+	if _, ok := fac.mutation.UpdatedAt(); !ok {
+		v := fighteralias.DefaultUpdatedAt()
+		fac.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (fac *FighterAliasCreate) check() error {
+	if _, ok := fac.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "FighterAlias.created_at"`)}
+	}
+	if _, ok := fac.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "FighterAlias.updated_at"`)}
+	}
 	if _, ok := fac.mutation.Alias(); !ok {
 		return &ValidationError{Name: "alias", err: errors.New(`ent: missing required field "FighterAlias.alias"`)}
 	}
@@ -116,6 +164,14 @@ func (fac *FighterAliasCreate) createSpec() (*FighterAlias, *sqlgraph.CreateSpec
 		_spec = sqlgraph.NewCreateSpec(fighteralias.Table, sqlgraph.NewFieldSpec(fighteralias.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = fac.conflict
+	if value, ok := fac.mutation.CreatedAt(); ok {
+		_spec.SetField(fighteralias.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := fac.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighteralias.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := fac.mutation.Alias(); ok {
 		_spec.SetField(fighteralias.FieldAlias, field.TypeString, value)
 		_node.Alias = value
@@ -144,7 +200,7 @@ func (fac *FighterAliasCreate) createSpec() (*FighterAlias, *sqlgraph.CreateSpec
 // of the `INSERT` statement. For example:
 //
 //	client.FighterAlias.Create().
-//		SetAlias(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -153,7 +209,7 @@ func (fac *FighterAliasCreate) createSpec() (*FighterAlias, *sqlgraph.CreateSpec
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FighterAliasUpsert) {
-//			SetAlias(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (fac *FighterAliasCreate) OnConflict(opts ...sql.ConflictOption) *FighterAliasUpsertOne {
@@ -189,6 +245,18 @@ type (
 	}
 )
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *FighterAliasUpsert) SetUpdatedAt(v time.Time) *FighterAliasUpsert {
+	u.Set(fighteralias.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *FighterAliasUpsert) UpdateUpdatedAt() *FighterAliasUpsert {
+	u.SetExcluded(fighteralias.FieldUpdatedAt)
+	return u
+}
+
 // SetAlias sets the "alias" field.
 func (u *FighterAliasUpsert) SetAlias(v string) *FighterAliasUpsert {
 	u.Set(fighteralias.FieldAlias, v)
@@ -211,6 +279,11 @@ func (u *FighterAliasUpsert) UpdateAlias() *FighterAliasUpsert {
 //		Exec(ctx)
 func (u *FighterAliasUpsertOne) UpdateNewValues() *FighterAliasUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(fighteralias.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -239,6 +312,20 @@ func (u *FighterAliasUpsertOne) Update(set func(*FighterAliasUpsert)) *FighterAl
 		set(&FighterAliasUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *FighterAliasUpsertOne) SetUpdatedAt(v time.Time) *FighterAliasUpsertOne {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *FighterAliasUpsertOne) UpdateUpdatedAt() *FighterAliasUpsertOne {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetAlias sets the "alias" field.
@@ -303,6 +390,7 @@ func (facb *FighterAliasCreateBulk) Save(ctx context.Context) ([]*FighterAlias, 
 	for i := range facb.builders {
 		func(i int, root context.Context) {
 			builder := facb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FighterAliasMutation)
 				if !ok {
@@ -385,7 +473,7 @@ func (facb *FighterAliasCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FighterAliasUpsert) {
-//			SetAlias(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (facb *FighterAliasCreateBulk) OnConflict(opts ...sql.ConflictOption) *FighterAliasUpsertBulk {
@@ -424,6 +512,13 @@ type FighterAliasUpsertBulk struct {
 //		Exec(ctx)
 func (u *FighterAliasUpsertBulk) UpdateNewValues() *FighterAliasUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(fighteralias.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -452,6 +547,20 @@ func (u *FighterAliasUpsertBulk) Update(set func(*FighterAliasUpsert)) *FighterA
 		set(&FighterAliasUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *FighterAliasUpsertBulk) SetUpdatedAt(v time.Time) *FighterAliasUpsertBulk {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *FighterAliasUpsertBulk) UpdateUpdatedAt() *FighterAliasUpsertBulk {
+	return u.Update(func(s *FighterAliasUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetAlias sets the "alias" field.

@@ -3,6 +3,8 @@
 package event
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -12,10 +14,16 @@ const (
 	Label = "event"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldUfcEventID holds the string denoting the ufc_event_id field in the database.
 	FieldUfcEventID = "ufc_event_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDate holds the string denoting the date field in the database.
+	FieldDate = "date"
 	// EdgeFights holds the string denoting the fights edge name in mutations.
 	EdgeFights = "fights"
 	// Table holds the table name of the event in the database.
@@ -32,8 +40,11 @@ const (
 // Columns holds all SQL columns for event fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldUfcEventID,
 	FieldName,
+	FieldDate,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -47,6 +58,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// UfcEventIDValidator is a validator for the "ufc_event_id" field. It is called by the builders before save.
 	UfcEventIDValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -61,6 +78,16 @@ func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
 // ByUfcEventID orders the results by the ufc_event_id field.
 func ByUfcEventID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldUfcEventID, opts...).ToFunc()
@@ -69,6 +96,11 @@ func ByUfcEventID(opts ...sql.OrderTermOption) Order {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByDate orders the results by the date field.
+func ByDate(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldDate, opts...).ToFunc()
 }
 
 // ByFightsCount orders the results by fights count.

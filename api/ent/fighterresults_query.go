@@ -333,12 +333,12 @@ func (frq *FighterResultsQuery) WithFight(opts ...func(*FightQuery)) *FighterRes
 // Example:
 //
 //	var v []struct {
-//		FighterID int `json:"fighter_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.FighterResults.Query().
-//		GroupBy(fighterresults.FieldFighterID).
+//		GroupBy(fighterresults.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (frq *FighterResultsQuery) GroupBy(field string, fields ...string) *FighterResultsGroupBy {
@@ -356,11 +356,11 @@ func (frq *FighterResultsQuery) GroupBy(field string, fields ...string) *Fighter
 // Example:
 //
 //	var v []struct {
-//		FighterID int `json:"fighter_id,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.FighterResults.Query().
-//		Select(fighterresults.FieldFighterID).
+//		Select(fighterresults.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (frq *FighterResultsQuery) Select(fields ...string) *FighterResultsSelect {
 	frq.ctx.Fields = append(frq.ctx.Fields, fields...)

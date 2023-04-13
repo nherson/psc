@@ -298,12 +298,12 @@ func (faq *FighterAliasQuery) WithFighter(opts ...func(*FighterQuery)) *FighterA
 // Example:
 //
 //	var v []struct {
-//		Alias string `json:"alias,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.FighterAlias.Query().
-//		GroupBy(fighteralias.FieldAlias).
+//		GroupBy(fighteralias.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (faq *FighterAliasQuery) GroupBy(field string, fields ...string) *FighterAliasGroupBy {
@@ -321,11 +321,11 @@ func (faq *FighterAliasQuery) GroupBy(field string, fields ...string) *FighterAl
 // Example:
 //
 //	var v []struct {
-//		Alias string `json:"alias,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.FighterAlias.Query().
-//		Select(fighteralias.FieldAlias).
+//		Select(fighteralias.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (faq *FighterAliasQuery) Select(fields ...string) *FighterAliasSelect {
 	faq.ctx.Fields = append(faq.ctx.Fields, fields...)

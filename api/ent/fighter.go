@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,6 +17,10 @@ type Fighter struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// The fighter identifier as assigned by UFC
 	UfcFighterID string `json:"ufc_fighter_id,omitempty"`
 	// MmaID holds the value of the "mma_id" field.
@@ -81,6 +86,8 @@ func (*Fighter) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case fighter.FieldUfcFighterID, fighter.FieldFirstName, fighter.FieldLastName, fighter.FieldNickName:
 			values[i] = new(sql.NullString)
+		case fighter.FieldCreatedAt, fighter.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -102,6 +109,18 @@ func (f *Fighter) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			f.ID = int(value.Int64)
+		case fighter.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				f.CreatedAt = value.Time
+			}
+		case fighter.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				f.UpdatedAt = value.Time
+			}
 		case fighter.FieldUfcFighterID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field ufc_fighter_id", values[i])
@@ -183,6 +202,12 @@ func (f *Fighter) String() string {
 	var builder strings.Builder
 	builder.WriteString("Fighter(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(f.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(f.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("ufc_fighter_id=")
 	builder.WriteString(f.UfcFighterID)
 	builder.WriteString(", ")

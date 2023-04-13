@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,6 +29,12 @@ func (eu *EventUpdate) Where(ps ...predicate.Event) *EventUpdate {
 	return eu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (eu *EventUpdate) SetUpdatedAt(t time.Time) *EventUpdate {
+	eu.mutation.SetUpdatedAt(t)
+	return eu
+}
+
 // SetUfcEventID sets the "ufc_event_id" field.
 func (eu *EventUpdate) SetUfcEventID(s string) *EventUpdate {
 	eu.mutation.SetUfcEventID(s)
@@ -37,6 +44,26 @@ func (eu *EventUpdate) SetUfcEventID(s string) *EventUpdate {
 // SetName sets the "name" field.
 func (eu *EventUpdate) SetName(s string) *EventUpdate {
 	eu.mutation.SetName(s)
+	return eu
+}
+
+// SetDate sets the "date" field.
+func (eu *EventUpdate) SetDate(t time.Time) *EventUpdate {
+	eu.mutation.SetDate(t)
+	return eu
+}
+
+// SetNillableDate sets the "date" field if the given value is not nil.
+func (eu *EventUpdate) SetNillableDate(t *time.Time) *EventUpdate {
+	if t != nil {
+		eu.SetDate(*t)
+	}
+	return eu
+}
+
+// ClearDate clears the value of the "date" field.
+func (eu *EventUpdate) ClearDate() *EventUpdate {
+	eu.mutation.ClearDate()
 	return eu
 }
 
@@ -83,6 +110,7 @@ func (eu *EventUpdate) RemoveFights(f ...*Fight) *EventUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (eu *EventUpdate) Save(ctx context.Context) (int, error) {
+	eu.defaults()
 	return withHooks[int, EventMutation](ctx, eu.sqlSave, eu.mutation, eu.hooks)
 }
 
@@ -105,6 +133,14 @@ func (eu *EventUpdate) Exec(ctx context.Context) error {
 func (eu *EventUpdate) ExecX(ctx context.Context) {
 	if err := eu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (eu *EventUpdate) defaults() {
+	if _, ok := eu.mutation.UpdatedAt(); !ok {
+		v := event.UpdateDefaultUpdatedAt()
+		eu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -135,11 +171,20 @@ func (eu *EventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := eu.mutation.UpdatedAt(); ok {
+		_spec.SetField(event.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := eu.mutation.UfcEventID(); ok {
 		_spec.SetField(event.FieldUfcEventID, field.TypeString, value)
 	}
 	if value, ok := eu.mutation.Name(); ok {
 		_spec.SetField(event.FieldName, field.TypeString, value)
+	}
+	if value, ok := eu.mutation.Date(); ok {
+		_spec.SetField(event.FieldDate, field.TypeTime, value)
+	}
+	if eu.mutation.DateCleared() {
+		_spec.ClearField(event.FieldDate, field.TypeTime)
 	}
 	if eu.mutation.FightsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -206,6 +251,12 @@ type EventUpdateOne struct {
 	mutation *EventMutation
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (euo *EventUpdateOne) SetUpdatedAt(t time.Time) *EventUpdateOne {
+	euo.mutation.SetUpdatedAt(t)
+	return euo
+}
+
 // SetUfcEventID sets the "ufc_event_id" field.
 func (euo *EventUpdateOne) SetUfcEventID(s string) *EventUpdateOne {
 	euo.mutation.SetUfcEventID(s)
@@ -215,6 +266,26 @@ func (euo *EventUpdateOne) SetUfcEventID(s string) *EventUpdateOne {
 // SetName sets the "name" field.
 func (euo *EventUpdateOne) SetName(s string) *EventUpdateOne {
 	euo.mutation.SetName(s)
+	return euo
+}
+
+// SetDate sets the "date" field.
+func (euo *EventUpdateOne) SetDate(t time.Time) *EventUpdateOne {
+	euo.mutation.SetDate(t)
+	return euo
+}
+
+// SetNillableDate sets the "date" field if the given value is not nil.
+func (euo *EventUpdateOne) SetNillableDate(t *time.Time) *EventUpdateOne {
+	if t != nil {
+		euo.SetDate(*t)
+	}
+	return euo
+}
+
+// ClearDate clears the value of the "date" field.
+func (euo *EventUpdateOne) ClearDate() *EventUpdateOne {
+	euo.mutation.ClearDate()
 	return euo
 }
 
@@ -274,6 +345,7 @@ func (euo *EventUpdateOne) Select(field string, fields ...string) *EventUpdateOn
 
 // Save executes the query and returns the updated Event entity.
 func (euo *EventUpdateOne) Save(ctx context.Context) (*Event, error) {
+	euo.defaults()
 	return withHooks[*Event, EventMutation](ctx, euo.sqlSave, euo.mutation, euo.hooks)
 }
 
@@ -296,6 +368,14 @@ func (euo *EventUpdateOne) Exec(ctx context.Context) error {
 func (euo *EventUpdateOne) ExecX(ctx context.Context) {
 	if err := euo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (euo *EventUpdateOne) defaults() {
+	if _, ok := euo.mutation.UpdatedAt(); !ok {
+		v := event.UpdateDefaultUpdatedAt()
+		euo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -343,11 +423,20 @@ func (euo *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error
 			}
 		}
 	}
+	if value, ok := euo.mutation.UpdatedAt(); ok {
+		_spec.SetField(event.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := euo.mutation.UfcEventID(); ok {
 		_spec.SetField(event.FieldUfcEventID, field.TypeString, value)
 	}
 	if value, ok := euo.mutation.Name(); ok {
 		_spec.SetField(event.FieldName, field.TypeString, value)
+	}
+	if value, ok := euo.mutation.Date(); ok {
+		_spec.SetField(event.FieldDate, field.TypeTime, value)
+	}
+	if euo.mutation.DateCleared() {
+		_spec.ClearField(event.FieldDate, field.TypeTime)
 	}
 	if euo.mutation.FightsCleared() {
 		edge := &sqlgraph.EdgeSpec{

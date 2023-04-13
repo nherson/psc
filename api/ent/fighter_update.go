@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +28,12 @@ type FighterUpdate struct {
 // Where appends a list predicates to the FighterUpdate builder.
 func (fu *FighterUpdate) Where(ps ...predicate.Fighter) *FighterUpdate {
 	fu.mutation.Where(ps...)
+	return fu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (fu *FighterUpdate) SetUpdatedAt(t time.Time) *FighterUpdate {
+	fu.mutation.SetUpdatedAt(t)
 	return fu
 }
 
@@ -182,6 +189,7 @@ func (fu *FighterUpdate) RemoveFighterResults(f ...*FighterResults) *FighterUpda
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FighterUpdate) Save(ctx context.Context) (int, error) {
+	fu.defaults()
 	return withHooks[int, FighterMutation](ctx, fu.sqlSave, fu.mutation, fu.hooks)
 }
 
@@ -207,6 +215,14 @@ func (fu *FighterUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (fu *FighterUpdate) defaults() {
+	if _, ok := fu.mutation.UpdatedAt(); !ok {
+		v := fighter.UpdateDefaultUpdatedAt()
+		fu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (fu *FighterUpdate) check() error {
 	if v, ok := fu.mutation.UfcFighterID(); ok {
@@ -228,6 +244,9 @@ func (fu *FighterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fu.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighter.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := fu.mutation.UfcFighterID(); ok {
 		_spec.SetField(fighter.FieldUfcFighterID, field.TypeString, value)
@@ -414,6 +433,12 @@ type FighterUpdateOne struct {
 	mutation *FighterMutation
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (fuo *FighterUpdateOne) SetUpdatedAt(t time.Time) *FighterUpdateOne {
+	fuo.mutation.SetUpdatedAt(t)
+	return fuo
+}
+
 // SetUfcFighterID sets the "ufc_fighter_id" field.
 func (fuo *FighterUpdateOne) SetUfcFighterID(s string) *FighterUpdateOne {
 	fuo.mutation.SetUfcFighterID(s)
@@ -579,6 +604,7 @@ func (fuo *FighterUpdateOne) Select(field string, fields ...string) *FighterUpda
 
 // Save executes the query and returns the updated Fighter entity.
 func (fuo *FighterUpdateOne) Save(ctx context.Context) (*Fighter, error) {
+	fuo.defaults()
 	return withHooks[*Fighter, FighterMutation](ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
 }
 
@@ -601,6 +627,14 @@ func (fuo *FighterUpdateOne) Exec(ctx context.Context) error {
 func (fuo *FighterUpdateOne) ExecX(ctx context.Context) {
 	if err := fuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (fuo *FighterUpdateOne) defaults() {
+	if _, ok := fuo.mutation.UpdatedAt(); !ok {
+		v := fighter.UpdateDefaultUpdatedAt()
+		fuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -642,6 +676,9 @@ func (fuo *FighterUpdateOne) sqlSave(ctx context.Context) (_node *Fighter, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighter.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := fuo.mutation.UfcFighterID(); ok {
 		_spec.SetField(fighter.FieldUfcFighterID, field.TypeString, value)

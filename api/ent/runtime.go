@@ -3,20 +3,37 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/nherson/psc/api/ent/event"
 	"github.com/nherson/psc/api/ent/fight"
 	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/fighteralias"
 	"github.com/nherson/psc/api/ent/fighterresults"
 	"github.com/nherson/psc/api/ent/schema"
+	"github.com/nherson/psc/api/ent/upcomingevent"
+	"github.com/nherson/psc/api/ent/upcomingfight"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	eventMixin := schema.Event{}.Mixin()
+	eventMixinFields0 := eventMixin[0].Fields()
+	_ = eventMixinFields0
 	eventFields := schema.Event{}.Fields()
 	_ = eventFields
+	// eventDescCreatedAt is the schema descriptor for created_at field.
+	eventDescCreatedAt := eventMixinFields0[0].Descriptor()
+	// event.DefaultCreatedAt holds the default value on creation for the created_at field.
+	event.DefaultCreatedAt = eventDescCreatedAt.Default.(func() time.Time)
+	// eventDescUpdatedAt is the schema descriptor for updated_at field.
+	eventDescUpdatedAt := eventMixinFields0[1].Descriptor()
+	// event.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	event.DefaultUpdatedAt = eventDescUpdatedAt.Default.(func() time.Time)
+	// event.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	event.UpdateDefaultUpdatedAt = eventDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// eventDescUfcEventID is the schema descriptor for ufc_event_id field.
 	eventDescUfcEventID := eventFields[0].Descriptor()
 	// event.UfcEventIDValidator is a validator for the "ufc_event_id" field. It is called by the builders before save.
@@ -25,8 +42,21 @@ func init() {
 	eventDescName := eventFields[1].Descriptor()
 	// event.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	event.NameValidator = eventDescName.Validators[0].(func(string) error)
+	fightMixin := schema.Fight{}.Mixin()
+	fightMixinFields0 := fightMixin[0].Fields()
+	_ = fightMixinFields0
 	fightFields := schema.Fight{}.Fields()
 	_ = fightFields
+	// fightDescCreatedAt is the schema descriptor for created_at field.
+	fightDescCreatedAt := fightMixinFields0[0].Descriptor()
+	// fight.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fight.DefaultCreatedAt = fightDescCreatedAt.Default.(func() time.Time)
+	// fightDescUpdatedAt is the schema descriptor for updated_at field.
+	fightDescUpdatedAt := fightMixinFields0[1].Descriptor()
+	// fight.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fight.DefaultUpdatedAt = fightDescUpdatedAt.Default.(func() time.Time)
+	// fight.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fight.UpdateDefaultUpdatedAt = fightDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// fightDescUfcFightID is the schema descriptor for ufc_fight_id field.
 	fightDescUfcFightID := fightFields[0].Descriptor()
 	// fight.UfcFightIDValidator is a validator for the "ufc_fight_id" field. It is called by the builders before save.
@@ -43,22 +73,91 @@ func init() {
 	fightDescResultMethod := fightFields[3].Descriptor()
 	// fight.ResultMethodValidator is a validator for the "result_method" field. It is called by the builders before save.
 	fight.ResultMethodValidator = fightDescResultMethod.Validators[0].(func(string) error)
+	fighterMixin := schema.Fighter{}.Mixin()
+	fighterMixinFields0 := fighterMixin[0].Fields()
+	_ = fighterMixinFields0
 	fighterFields := schema.Fighter{}.Fields()
 	_ = fighterFields
+	// fighterDescCreatedAt is the schema descriptor for created_at field.
+	fighterDescCreatedAt := fighterMixinFields0[0].Descriptor()
+	// fighter.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fighter.DefaultCreatedAt = fighterDescCreatedAt.Default.(func() time.Time)
+	// fighterDescUpdatedAt is the schema descriptor for updated_at field.
+	fighterDescUpdatedAt := fighterMixinFields0[1].Descriptor()
+	// fighter.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fighter.DefaultUpdatedAt = fighterDescUpdatedAt.Default.(func() time.Time)
+	// fighter.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fighter.UpdateDefaultUpdatedAt = fighterDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// fighterDescUfcFighterID is the schema descriptor for ufc_fighter_id field.
 	fighterDescUfcFighterID := fighterFields[0].Descriptor()
 	// fighter.UfcFighterIDValidator is a validator for the "ufc_fighter_id" field. It is called by the builders before save.
 	fighter.UfcFighterIDValidator = fighterDescUfcFighterID.Validators[0].(func(string) error)
+	fighteraliasMixin := schema.FighterAlias{}.Mixin()
+	fighteraliasMixinFields0 := fighteraliasMixin[0].Fields()
+	_ = fighteraliasMixinFields0
 	fighteraliasFields := schema.FighterAlias{}.Fields()
 	_ = fighteraliasFields
+	// fighteraliasDescCreatedAt is the schema descriptor for created_at field.
+	fighteraliasDescCreatedAt := fighteraliasMixinFields0[0].Descriptor()
+	// fighteralias.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fighteralias.DefaultCreatedAt = fighteraliasDescCreatedAt.Default.(func() time.Time)
+	// fighteraliasDescUpdatedAt is the schema descriptor for updated_at field.
+	fighteraliasDescUpdatedAt := fighteraliasMixinFields0[1].Descriptor()
+	// fighteralias.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fighteralias.DefaultUpdatedAt = fighteraliasDescUpdatedAt.Default.(func() time.Time)
+	// fighteralias.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fighteralias.UpdateDefaultUpdatedAt = fighteraliasDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// fighteraliasDescAlias is the schema descriptor for alias field.
 	fighteraliasDescAlias := fighteraliasFields[0].Descriptor()
 	// fighteralias.AliasValidator is a validator for the "alias" field. It is called by the builders before save.
 	fighteralias.AliasValidator = fighteraliasDescAlias.Validators[0].(func(string) error)
+	fighterresultsMixin := schema.FighterResults{}.Mixin()
+	fighterresultsMixinFields0 := fighterresultsMixin[0].Fields()
+	_ = fighterresultsMixinFields0
 	fighterresultsFields := schema.FighterResults{}.Fields()
 	_ = fighterresultsFields
+	// fighterresultsDescCreatedAt is the schema descriptor for created_at field.
+	fighterresultsDescCreatedAt := fighterresultsMixinFields0[0].Descriptor()
+	// fighterresults.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fighterresults.DefaultCreatedAt = fighterresultsDescCreatedAt.Default.(func() time.Time)
+	// fighterresultsDescUpdatedAt is the schema descriptor for updated_at field.
+	fighterresultsDescUpdatedAt := fighterresultsMixinFields0[1].Descriptor()
+	// fighterresults.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fighterresults.DefaultUpdatedAt = fighterresultsDescUpdatedAt.Default.(func() time.Time)
+	// fighterresults.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fighterresults.UpdateDefaultUpdatedAt = fighterresultsDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// fighterresultsDescMissedWeight is the schema descriptor for missed_weight field.
 	fighterresultsDescMissedWeight := fighterresultsFields[8].Descriptor()
 	// fighterresults.DefaultMissedWeight holds the default value on creation for the missed_weight field.
 	fighterresults.DefaultMissedWeight = fighterresultsDescMissedWeight.Default.(bool)
+	upcomingeventMixin := schema.UpcomingEvent{}.Mixin()
+	upcomingeventMixinFields0 := upcomingeventMixin[0].Fields()
+	_ = upcomingeventMixinFields0
+	upcomingeventFields := schema.UpcomingEvent{}.Fields()
+	_ = upcomingeventFields
+	// upcomingeventDescCreatedAt is the schema descriptor for created_at field.
+	upcomingeventDescCreatedAt := upcomingeventMixinFields0[0].Descriptor()
+	// upcomingevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	upcomingevent.DefaultCreatedAt = upcomingeventDescCreatedAt.Default.(func() time.Time)
+	// upcomingeventDescUpdatedAt is the schema descriptor for updated_at field.
+	upcomingeventDescUpdatedAt := upcomingeventMixinFields0[1].Descriptor()
+	// upcomingevent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	upcomingevent.DefaultUpdatedAt = upcomingeventDescUpdatedAt.Default.(func() time.Time)
+	// upcomingevent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	upcomingevent.UpdateDefaultUpdatedAt = upcomingeventDescUpdatedAt.UpdateDefault.(func() time.Time)
+	upcomingfightMixin := schema.UpcomingFight{}.Mixin()
+	upcomingfightMixinFields0 := upcomingfightMixin[0].Fields()
+	_ = upcomingfightMixinFields0
+	upcomingfightFields := schema.UpcomingFight{}.Fields()
+	_ = upcomingfightFields
+	// upcomingfightDescCreatedAt is the schema descriptor for created_at field.
+	upcomingfightDescCreatedAt := upcomingfightMixinFields0[0].Descriptor()
+	// upcomingfight.DefaultCreatedAt holds the default value on creation for the created_at field.
+	upcomingfight.DefaultCreatedAt = upcomingfightDescCreatedAt.Default.(func() time.Time)
+	// upcomingfightDescUpdatedAt is the schema descriptor for updated_at field.
+	upcomingfightDescUpdatedAt := upcomingfightMixinFields0[1].Descriptor()
+	// upcomingfight.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	upcomingfight.DefaultUpdatedAt = upcomingfightDescUpdatedAt.Default.(func() time.Time)
+	// upcomingfight.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	upcomingfight.UpdateDefaultUpdatedAt = upcomingfightDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

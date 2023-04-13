@@ -10,7 +10,7 @@ type UpcomingFight struct {
 	ent.Schema
 }
 
-func (UpcomingFight) Mixins() []ent.Mixin {
+func (UpcomingFight) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.TimeMixin{},
 	}

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +28,12 @@ func (ufu *UpcomingFightUpdate) Where(ps ...predicate.UpcomingFight) *UpcomingFi
 	return ufu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (ufu *UpcomingFightUpdate) SetUpdatedAt(t time.Time) *UpcomingFightUpdate {
+	ufu.mutation.SetUpdatedAt(t)
+	return ufu
+}
+
 // Mutation returns the UpcomingFightMutation object of the builder.
 func (ufu *UpcomingFightUpdate) Mutation() *UpcomingFightMutation {
 	return ufu.mutation
@@ -34,6 +41,7 @@ func (ufu *UpcomingFightUpdate) Mutation() *UpcomingFightMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ufu *UpcomingFightUpdate) Save(ctx context.Context) (int, error) {
+	ufu.defaults()
 	return withHooks[int, UpcomingFightMutation](ctx, ufu.sqlSave, ufu.mutation, ufu.hooks)
 }
 
@@ -59,6 +67,14 @@ func (ufu *UpcomingFightUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ufu *UpcomingFightUpdate) defaults() {
+	if _, ok := ufu.mutation.UpdatedAt(); !ok {
+		v := upcomingfight.UpdateDefaultUpdatedAt()
+		ufu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (ufu *UpcomingFightUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(upcomingfight.Table, upcomingfight.Columns, sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt))
 	if ps := ufu.mutation.predicates; len(ps) > 0 {
@@ -67,6 +83,9 @@ func (ufu *UpcomingFightUpdate) sqlSave(ctx context.Context) (n int, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ufu.mutation.UpdatedAt(); ok {
+		_spec.SetField(upcomingfight.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ufu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -86,6 +105,12 @@ type UpcomingFightUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UpcomingFightMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ufuo *UpcomingFightUpdateOne) SetUpdatedAt(t time.Time) *UpcomingFightUpdateOne {
+	ufuo.mutation.SetUpdatedAt(t)
+	return ufuo
 }
 
 // Mutation returns the UpcomingFightMutation object of the builder.
@@ -108,6 +133,7 @@ func (ufuo *UpcomingFightUpdateOne) Select(field string, fields ...string) *Upco
 
 // Save executes the query and returns the updated UpcomingFight entity.
 func (ufuo *UpcomingFightUpdateOne) Save(ctx context.Context) (*UpcomingFight, error) {
+	ufuo.defaults()
 	return withHooks[*UpcomingFight, UpcomingFightMutation](ctx, ufuo.sqlSave, ufuo.mutation, ufuo.hooks)
 }
 
@@ -130,6 +156,14 @@ func (ufuo *UpcomingFightUpdateOne) Exec(ctx context.Context) error {
 func (ufuo *UpcomingFightUpdateOne) ExecX(ctx context.Context) {
 	if err := ufuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ufuo *UpcomingFightUpdateOne) defaults() {
+	if _, ok := ufuo.mutation.UpdatedAt(); !ok {
+		v := upcomingfight.UpdateDefaultUpdatedAt()
+		ufuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -158,6 +192,9 @@ func (ufuo *UpcomingFightUpdateOne) sqlSave(ctx context.Context) (_node *Upcomin
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ufuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(upcomingfight.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &UpcomingFight{config: ufuo.config}
 	_spec.Assign = _node.assignValues

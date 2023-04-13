@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -22,6 +23,34 @@ type EventCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (ec *EventCreate) SetCreatedAt(t time.Time) *EventCreate {
+	ec.mutation.SetCreatedAt(t)
+	return ec
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ec *EventCreate) SetNillableCreatedAt(t *time.Time) *EventCreate {
+	if t != nil {
+		ec.SetCreatedAt(*t)
+	}
+	return ec
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ec *EventCreate) SetUpdatedAt(t time.Time) *EventCreate {
+	ec.mutation.SetUpdatedAt(t)
+	return ec
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ec *EventCreate) SetNillableUpdatedAt(t *time.Time) *EventCreate {
+	if t != nil {
+		ec.SetUpdatedAt(*t)
+	}
+	return ec
+}
+
 // SetUfcEventID sets the "ufc_event_id" field.
 func (ec *EventCreate) SetUfcEventID(s string) *EventCreate {
 	ec.mutation.SetUfcEventID(s)
@@ -31,6 +60,20 @@ func (ec *EventCreate) SetUfcEventID(s string) *EventCreate {
 // SetName sets the "name" field.
 func (ec *EventCreate) SetName(s string) *EventCreate {
 	ec.mutation.SetName(s)
+	return ec
+}
+
+// SetDate sets the "date" field.
+func (ec *EventCreate) SetDate(t time.Time) *EventCreate {
+	ec.mutation.SetDate(t)
+	return ec
+}
+
+// SetNillableDate sets the "date" field if the given value is not nil.
+func (ec *EventCreate) SetNillableDate(t *time.Time) *EventCreate {
+	if t != nil {
+		ec.SetDate(*t)
+	}
 	return ec
 }
 
@@ -56,6 +99,7 @@ func (ec *EventCreate) Mutation() *EventMutation {
 
 // Save creates the Event in the database.
 func (ec *EventCreate) Save(ctx context.Context) (*Event, error) {
+	ec.defaults()
 	return withHooks[*Event, EventMutation](ctx, ec.sqlSave, ec.mutation, ec.hooks)
 }
 
@@ -81,8 +125,26 @@ func (ec *EventCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ec *EventCreate) defaults() {
+	if _, ok := ec.mutation.CreatedAt(); !ok {
+		v := event.DefaultCreatedAt()
+		ec.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ec.mutation.UpdatedAt(); !ok {
+		v := event.DefaultUpdatedAt()
+		ec.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ec *EventCreate) check() error {
+	if _, ok := ec.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Event.created_at"`)}
+	}
+	if _, ok := ec.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Event.updated_at"`)}
+	}
 	if _, ok := ec.mutation.UfcEventID(); !ok {
 		return &ValidationError{Name: "ufc_event_id", err: errors.New(`ent: missing required field "Event.ufc_event_id"`)}
 	}
@@ -126,6 +188,14 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(event.Table, sqlgraph.NewFieldSpec(event.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ec.conflict
+	if value, ok := ec.mutation.CreatedAt(); ok {
+		_spec.SetField(event.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := ec.mutation.UpdatedAt(); ok {
+		_spec.SetField(event.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := ec.mutation.UfcEventID(); ok {
 		_spec.SetField(event.FieldUfcEventID, field.TypeString, value)
 		_node.UfcEventID = value
@@ -133,6 +203,10 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.Name(); ok {
 		_spec.SetField(event.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := ec.mutation.Date(); ok {
+		_spec.SetField(event.FieldDate, field.TypeTime, value)
+		_node.Date = value
 	}
 	if nodes := ec.mutation.FightsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -157,7 +231,7 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Event.Create().
-//		SetUfcEventID(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -166,7 +240,7 @@ func (ec *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.EventUpsert) {
-//			SetUfcEventID(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (ec *EventCreate) OnConflict(opts ...sql.ConflictOption) *EventUpsertOne {
@@ -202,6 +276,18 @@ type (
 	}
 )
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *EventUpsert) SetUpdatedAt(v time.Time) *EventUpsert {
+	u.Set(event.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *EventUpsert) UpdateUpdatedAt() *EventUpsert {
+	u.SetExcluded(event.FieldUpdatedAt)
+	return u
+}
+
 // SetUfcEventID sets the "ufc_event_id" field.
 func (u *EventUpsert) SetUfcEventID(v string) *EventUpsert {
 	u.Set(event.FieldUfcEventID, v)
@@ -226,6 +312,24 @@ func (u *EventUpsert) UpdateName() *EventUpsert {
 	return u
 }
 
+// SetDate sets the "date" field.
+func (u *EventUpsert) SetDate(v time.Time) *EventUpsert {
+	u.Set(event.FieldDate, v)
+	return u
+}
+
+// UpdateDate sets the "date" field to the value that was provided on create.
+func (u *EventUpsert) UpdateDate() *EventUpsert {
+	u.SetExcluded(event.FieldDate)
+	return u
+}
+
+// ClearDate clears the value of the "date" field.
+func (u *EventUpsert) ClearDate() *EventUpsert {
+	u.SetNull(event.FieldDate)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -236,6 +340,11 @@ func (u *EventUpsert) UpdateName() *EventUpsert {
 //		Exec(ctx)
 func (u *EventUpsertOne) UpdateNewValues() *EventUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(event.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -266,6 +375,20 @@ func (u *EventUpsertOne) Update(set func(*EventUpsert)) *EventUpsertOne {
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *EventUpsertOne) SetUpdatedAt(v time.Time) *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *EventUpsertOne) UpdateUpdatedAt() *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
 // SetUfcEventID sets the "ufc_event_id" field.
 func (u *EventUpsertOne) SetUfcEventID(v string) *EventUpsertOne {
 	return u.Update(func(s *EventUpsert) {
@@ -291,6 +414,27 @@ func (u *EventUpsertOne) SetName(v string) *EventUpsertOne {
 func (u *EventUpsertOne) UpdateName() *EventUpsertOne {
 	return u.Update(func(s *EventUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetDate sets the "date" field.
+func (u *EventUpsertOne) SetDate(v time.Time) *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.SetDate(v)
+	})
+}
+
+// UpdateDate sets the "date" field to the value that was provided on create.
+func (u *EventUpsertOne) UpdateDate() *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdateDate()
+	})
+}
+
+// ClearDate clears the value of the "date" field.
+func (u *EventUpsertOne) ClearDate() *EventUpsertOne {
+	return u.Update(func(s *EventUpsert) {
+		s.ClearDate()
 	})
 }
 
@@ -342,6 +486,7 @@ func (ecb *EventCreateBulk) Save(ctx context.Context) ([]*Event, error) {
 	for i := range ecb.builders {
 		func(i int, root context.Context) {
 			builder := ecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*EventMutation)
 				if !ok {
@@ -424,7 +569,7 @@ func (ecb *EventCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.EventUpsert) {
-//			SetUfcEventID(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (ecb *EventCreateBulk) OnConflict(opts ...sql.ConflictOption) *EventUpsertBulk {
@@ -463,6 +608,13 @@ type EventUpsertBulk struct {
 //		Exec(ctx)
 func (u *EventUpsertBulk) UpdateNewValues() *EventUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(event.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -493,6 +645,20 @@ func (u *EventUpsertBulk) Update(set func(*EventUpsert)) *EventUpsertBulk {
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *EventUpsertBulk) SetUpdatedAt(v time.Time) *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *EventUpsertBulk) UpdateUpdatedAt() *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
 // SetUfcEventID sets the "ufc_event_id" field.
 func (u *EventUpsertBulk) SetUfcEventID(v string) *EventUpsertBulk {
 	return u.Update(func(s *EventUpsert) {
@@ -518,6 +684,27 @@ func (u *EventUpsertBulk) SetName(v string) *EventUpsertBulk {
 func (u *EventUpsertBulk) UpdateName() *EventUpsertBulk {
 	return u.Update(func(s *EventUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetDate sets the "date" field.
+func (u *EventUpsertBulk) SetDate(v time.Time) *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.SetDate(v)
+	})
+}
+
+// UpdateDate sets the "date" field to the value that was provided on create.
+func (u *EventUpsertBulk) UpdateDate() *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.UpdateDate()
+	})
+}
+
+// ClearDate clears the value of the "date" field.
+func (u *EventUpsertBulk) ClearDate() *EventUpsertBulk {
+	return u.Update(func(s *EventUpsert) {
+		s.ClearDate()
 	})
 }
 

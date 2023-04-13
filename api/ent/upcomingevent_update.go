@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +28,12 @@ func (ueu *UpcomingEventUpdate) Where(ps ...predicate.UpcomingEvent) *UpcomingEv
 	return ueu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (ueu *UpcomingEventUpdate) SetUpdatedAt(t time.Time) *UpcomingEventUpdate {
+	ueu.mutation.SetUpdatedAt(t)
+	return ueu
+}
+
 // Mutation returns the UpcomingEventMutation object of the builder.
 func (ueu *UpcomingEventUpdate) Mutation() *UpcomingEventMutation {
 	return ueu.mutation
@@ -34,6 +41,7 @@ func (ueu *UpcomingEventUpdate) Mutation() *UpcomingEventMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ueu *UpcomingEventUpdate) Save(ctx context.Context) (int, error) {
+	ueu.defaults()
 	return withHooks[int, UpcomingEventMutation](ctx, ueu.sqlSave, ueu.mutation, ueu.hooks)
 }
 
@@ -59,6 +67,14 @@ func (ueu *UpcomingEventUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ueu *UpcomingEventUpdate) defaults() {
+	if _, ok := ueu.mutation.UpdatedAt(); !ok {
+		v := upcomingevent.UpdateDefaultUpdatedAt()
+		ueu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (ueu *UpcomingEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(upcomingevent.Table, upcomingevent.Columns, sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt))
 	if ps := ueu.mutation.predicates; len(ps) > 0 {
@@ -67,6 +83,9 @@ func (ueu *UpcomingEventUpdate) sqlSave(ctx context.Context) (n int, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ueu.mutation.UpdatedAt(); ok {
+		_spec.SetField(upcomingevent.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ueu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -86,6 +105,12 @@ type UpcomingEventUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UpcomingEventMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ueuo *UpcomingEventUpdateOne) SetUpdatedAt(t time.Time) *UpcomingEventUpdateOne {
+	ueuo.mutation.SetUpdatedAt(t)
+	return ueuo
 }
 
 // Mutation returns the UpcomingEventMutation object of the builder.
@@ -108,6 +133,7 @@ func (ueuo *UpcomingEventUpdateOne) Select(field string, fields ...string) *Upco
 
 // Save executes the query and returns the updated UpcomingEvent entity.
 func (ueuo *UpcomingEventUpdateOne) Save(ctx context.Context) (*UpcomingEvent, error) {
+	ueuo.defaults()
 	return withHooks[*UpcomingEvent, UpcomingEventMutation](ctx, ueuo.sqlSave, ueuo.mutation, ueuo.hooks)
 }
 
@@ -130,6 +156,14 @@ func (ueuo *UpcomingEventUpdateOne) Exec(ctx context.Context) error {
 func (ueuo *UpcomingEventUpdateOne) ExecX(ctx context.Context) {
 	if err := ueuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ueuo *UpcomingEventUpdateOne) defaults() {
+	if _, ok := ueuo.mutation.UpdatedAt(); !ok {
+		v := upcomingevent.UpdateDefaultUpdatedAt()
+		ueuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -158,6 +192,9 @@ func (ueuo *UpcomingEventUpdateOne) sqlSave(ctx context.Context) (_node *Upcomin
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ueuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(upcomingevent.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &UpcomingEvent{config: ueuo.config}
 	_spec.Assign = _node.assignValues

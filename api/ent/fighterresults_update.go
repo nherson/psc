@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -26,6 +27,12 @@ type FighterResultsUpdate struct {
 // Where appends a list predicates to the FighterResultsUpdate builder.
 func (fru *FighterResultsUpdate) Where(ps ...predicate.FighterResults) *FighterResultsUpdate {
 	fru.mutation.Where(ps...)
+	return fru
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (fru *FighterResultsUpdate) SetUpdatedAt(t time.Time) *FighterResultsUpdate {
+	fru.mutation.SetUpdatedAt(t)
 	return fru
 }
 
@@ -154,6 +161,7 @@ func (fru *FighterResultsUpdate) ClearFight() *FighterResultsUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fru *FighterResultsUpdate) Save(ctx context.Context) (int, error) {
+	fru.defaults()
 	return withHooks[int, FighterResultsMutation](ctx, fru.sqlSave, fru.mutation, fru.hooks)
 }
 
@@ -179,6 +187,14 @@ func (fru *FighterResultsUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (fru *FighterResultsUpdate) defaults() {
+	if _, ok := fru.mutation.UpdatedAt(); !ok {
+		v := fighterresults.UpdateDefaultUpdatedAt()
+		fru.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (fru *FighterResultsUpdate) check() error {
 	if _, ok := fru.mutation.FighterID(); fru.mutation.FighterCleared() && !ok {
@@ -201,6 +217,9 @@ func (fru *FighterResultsUpdate) sqlSave(ctx context.Context) (n int, err error)
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fru.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighterresults.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := fru.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)
@@ -314,6 +333,12 @@ type FighterResultsUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *FighterResultsMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (fruo *FighterResultsUpdateOne) SetUpdatedAt(t time.Time) *FighterResultsUpdateOne {
+	fruo.mutation.SetUpdatedAt(t)
+	return fruo
 }
 
 // SetFighterID sets the "fighter_id" field.
@@ -454,6 +479,7 @@ func (fruo *FighterResultsUpdateOne) Select(field string, fields ...string) *Fig
 
 // Save executes the query and returns the updated FighterResults entity.
 func (fruo *FighterResultsUpdateOne) Save(ctx context.Context) (*FighterResults, error) {
+	fruo.defaults()
 	return withHooks[*FighterResults, FighterResultsMutation](ctx, fruo.sqlSave, fruo.mutation, fruo.hooks)
 }
 
@@ -476,6 +502,14 @@ func (fruo *FighterResultsUpdateOne) Exec(ctx context.Context) error {
 func (fruo *FighterResultsUpdateOne) ExecX(ctx context.Context) {
 	if err := fruo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (fruo *FighterResultsUpdateOne) defaults() {
+	if _, ok := fruo.mutation.UpdatedAt(); !ok {
+		v := fighterresults.UpdateDefaultUpdatedAt()
+		fruo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -518,6 +552,9 @@ func (fruo *FighterResultsUpdateOne) sqlSave(ctx context.Context) (_node *Fighte
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fruo.mutation.UpdatedAt(); ok {
+		_spec.SetField(fighterresults.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := fruo.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)

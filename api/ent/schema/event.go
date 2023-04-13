@@ -12,7 +12,7 @@ type Event struct {
 	ent.Schema
 }
 
-func (Event) Mixins() []ent.Mixin {
+func (Event) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.TimeMixin{},
 	}
@@ -23,6 +23,7 @@ func (Event) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("ufc_event_id").NotEmpty().Unique().Comment("The event identifier as assigned by UFC"),
 		field.String("name").NotEmpty(),
+		field.Time("date").Optional(),
 	}
 }
 

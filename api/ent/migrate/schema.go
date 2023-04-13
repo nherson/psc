@@ -11,8 +11,11 @@ var (
 	// EventsColumns holds the columns for the "events" table.
 	EventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "ufc_event_id", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "date", Type: field.TypeTime, Nullable: true},
 	}
 	// EventsTable holds the schema information for the "events" table.
 	EventsTable = &schema.Table{
@@ -23,6 +26,8 @@ var (
 	// FightsColumns holds the columns for the "fights" table.
 	FightsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "ufc_fight_id", Type: field.TypeString, Unique: true},
 		{Name: "card_order", Type: field.TypeInt},
 		{Name: "card_segment", Type: field.TypeString},
@@ -39,7 +44,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "fights_events_fights",
-				Columns:    []*schema.Column{FightsColumns[7]},
+				Columns:    []*schema.Column{FightsColumns[9]},
 				RefColumns: []*schema.Column{EventsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -48,6 +53,8 @@ var (
 	// FightersColumns holds the columns for the "fighters" table.
 	FightersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "ufc_fighter_id", Type: field.TypeString, Unique: true},
 		{Name: "mma_id", Type: field.TypeInt},
 		{Name: "first_name", Type: field.TypeString},
@@ -63,6 +70,8 @@ var (
 	// FighterAliasColumns holds the columns for the "fighter_alias" table.
 	FighterAliasColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "alias", Type: field.TypeString},
 		{Name: "fighter_fighter_aliases", Type: field.TypeInt, Nullable: true},
 	}
@@ -74,7 +83,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "fighter_alias_fighters_fighter_aliases",
-				Columns:    []*schema.Column{FighterAliasColumns[2]},
+				Columns:    []*schema.Column{FighterAliasColumns[4]},
 				RefColumns: []*schema.Column{FightersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -83,6 +92,8 @@ var (
 	// FighterResultsColumns holds the columns for the "fighter_results" table.
 	FighterResultsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "significant_strikes_landed", Type: field.TypeInt},
 		{Name: "takedowns", Type: field.TypeInt},
 		{Name: "knockdowns", Type: field.TypeInt},
@@ -101,13 +112,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "fighter_results_fighters_fighter",
-				Columns:    []*schema.Column{FighterResultsColumns[8]},
+				Columns:    []*schema.Column{FighterResultsColumns[10]},
 				RefColumns: []*schema.Column{FightersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "fighter_results_fights_fight",
-				Columns:    []*schema.Column{FighterResultsColumns[9]},
+				Columns:    []*schema.Column{FighterResultsColumns[11]},
 				RefColumns: []*schema.Column{FightsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -116,13 +127,15 @@ var (
 			{
 				Name:    "fighterresults_fighter_id_fight_id",
 				Unique:  true,
-				Columns: []*schema.Column{FighterResultsColumns[8], FighterResultsColumns[9]},
+				Columns: []*schema.Column{FighterResultsColumns[10], FighterResultsColumns[11]},
 			},
 		},
 	}
 	// UpcomingEventsColumns holds the columns for the "upcoming_events" table.
 	UpcomingEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// UpcomingEventsTable holds the schema information for the "upcoming_events" table.
 	UpcomingEventsTable = &schema.Table{
@@ -133,6 +146,8 @@ var (
 	// UpcomingFightsColumns holds the columns for the "upcoming_fights" table.
 	UpcomingFightsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// UpcomingFightsTable holds the schema information for the "upcoming_fights" table.
 	UpcomingFightsTable = &schema.Table{
