@@ -33,13 +33,13 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// PSCServiceHelloProcedure is the fully-qualified name of the PSCService's Hello RPC.
-	PSCServiceHelloProcedure = "/api.v1.PSCService/Hello"
+	// PSCServiceListEventsProcedure is the fully-qualified name of the PSCService's ListEvents RPC.
+	PSCServiceListEventsProcedure = "/api.v1.PSCService/ListEvents"
 )
 
 // PSCServiceClient is a client for the api.v1.PSCService service.
 type PSCServiceClient interface {
-	Hello(context.Context, *connect_go.Request[v1.HelloRequest]) (*connect_go.Response[v1.HelloResponse], error)
+	ListEvents(context.Context, *connect_go.Request[v1.ListEventsRequest]) (*connect_go.Response[v1.ListEventsResponse], error)
 }
 
 // NewPSCServiceClient constructs a client for the api.v1.PSCService service. By default, it uses
@@ -52,9 +52,9 @@ type PSCServiceClient interface {
 func NewPSCServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PSCServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &pSCServiceClient{
-		hello: connect_go.NewClient[v1.HelloRequest, v1.HelloResponse](
+		listEvents: connect_go.NewClient[v1.ListEventsRequest, v1.ListEventsResponse](
 			httpClient,
-			baseURL+PSCServiceHelloProcedure,
+			baseURL+PSCServiceListEventsProcedure,
 			opts...,
 		),
 	}
@@ -62,17 +62,17 @@ func NewPSCServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts 
 
 // pSCServiceClient implements PSCServiceClient.
 type pSCServiceClient struct {
-	hello *connect_go.Client[v1.HelloRequest, v1.HelloResponse]
+	listEvents *connect_go.Client[v1.ListEventsRequest, v1.ListEventsResponse]
 }
 
-// Hello calls api.v1.PSCService.Hello.
-func (c *pSCServiceClient) Hello(ctx context.Context, req *connect_go.Request[v1.HelloRequest]) (*connect_go.Response[v1.HelloResponse], error) {
-	return c.hello.CallUnary(ctx, req)
+// ListEvents calls api.v1.PSCService.ListEvents.
+func (c *pSCServiceClient) ListEvents(ctx context.Context, req *connect_go.Request[v1.ListEventsRequest]) (*connect_go.Response[v1.ListEventsResponse], error) {
+	return c.listEvents.CallUnary(ctx, req)
 }
 
 // PSCServiceHandler is an implementation of the api.v1.PSCService service.
 type PSCServiceHandler interface {
-	Hello(context.Context, *connect_go.Request[v1.HelloRequest]) (*connect_go.Response[v1.HelloResponse], error)
+	ListEvents(context.Context, *connect_go.Request[v1.ListEventsRequest]) (*connect_go.Response[v1.ListEventsResponse], error)
 }
 
 // NewPSCServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -82,9 +82,9 @@ type PSCServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewPSCServiceHandler(svc PSCServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
-	mux.Handle(PSCServiceHelloProcedure, connect_go.NewUnaryHandler(
-		PSCServiceHelloProcedure,
-		svc.Hello,
+	mux.Handle(PSCServiceListEventsProcedure, connect_go.NewUnaryHandler(
+		PSCServiceListEventsProcedure,
+		svc.ListEvents,
 		opts...,
 	))
 	return "/api.v1.PSCService/", mux
@@ -93,6 +93,6 @@ func NewPSCServiceHandler(svc PSCServiceHandler, opts ...connect_go.HandlerOptio
 // UnimplementedPSCServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedPSCServiceHandler struct{}
 
-func (UnimplementedPSCServiceHandler) Hello(context.Context, *connect_go.Request[v1.HelloRequest]) (*connect_go.Response[v1.HelloResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.v1.PSCService.Hello is not implemented"))
+func (UnimplementedPSCServiceHandler) ListEvents(context.Context, *connect_go.Request[v1.ListEventsRequest]) (*connect_go.Response[v1.ListEventsResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.v1.PSCService.ListEvents is not implemented"))
 }

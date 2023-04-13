@@ -2,17 +2,18 @@ package data
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
 	"github.com/magefile/mage/mg"
+	"github.com/pkg/errors"
 
 	"github.com/nherson/psc/api/ent"
 	"github.com/nherson/psc/api/ent/event"
@@ -22,6 +23,8 @@ import (
 	"github.com/nherson/psc/api/internal/clients/ufc"
 	"github.com/nherson/psc/api/magefiles/internal/db"
 )
+
+const timestampFormat = "2006-01-02T15:04Z"
 
 type Import mg.Namespace
 
@@ -76,9 +79,16 @@ func importEvent(idString string) error {
 		return err
 	}
 
+	date, err := time.Parse(timestampFormat, eventData.StartTime)
+	if err != nil {
+		return errors.Wrap(err, "could not parse event start time")
+	}
+	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+
 	eventID, err := tx.Event.Create().
 		SetUfcEventID(strconv.Itoa(eventData.EventID)).
 		SetName(eventData.Name).
+		SetDate(date).
 		OnConflictColumns(event.FieldUfcEventID).
 		UpdateNewValues().
 		ID(ctx)

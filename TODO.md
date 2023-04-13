@@ -5,7 +5,7 @@ Base work
 * ~~Bulk upsert of historical data (mage target)~~
 * API: upcoming
 * ~~Mage: historical import (import:all and import:event XXXX)~~
-* Add timestamps to events for when they happened
+* ~~Add timestamps to events for when they happened~~
 
 Monthly process
 ---
@@ -21,3 +21,12 @@ Nice to haves
 ---
 * API to update upcoming events, fighters, odds, etc
   * Make it an API endpoint and hit it on a cron?
+
+
+
+Pre-upsert counts
+
+events: 315
+fighters: 1369
+fights: 3622
+fighter_results: 7244

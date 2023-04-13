@@ -2,18 +2,30 @@ package psc
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bufbuild/connect-go"
 
+	"github.com/nherson/psc/api/ent"
 	apiv1 "github.com/nherson/psc/api/proto/api/v1"
 )
 
-type PSCServer struct{}
+type PSCServer struct {
+	DB *ent.Client
+}
 
-func (s *PSCServer) Hello(ctx context.Context, req *connect.Request[apiv1.HelloRequest]) (*connect.Response[apiv1.HelloResponse], error) {
-	res := connect.NewResponse(&apiv1.HelloResponse{
-		Message: fmt.Sprintf("Hello, %s!", req.Msg.Name),
+func (s *PSCServer) ListEvents(ctx context.Context, req *connect.Request[apiv1.ListEventsRequest]) (*connect.Response[apiv1.ListEventsResponse], error) {
+	events, err := s.DB.Event.Query().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var apiEvents []*apiv1.Event
+	for _, e := range events {
+		apiEvents = append(apiEvents, dbEventToApi(e))
+	}
+
+	res := connect.NewResponse(&apiv1.ListEventsResponse{
+		Events: apiEvents,
 	})
 
 	return res, nil
