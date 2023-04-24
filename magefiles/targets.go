@@ -47,6 +47,13 @@ func (Proto) Format() error {
 	return sh.Run("gofmt", "-w", "api/internal/proto/api/v1")
 }
 
+type Web mg.Namespace
+
+func (Web) Start() error {
+	_, err := sh.Exec(nil, os.Stdout, os.Stderr, "yarn", "--cwd", "web", "start")
+	return err
+}
+
 func Deploy() error {
 	return sh.Run("flyctl", "deploy")
 }

@@ -2,3 +2,4 @@
 data
 !api/magefiles/data
 .DS_Store
+.vscode

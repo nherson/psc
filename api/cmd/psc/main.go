@@ -8,6 +8,7 @@ import (
 	"github.com/nherson/psc/api/internal/clients/db"
 	"github.com/nherson/psc/api/internal/services/psc"
 	"github.com/nherson/psc/api/proto/api/v1/apiv1connect"
+	"github.com/nherson/psc/web"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 	}
 	apiMux.Handle(apiv1connect.NewPSCServiceHandler(pscServer))
 	mux.Handle("/api/", http.StripPrefix("/api", apiMux))
+
+	mux.Handle("/", web.Handler())
 
 	http.ListenAndServe(":8080", mux)
 }
