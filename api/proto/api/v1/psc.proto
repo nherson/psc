@@ -9,11 +9,46 @@ option go_package = "github.com/nherson/psc/proto/api/v1;apiv1";
 service PSCService {
 
   rpc ListEvents(ListEventsRequest) returns (ListEventsResponse) {}
+  rpc ListResultsForEvent(ListResultsForEventRequest) returns (ListResultsForEventResponse) {}
+  rpc ListResultsForFighter(ListResultsForFighterRequest) returns (ListResultsForFighterResponse) {}
 }
 
 message ListEventsRequest {}
+
 message ListEventsResponse {
   repeated Event events = 1;
+}
+
+message ListResultsForEventRequest {
+  int32 event_id = 1;
+}
+
+message ListResultsForEventResponse {
+  Event event = 1;
+  repeated FightResult fight_results = 2;
+}
+
+message ListResultsForFighterRequest {}
+
+message ListResultsForFighterResponse {}
+
+message FightResult {
+  repeated FighterResult fighter_results = 1;
+}
+
+message FighterResult {
+  Fighter fighter = 1;
+  int32 significant_strikes = 2;
+  int32 takedowns = 3;
+  int32 knockdowns = 4;
+  int32 control_time_seconds = 5;
+  float score = 6;
+}
+
+message Fighter {
+  string first_name = 1;
+  string last_name = 2;
+  string nick_name = 3;
 }
 
 message Event {
