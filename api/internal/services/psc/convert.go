@@ -19,10 +19,11 @@ func dbEventToApi(event *ent.Event) *apiv1.Event {
 
 // Assumes eager loading of related FighterResults and FighterResults.Fighter edges
 // and also there are exactly two Fight.Edges.FighterResults
-func dbFightResultsToApi(fightResults *ent.Fight) *apiv1.FightResult {
+func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.FightResult {
 	f0 := fightResults.Edges.FighterResults[0]
 	f1 := fightResults.Edges.FighterResults[1]
 	return &apiv1.FightResult{
+		Event: dbEventToApi(event),
 		FighterResults: []*apiv1.FighterResult{
 			{
 				Fighter: &apiv1.Fighter{

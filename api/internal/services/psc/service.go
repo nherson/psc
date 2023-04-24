@@ -2,13 +2,13 @@ package psc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/bufbuild/connect-go"
 
 	"github.com/nherson/psc/api/ent"
 	"github.com/nherson/psc/api/ent/event"
+	"github.com/nherson/psc/api/ent/fighter"
 	apiv1 "github.com/nherson/psc/api/proto/api/v1"
 )
 
@@ -40,7 +40,7 @@ func (s *PSCServer) ListResultsForEvent(
 ) (*connect.Response[apiv1.ListResultsForEventResponse], error) {
 
 	var resp apiv1.ListResultsForEventResponse
-	events, err := s.DB.Event.Query().
+	e, err := s.DB.Event.Query().
 		Where(
 			event.ID(int(req.Msg.GetEventId())),
 		).
@@ -51,17 +51,13 @@ func (s *PSCServer) ListResultsForEvent(
 				},
 			)
 		}).
-		All(ctx)
+		Only(ctx)
 
-	if ent.IsNotFound(err) || len(events) == 0 {
+	if ent.IsNotFound(err) {
 		return nil, connect.NewError(connect.CodeNotFound, err)
 	} else if err != nil {
 		return nil, err
-	} else if len(events) != 1 {
-		// this should never happen
-		return nil, fmt.Errorf("bad number of events for query by id: %d", len(events))
 	}
-	e := events[0]
 	resp.Event = dbEventToApi(e)
 
 	for _, f := range e.Edges.Fights {
@@ -69,7 +65,7 @@ func (s *PSCServer) ListResultsForEvent(
 			return nil, fmt.Errorf("bad number of fight results for fight: %d", len(f.Edges.FighterResults))
 		}
 
-		resp.FightResults = append(resp.FightResults, dbFightResultsToApi(f))
+		resp.FightResults = append(resp.FightResults, dbFightResultsToApi(f, e))
 	}
 
 	return connect.NewResponse(&resp), nil
@@ -79,5 +75,28 @@ func (s *PSCServer) ListResultsForFighter(
 	ctx context.Context,
 	req *connect.Request[apiv1.ListResultsForFighterRequest],
 ) (*connect.Response[apiv1.ListResultsForFighterResponse], error) {
-	return nil, errors.New("not implemented")
+
+	f, err := s.DB.Fighter.Query().
+		Where(fighter.ID(int(req.Msg.GetFighterId()))).
+		WithFights(func(q *ent.FightQuery) {
+			q.WithEvent()
+			q.WithFighterResults(
+				func(q *ent.FighterResultsQuery) {
+					q.WithFighter()
+				},
+			)
+		}).
+		Only(ctx)
+	if ent.IsNotFound(err) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
+	} else if err != nil {
+		return nil, err
+	}
+
+	var resp apiv1.ListResultsForFighterResponse
+	for _, fight := range f.Edges.Fights {
+		resp.FightResults = append(resp.FightResults, dbFightResultsToApi(fight, fight.Edges.Event))
+	}
+
+	return connect.NewResponse(&resp), nil
 }

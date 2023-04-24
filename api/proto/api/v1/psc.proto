@@ -28,12 +28,17 @@ message ListResultsForEventResponse {
   repeated FightResult fight_results = 2;
 }
 
-message ListResultsForFighterRequest {}
+message ListResultsForFighterRequest {
+  int32 fighter_id = 1;
+}
 
-message ListResultsForFighterResponse {}
+message ListResultsForFighterResponse {
+  repeated FightResult fight_results = 1;
+}
 
 message FightResult {
   repeated FighterResult fighter_results = 1;
+  Event event = 2;
 }
 
 message FighterResult {
