@@ -1,0 +1,1 @@
+`psc_connect.ts` and `psc_pb.ts` are generated from the protobuf service definitions defined in `api/proto/api/v1/`. Do not edit by hand! Use `mage proto:generate` to update.

@@ -40,7 +40,12 @@ func (Ent) Shell() error {
 type Proto mg.Namespace
 
 func (Proto) Generate() error {
-	return sh.Run("buf", "generate")
+	err := sh.Run("buf", "generate")
+	if err != nil {
+		return err
+	}
+
+	return sh.Run("mv", "api/proto/api/v1/psc_connect.ts", "api/proto/api/v1/psc_pb.ts", "web/src/api/")
 }
 
 func (Proto) Format() error {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 
 	"github.com/nherson/psc/api/internal/clients/db"
 	"github.com/nherson/psc/api/internal/services/psc"
@@ -25,5 +26,11 @@ func main() {
 
 	mux.Handle("/", web.Handler())
 
-	http.ListenAndServe(":8080", mux)
+	c := cors.New(cors.Options{
+		AllowedHeaders:     []string{"Connect-Protocol-Version", "Content-Type"},
+		OptionsPassthrough: false,
+		Debug:              true,
+	})
+
+	http.ListenAndServe(":8080", c.Handler(mux))
 }

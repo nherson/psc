@@ -9,6 +9,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/magefile/mage v1.14.0
 	github.com/pkg/errors v0.9.1
+	github.com/rs/cors v1.9.0
 	google.golang.org/protobuf v1.30.0
 )
 

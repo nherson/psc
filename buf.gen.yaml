@@ -23,3 +23,11 @@ plugins:
   - name: connect-go
     out: .
     opt: paths=source_relative
+  - plugin: es
+    opt: target=ts
+    out: .
+  - plugin: connect-es
+    opt:
+      - target=ts
+      - import_extension=none
+    out: .
