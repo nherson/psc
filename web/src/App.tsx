@@ -4,17 +4,19 @@ import { Home } from "./pages/Home";
 import NavBar from "./components/NavBar";
 import { Fighters } from "./pages/Fighters";
 import { Events } from "./pages/Events";
+import { Event } from "./pages/Event";
 
 export const App = () => (
   <ChakraProvider theme={theme}>
     <BrowserRouter>
       <Box textAlign="center" fontSize="xl">
         <NavBar />
-        <Grid minH="100vh" p={5}>
+        <Grid minH="100vh" p={5} px={20}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/fighters" element={<Fighters />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/events/:id" element={<Event />} />
           </Routes>
         </Grid>
       </Box>

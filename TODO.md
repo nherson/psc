@@ -24,6 +24,8 @@ Nice to haves
 ---
 * API to update upcoming events, fighters, odds, etc
   * Make it an API endpoint and hit it on a cron?
+* Add "corner" to FightResult for a fighter, for visual consistency (Red left, Blue right)
+* Include venue information for events
 
 
 
