@@ -7,7 +7,7 @@ Base work
 * ~~Mage: historical import (import:all and import:event XXXX)~~
 * ~~Add timestamps to events for when they happened~~
 * Clean up multiple connection functions (and rollback function)
-* Setup Chakra UI basics
+* ~~Setup Chakra UI basics~~
 * Build UI parity with old site
 
 Monthly process
@@ -24,14 +24,5 @@ Nice to haves
 ---
 * API to update upcoming events, fighters, odds, etc
   * Make it an API endpoint and hit it on a cron?
-* Add "corner" to FightResult for a fighter, for visual consistency (Red left, Blue right)
+* ~~Add "corner" to FightResult for a fighter, for visual consistency (Red left, Blue right)~~
 * Include venue information for events
-
-
-
-Pre-upsert counts
-
-events: 315
-fighters: 1369
-fights: 3622
-fighter_results: 7244
