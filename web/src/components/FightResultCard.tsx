@@ -22,13 +22,19 @@ export const FightResultRow = ({
   return (
     <HStack spacing="1" align="stretch">
       <Flex grow={1}>
-        <FighterResultCard fighterResult={fightResult.fighterResults[0]} />
+        <FighterResultCard
+          fighterResult={fightResult.fighterResults[0]}
+          fightResult={fightResult}
+        />
       </Flex>
       <Flex p="4">
         <Center>vs</Center>
       </Flex>
       <Flex grow={1}>
-        <FighterResultCard fighterResult={fightResult.fighterResults[1]} />
+        <FighterResultCard
+          fighterResult={fightResult.fighterResults[1]}
+          fightResult={fightResult}
+        />
       </Flex>
     </HStack>
   );
@@ -36,15 +42,23 @@ export const FightResultRow = ({
 
 const FighterResultCard = ({
   fighterResult,
+  fightResult,
 }: {
   fighterResult: FighterResult;
+  fightResult: FightResult;
 }) => (
   <Card w="100%" bgColor={useColorModeValue("gray.100", "gray.700")}>
-    <Flex h="5px" w="100%" bgColor="blue.700" />
+    <Flex
+      h="5px"
+      w="100%"
+      bgColor={fighterResult.corner === "red" ? "red.700" : "blue.700"}
+    />
     <CardHeader>
-      <Heading size="md">
-        {fighterResult.fighter?.firstName} {fighterResult.fighter?.lastName}
-      </Heading>
+      <Box>
+        <Heading size="md">
+          {fighterResult.fighter?.firstName} {fighterResult.fighter?.lastName}
+        </Heading>
+      </Box>
     </CardHeader>
     <Divider />
     <CardBody>
@@ -92,7 +106,7 @@ const FighterResultCard = ({
             <Box flexGrow={1} w="50px"></Box>
             <Box>
               <Text fontSize="md">
-                {formatControlTimeSeconds(fighterResult.controlTimeSeconds)}
+                {formatSeconds(fighterResult.controlTimeSeconds)}
               </Text>
             </Box>
           </Flex>
@@ -112,11 +126,20 @@ const FighterResultCard = ({
           <Text fontSize="md">{fighterResult.score.toFixed(2)}</Text>
         </Box>
       </Flex>
-      {fighterResult.significantStrikes === 75 && (
+      {fighterResult.win && (
         <Flex w="100%" pt="3">
           <Box flexGrow={1}>
             <Center>
-              <Text fontSize="md">Won by decision</Text>
+              <VStack>
+                <Text fontSize="md">Winner</Text>
+                <Text fontSize="md">{fighterResult.winMethod}</Text>
+                {fighterResult.winByStoppage && (
+                  <Text fontSize="sm">
+                    R{fightResult.resultEndingRound}{" "}
+                    {formatSeconds(fightResult.resultEndingTimeSeconds)}
+                  </Text>
+                )}
+              </VStack>
             </Center>
           </Box>
         </Flex>
@@ -125,7 +148,7 @@ const FighterResultCard = ({
   </Card>
 );
 
-const formatControlTimeSeconds = (n: number): string => {
+const formatSeconds = (n: number): string => {
   const m = Math.floor(n / 60);
   const s = n % 60;
   const ss = s < 10 ? `0${s}` : `${s}`; // pad the 0 if needed

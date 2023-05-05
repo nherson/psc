@@ -48,6 +48,20 @@ func (fru *FighterResultsUpdate) SetFightID(i int) *FighterResultsUpdate {
 	return fru
 }
 
+// SetCorner sets the "corner" field.
+func (fru *FighterResultsUpdate) SetCorner(f fighterresults.Corner) *FighterResultsUpdate {
+	fru.mutation.SetCorner(f)
+	return fru
+}
+
+// SetNillableCorner sets the "corner" field if the given value is not nil.
+func (fru *FighterResultsUpdate) SetNillableCorner(f *fighterresults.Corner) *FighterResultsUpdate {
+	if f != nil {
+		fru.SetCorner(*f)
+	}
+	return fru
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (fru *FighterResultsUpdate) SetSignificantStrikesLanded(i int) *FighterResultsUpdate {
 	fru.mutation.ResetSignificantStrikesLanded()
@@ -97,6 +111,20 @@ func (fru *FighterResultsUpdate) SetControlTimeSeconds(i int) *FighterResultsUpd
 // AddControlTimeSeconds adds i to the "control_time_seconds" field.
 func (fru *FighterResultsUpdate) AddControlTimeSeconds(i int) *FighterResultsUpdate {
 	fru.mutation.AddControlTimeSeconds(i)
+	return fru
+}
+
+// SetWin sets the "win" field.
+func (fru *FighterResultsUpdate) SetWin(b bool) *FighterResultsUpdate {
+	fru.mutation.SetWin(b)
+	return fru
+}
+
+// SetNillableWin sets the "win" field if the given value is not nil.
+func (fru *FighterResultsUpdate) SetNillableWin(b *bool) *FighterResultsUpdate {
+	if b != nil {
+		fru.SetWin(*b)
+	}
 	return fru
 }
 
@@ -197,6 +225,11 @@ func (fru *FighterResultsUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fru *FighterResultsUpdate) check() error {
+	if v, ok := fru.mutation.Corner(); ok {
+		if err := fighterresults.CornerValidator(v); err != nil {
+			return &ValidationError{Name: "corner", err: fmt.Errorf(`ent: validator failed for field "FighterResults.corner": %w`, err)}
+		}
+	}
 	if _, ok := fru.mutation.FighterID(); fru.mutation.FighterCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "FighterResults.fighter"`)
 	}
@@ -221,6 +254,9 @@ func (fru *FighterResultsUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if value, ok := fru.mutation.UpdatedAt(); ok {
 		_spec.SetField(fighterresults.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := fru.mutation.Corner(); ok {
+		_spec.SetField(fighterresults.FieldCorner, field.TypeEnum, value)
+	}
 	if value, ok := fru.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)
 	}
@@ -244,6 +280,9 @@ func (fru *FighterResultsUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if value, ok := fru.mutation.AddedControlTimeSeconds(); ok {
 		_spec.AddField(fighterresults.FieldControlTimeSeconds, field.TypeInt, value)
+	}
+	if value, ok := fru.mutation.Win(); ok {
+		_spec.SetField(fighterresults.FieldWin, field.TypeBool, value)
 	}
 	if value, ok := fru.mutation.WinByStoppage(); ok {
 		_spec.SetField(fighterresults.FieldWinByStoppage, field.TypeBool, value)
@@ -353,6 +392,20 @@ func (fruo *FighterResultsUpdateOne) SetFightID(i int) *FighterResultsUpdateOne 
 	return fruo
 }
 
+// SetCorner sets the "corner" field.
+func (fruo *FighterResultsUpdateOne) SetCorner(f fighterresults.Corner) *FighterResultsUpdateOne {
+	fruo.mutation.SetCorner(f)
+	return fruo
+}
+
+// SetNillableCorner sets the "corner" field if the given value is not nil.
+func (fruo *FighterResultsUpdateOne) SetNillableCorner(f *fighterresults.Corner) *FighterResultsUpdateOne {
+	if f != nil {
+		fruo.SetCorner(*f)
+	}
+	return fruo
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (fruo *FighterResultsUpdateOne) SetSignificantStrikesLanded(i int) *FighterResultsUpdateOne {
 	fruo.mutation.ResetSignificantStrikesLanded()
@@ -402,6 +455,20 @@ func (fruo *FighterResultsUpdateOne) SetControlTimeSeconds(i int) *FighterResult
 // AddControlTimeSeconds adds i to the "control_time_seconds" field.
 func (fruo *FighterResultsUpdateOne) AddControlTimeSeconds(i int) *FighterResultsUpdateOne {
 	fruo.mutation.AddControlTimeSeconds(i)
+	return fruo
+}
+
+// SetWin sets the "win" field.
+func (fruo *FighterResultsUpdateOne) SetWin(b bool) *FighterResultsUpdateOne {
+	fruo.mutation.SetWin(b)
+	return fruo
+}
+
+// SetNillableWin sets the "win" field if the given value is not nil.
+func (fruo *FighterResultsUpdateOne) SetNillableWin(b *bool) *FighterResultsUpdateOne {
+	if b != nil {
+		fruo.SetWin(*b)
+	}
 	return fruo
 }
 
@@ -515,6 +582,11 @@ func (fruo *FighterResultsUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fruo *FighterResultsUpdateOne) check() error {
+	if v, ok := fruo.mutation.Corner(); ok {
+		if err := fighterresults.CornerValidator(v); err != nil {
+			return &ValidationError{Name: "corner", err: fmt.Errorf(`ent: validator failed for field "FighterResults.corner": %w`, err)}
+		}
+	}
 	if _, ok := fruo.mutation.FighterID(); fruo.mutation.FighterCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "FighterResults.fighter"`)
 	}
@@ -556,6 +628,9 @@ func (fruo *FighterResultsUpdateOne) sqlSave(ctx context.Context) (_node *Fighte
 	if value, ok := fruo.mutation.UpdatedAt(); ok {
 		_spec.SetField(fighterresults.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := fruo.mutation.Corner(); ok {
+		_spec.SetField(fighterresults.FieldCorner, field.TypeEnum, value)
+	}
 	if value, ok := fruo.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)
 	}
@@ -579,6 +654,9 @@ func (fruo *FighterResultsUpdateOne) sqlSave(ctx context.Context) (_node *Fighte
 	}
 	if value, ok := fruo.mutation.AddedControlTimeSeconds(); ok {
 		_spec.AddField(fighterresults.FieldControlTimeSeconds, field.TypeInt, value)
+	}
+	if value, ok := fruo.mutation.Win(); ok {
+		_spec.SetField(fighterresults.FieldWin, field.TypeBool, value)
 	}
 	if value, ok := fruo.mutation.WinByStoppage(); ok {
 		_spec.SetField(fighterresults.FieldWinByStoppage, field.TypeBool, value)

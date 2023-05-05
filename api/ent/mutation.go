@@ -3191,6 +3191,7 @@ type FighterResultsMutation struct {
 	id                            *int
 	created_at                    *time.Time
 	updated_at                    *time.Time
+	corner                        *fighterresults.Corner
 	significant_strikes_landed    *int
 	addsignificant_strikes_landed *int
 	takedowns                     *int
@@ -3199,6 +3200,7 @@ type FighterResultsMutation struct {
 	addknockdowns                 *int
 	control_time_seconds          *int
 	addcontrol_time_seconds       *int
+	win                           *bool
 	win_by_stoppage               *bool
 	loss_by_stoppage              *bool
 	missed_weight                 *bool
@@ -3454,6 +3456,42 @@ func (m *FighterResultsMutation) ResetFightID() {
 	m.fight = nil
 }
 
+// SetCorner sets the "corner" field.
+func (m *FighterResultsMutation) SetCorner(f fighterresults.Corner) {
+	m.corner = &f
+}
+
+// Corner returns the value of the "corner" field in the mutation.
+func (m *FighterResultsMutation) Corner() (r fighterresults.Corner, exists bool) {
+	v := m.corner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCorner returns the old "corner" field's value of the FighterResults entity.
+// If the FighterResults object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterResultsMutation) OldCorner(ctx context.Context) (v fighterresults.Corner, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCorner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCorner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCorner: %w", err)
+	}
+	return oldValue.Corner, nil
+}
+
+// ResetCorner resets all changes to the "corner" field.
+func (m *FighterResultsMutation) ResetCorner() {
+	m.corner = nil
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (m *FighterResultsMutation) SetSignificantStrikesLanded(i int) {
 	m.significant_strikes_landed = &i
@@ -3678,6 +3716,42 @@ func (m *FighterResultsMutation) ResetControlTimeSeconds() {
 	m.addcontrol_time_seconds = nil
 }
 
+// SetWin sets the "win" field.
+func (m *FighterResultsMutation) SetWin(b bool) {
+	m.win = &b
+}
+
+// Win returns the value of the "win" field in the mutation.
+func (m *FighterResultsMutation) Win() (r bool, exists bool) {
+	v := m.win
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWin returns the old "win" field's value of the FighterResults entity.
+// If the FighterResults object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterResultsMutation) OldWin(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWin: %w", err)
+	}
+	return oldValue.Win, nil
+}
+
+// ResetWin resets all changes to the "win" field.
+func (m *FighterResultsMutation) ResetWin() {
+	m.win = nil
+}
+
 // SetWinByStoppage sets the "win_by_stoppage" field.
 func (m *FighterResultsMutation) SetWinByStoppage(b bool) {
 	m.win_by_stoppage = &b
@@ -3885,7 +3959,7 @@ func (m *FighterResultsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FighterResultsMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, fighterresults.FieldCreatedAt)
 	}
@@ -3898,6 +3972,9 @@ func (m *FighterResultsMutation) Fields() []string {
 	if m.fight != nil {
 		fields = append(fields, fighterresults.FieldFightID)
 	}
+	if m.corner != nil {
+		fields = append(fields, fighterresults.FieldCorner)
+	}
 	if m.significant_strikes_landed != nil {
 		fields = append(fields, fighterresults.FieldSignificantStrikesLanded)
 	}
@@ -3909,6 +3986,9 @@ func (m *FighterResultsMutation) Fields() []string {
 	}
 	if m.control_time_seconds != nil {
 		fields = append(fields, fighterresults.FieldControlTimeSeconds)
+	}
+	if m.win != nil {
+		fields = append(fields, fighterresults.FieldWin)
 	}
 	if m.win_by_stoppage != nil {
 		fields = append(fields, fighterresults.FieldWinByStoppage)
@@ -3935,6 +4015,8 @@ func (m *FighterResultsMutation) Field(name string) (ent.Value, bool) {
 		return m.FighterID()
 	case fighterresults.FieldFightID:
 		return m.FightID()
+	case fighterresults.FieldCorner:
+		return m.Corner()
 	case fighterresults.FieldSignificantStrikesLanded:
 		return m.SignificantStrikesLanded()
 	case fighterresults.FieldTakedowns:
@@ -3943,6 +4025,8 @@ func (m *FighterResultsMutation) Field(name string) (ent.Value, bool) {
 		return m.Knockdowns()
 	case fighterresults.FieldControlTimeSeconds:
 		return m.ControlTimeSeconds()
+	case fighterresults.FieldWin:
+		return m.Win()
 	case fighterresults.FieldWinByStoppage:
 		return m.WinByStoppage()
 	case fighterresults.FieldLossByStoppage:
@@ -3966,6 +4050,8 @@ func (m *FighterResultsMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldFighterID(ctx)
 	case fighterresults.FieldFightID:
 		return m.OldFightID(ctx)
+	case fighterresults.FieldCorner:
+		return m.OldCorner(ctx)
 	case fighterresults.FieldSignificantStrikesLanded:
 		return m.OldSignificantStrikesLanded(ctx)
 	case fighterresults.FieldTakedowns:
@@ -3974,6 +4060,8 @@ func (m *FighterResultsMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldKnockdowns(ctx)
 	case fighterresults.FieldControlTimeSeconds:
 		return m.OldControlTimeSeconds(ctx)
+	case fighterresults.FieldWin:
+		return m.OldWin(ctx)
 	case fighterresults.FieldWinByStoppage:
 		return m.OldWinByStoppage(ctx)
 	case fighterresults.FieldLossByStoppage:
@@ -4017,6 +4105,13 @@ func (m *FighterResultsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetFightID(v)
 		return nil
+	case fighterresults.FieldCorner:
+		v, ok := value.(fighterresults.Corner)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCorner(v)
+		return nil
 	case fighterresults.FieldSignificantStrikesLanded:
 		v, ok := value.(int)
 		if !ok {
@@ -4044,6 +4139,13 @@ func (m *FighterResultsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetControlTimeSeconds(v)
+		return nil
+	case fighterresults.FieldWin:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWin(v)
 		return nil
 	case fighterresults.FieldWinByStoppage:
 		v, ok := value.(bool)
@@ -4187,6 +4289,9 @@ func (m *FighterResultsMutation) ResetField(name string) error {
 	case fighterresults.FieldFightID:
 		m.ResetFightID()
 		return nil
+	case fighterresults.FieldCorner:
+		m.ResetCorner()
+		return nil
 	case fighterresults.FieldSignificantStrikesLanded:
 		m.ResetSignificantStrikesLanded()
 		return nil
@@ -4198,6 +4303,9 @@ func (m *FighterResultsMutation) ResetField(name string) error {
 		return nil
 	case fighterresults.FieldControlTimeSeconds:
 		m.ResetControlTimeSeconds()
+		return nil
+	case fighterresults.FieldWin:
+		m.ResetWin()
 		return nil
 	case fighterresults.FieldWinByStoppage:
 		m.ResetWinByStoppage()

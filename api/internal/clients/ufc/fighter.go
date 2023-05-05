@@ -1,10 +1,13 @@
 package ufc
 
 type Fighter struct {
-	FighterID int     `json:"FighterId"`
-	MMAID     int     `json:"MMAId"`
-	Name      Name    `json:"Name"`
-	Outcome   Outcome `json:"Outcome"`
+	FighterID int  `json:"FighterId"`
+	MMAID     int  `json:"MMAId"`
+	Name      Name `json:"Name"`
+
+	// Relevant in fight outcomes
+	Outcome Outcome `json:"Outcome"`
+	Corner  string  `json:"Corner"`
 }
 
 type Name struct {

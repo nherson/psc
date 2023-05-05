@@ -242,6 +242,16 @@ export class FightResult extends Message<FightResult> {
    */
   event?: Event;
 
+  /**
+   * @generated from field: int32 result_ending_round = 3;
+   */
+  resultEndingRound = 0;
+
+  /**
+   * @generated from field: int32 result_ending_time_seconds = 4;
+   */
+  resultEndingTimeSeconds = 0;
+
   constructor(data?: PartialMessage<FightResult>) {
     super();
     proto3.util.initPartial(data, this);
@@ -252,6 +262,8 @@ export class FightResult extends Message<FightResult> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "fighter_results", kind: "message", T: FighterResult, repeated: true },
     { no: 2, name: "event", kind: "message", T: Event },
+    { no: 3, name: "result_ending_round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: "result_ending_time_seconds", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FightResult {
@@ -305,6 +317,36 @@ export class FighterResult extends Message<FighterResult> {
    */
   score = 0;
 
+  /**
+   * True if the fighter won the fight
+   *
+   * @generated from field: bool win = 7;
+   */
+  win = false;
+
+  /**
+   * True if the fighter won the fight via stoppage
+   *
+   * @generated from field: bool win_by_stoppage = 8;
+   */
+  winByStoppage = false;
+
+  /**
+   * If the fighter won, this will be a string representing the method
+   * of victory, e.g. "Decision - Unanimous" or "Submission" or "TKO/KO".bool
+   * If the fighter did not win, will be an empty string
+   *
+   * @generated from field: string win_method = 9;
+   */
+  winMethod = "";
+
+  /**
+   * The corner the fighter was in, should be either 'red' or 'blue'
+   *
+   * @generated from field: string corner = 10;
+   */
+  corner = "";
+
   constructor(data?: PartialMessage<FighterResult>) {
     super();
     proto3.util.initPartial(data, this);
@@ -319,6 +361,10 @@ export class FighterResult extends Message<FighterResult> {
     { no: 4, name: "knockdowns", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
     { no: 5, name: "control_time_seconds", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
     { no: 6, name: "score", kind: "scalar", T: 2 /* ScalarType.FLOAT */ },
+    { no: 7, name: "win", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "win_by_stoppage", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 9, name: "win_method", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "corner", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FighterResult {

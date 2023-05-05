@@ -95,6 +95,11 @@ func ControlTimeSeconds(v int) predicate.FighterResults {
 	return predicate.FighterResults(sql.FieldEQ(FieldControlTimeSeconds, v))
 }
 
+// Win applies equality check predicate on the "win" field. It's identical to WinEQ.
+func Win(v bool) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldEQ(FieldWin, v))
+}
+
 // WinByStoppage applies equality check predicate on the "win_by_stoppage" field. It's identical to WinByStoppageEQ.
 func WinByStoppage(v bool) predicate.FighterResults {
 	return predicate.FighterResults(sql.FieldEQ(FieldWinByStoppage, v))
@@ -228,6 +233,26 @@ func FightIDIn(vs ...int) predicate.FighterResults {
 // FightIDNotIn applies the NotIn predicate on the "fight_id" field.
 func FightIDNotIn(vs ...int) predicate.FighterResults {
 	return predicate.FighterResults(sql.FieldNotIn(FieldFightID, vs...))
+}
+
+// CornerEQ applies the EQ predicate on the "corner" field.
+func CornerEQ(v Corner) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldEQ(FieldCorner, v))
+}
+
+// CornerNEQ applies the NEQ predicate on the "corner" field.
+func CornerNEQ(v Corner) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldNEQ(FieldCorner, v))
+}
+
+// CornerIn applies the In predicate on the "corner" field.
+func CornerIn(vs ...Corner) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldIn(FieldCorner, vs...))
+}
+
+// CornerNotIn applies the NotIn predicate on the "corner" field.
+func CornerNotIn(vs ...Corner) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldNotIn(FieldCorner, vs...))
 }
 
 // SignificantStrikesLandedEQ applies the EQ predicate on the "significant_strikes_landed" field.
@@ -388,6 +413,16 @@ func ControlTimeSecondsLT(v int) predicate.FighterResults {
 // ControlTimeSecondsLTE applies the LTE predicate on the "control_time_seconds" field.
 func ControlTimeSecondsLTE(v int) predicate.FighterResults {
 	return predicate.FighterResults(sql.FieldLTE(FieldControlTimeSeconds, v))
+}
+
+// WinEQ applies the EQ predicate on the "win" field.
+func WinEQ(v bool) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldEQ(FieldWin, v))
+}
+
+// WinNEQ applies the NEQ predicate on the "win" field.
+func WinNEQ(v bool) predicate.FighterResults {
+	return predicate.FighterResults(sql.FieldNEQ(FieldWin, v))
 }
 
 // WinByStoppageEQ applies the EQ predicate on the "win_by_stoppage" field.

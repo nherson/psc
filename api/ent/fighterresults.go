@@ -27,6 +27,8 @@ type FighterResults struct {
 	FighterID int `json:"fighter_id,omitempty"`
 	// Required for M2M relationship between Fights and Fighters. NOT UFC assigned identifier!
 	FightID int `json:"fight_id,omitempty"`
+	// Corner holds the value of the "corner" field.
+	Corner fighterresults.Corner `json:"corner,omitempty"`
 	// SignificantStrikesLanded holds the value of the "significant_strikes_landed" field.
 	SignificantStrikesLanded int `json:"significant_strikes_landed,omitempty"`
 	// Takedowns holds the value of the "takedowns" field.
@@ -35,6 +37,8 @@ type FighterResults struct {
 	Knockdowns int `json:"knockdowns,omitempty"`
 	// ControlTimeSeconds holds the value of the "control_time_seconds" field.
 	ControlTimeSeconds int `json:"control_time_seconds,omitempty"`
+	// Win holds the value of the "win" field.
+	Win bool `json:"win,omitempty"`
 	// WinByStoppage holds the value of the "win_by_stoppage" field.
 	WinByStoppage bool `json:"win_by_stoppage,omitempty"`
 	// LossByStoppage holds the value of the "loss_by_stoppage" field.
@@ -89,10 +93,12 @@ func (*FighterResults) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fighterresults.FieldWinByStoppage, fighterresults.FieldLossByStoppage, fighterresults.FieldMissedWeight:
+		case fighterresults.FieldWin, fighterresults.FieldWinByStoppage, fighterresults.FieldLossByStoppage, fighterresults.FieldMissedWeight:
 			values[i] = new(sql.NullBool)
 		case fighterresults.FieldID, fighterresults.FieldFighterID, fighterresults.FieldFightID, fighterresults.FieldSignificantStrikesLanded, fighterresults.FieldTakedowns, fighterresults.FieldKnockdowns, fighterresults.FieldControlTimeSeconds:
 			values[i] = new(sql.NullInt64)
+		case fighterresults.FieldCorner:
+			values[i] = new(sql.NullString)
 		case fighterresults.FieldCreatedAt, fighterresults.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -140,6 +146,12 @@ func (fr *FighterResults) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				fr.FightID = int(value.Int64)
 			}
+		case fighterresults.FieldCorner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field corner", values[i])
+			} else if value.Valid {
+				fr.Corner = fighterresults.Corner(value.String)
+			}
 		case fighterresults.FieldSignificantStrikesLanded:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field significant_strikes_landed", values[i])
@@ -163,6 +175,12 @@ func (fr *FighterResults) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field control_time_seconds", values[i])
 			} else if value.Valid {
 				fr.ControlTimeSeconds = int(value.Int64)
+			}
+		case fighterresults.FieldWin:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field win", values[i])
+			} else if value.Valid {
+				fr.Win = value.Bool
 			}
 		case fighterresults.FieldWinByStoppage:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -240,6 +258,9 @@ func (fr *FighterResults) String() string {
 	builder.WriteString("fight_id=")
 	builder.WriteString(fmt.Sprintf("%v", fr.FightID))
 	builder.WriteString(", ")
+	builder.WriteString("corner=")
+	builder.WriteString(fmt.Sprintf("%v", fr.Corner))
+	builder.WriteString(", ")
 	builder.WriteString("significant_strikes_landed=")
 	builder.WriteString(fmt.Sprintf("%v", fr.SignificantStrikesLanded))
 	builder.WriteString(", ")
@@ -251,6 +272,9 @@ func (fr *FighterResults) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("control_time_seconds=")
 	builder.WriteString(fmt.Sprintf("%v", fr.ControlTimeSeconds))
+	builder.WriteString(", ")
+	builder.WriteString("win=")
+	builder.WriteString(fmt.Sprintf("%v", fr.Win))
 	builder.WriteString(", ")
 	builder.WriteString("win_by_stoppage=")
 	builder.WriteString(fmt.Sprintf("%v", fr.WinByStoppage))

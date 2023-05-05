@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/nherson/psc/api/ent"
+	"github.com/nherson/psc/api/ent/fighterresults"
 	apiv1 "github.com/nherson/psc/api/proto/api/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -22,6 +23,24 @@ func dbEventToApi(event *ent.Event) *apiv1.Event {
 func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.FightResult {
 	f0 := fightResults.Edges.FighterResults[0]
 	f1 := fightResults.Edges.FighterResults[1]
+
+	// make sure that f0 is always red corner and f1 is always blue corner
+	// swap as necessary
+	if f0.Corner == fighterresults.CornerBlue {
+		tmp := f0
+		f0 = f1
+		f1 = tmp
+	}
+
+	var f0WinMethod string
+	var f1WinMethod string
+
+	if f0.Win {
+		f0WinMethod = fightResults.ResultMethod
+	} else if f1.Win {
+		f1WinMethod = fightResults.ResultMethod
+	}
+
 	return &apiv1.FightResult{
 		Event: dbEventToApi(event),
 		FighterResults: []*apiv1.FighterResult{
@@ -36,6 +55,10 @@ func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.Fight
 				Knockdowns:         int32(f0.Knockdowns),
 				ControlTimeSeconds: int32(f0.ControlTimeSeconds),
 				Score:              computeScore(f0, fightResults.ResultEndingRound),
+				WinByStoppage:      f0.WinByStoppage,
+				WinMethod:          f0WinMethod,
+				Win:                f0.Win,
+				Corner:             f0.Corner.String(),
 			},
 			{
 				Fighter: &apiv1.Fighter{
@@ -48,8 +71,14 @@ func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.Fight
 				Knockdowns:         int32(f1.Knockdowns),
 				ControlTimeSeconds: int32(f1.ControlTimeSeconds),
 				Score:              computeScore(f1, fightResults.ResultEndingRound),
+				WinByStoppage:      f1.WinByStoppage,
+				WinMethod:          f1WinMethod,
+				Win:                f1.Win,
+				Corner:             f1.Corner.String(),
 			},
 		},
+		ResultEndingRound:       int32(fightResults.ResultEndingRound),
+		ResultEndingTimeSeconds: int32(fightResults.ResultEndingTimeSeconds),
 	}
 }
 

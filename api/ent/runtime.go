@@ -126,8 +126,12 @@ func init() {
 	fighterresults.DefaultUpdatedAt = fighterresultsDescUpdatedAt.Default.(func() time.Time)
 	// fighterresults.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	fighterresults.UpdateDefaultUpdatedAt = fighterresultsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// fighterresultsDescWin is the schema descriptor for win field.
+	fighterresultsDescWin := fighterresultsFields[7].Descriptor()
+	// fighterresults.DefaultWin holds the default value on creation for the win field.
+	fighterresults.DefaultWin = fighterresultsDescWin.Default.(bool)
 	// fighterresultsDescMissedWeight is the schema descriptor for missed_weight field.
-	fighterresultsDescMissedWeight := fighterresultsFields[8].Descriptor()
+	fighterresultsDescMissedWeight := fighterresultsFields[10].Descriptor()
 	// fighterresults.DefaultMissedWeight holds the default value on creation for the missed_weight field.
 	fighterresults.DefaultMissedWeight = fighterresultsDescMissedWeight.Default.(bool)
 	upcomingeventMixin := schema.UpcomingEvent{}.Mixin()

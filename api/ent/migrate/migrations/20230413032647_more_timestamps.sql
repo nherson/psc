@@ -1,5 +1,3 @@
--- Modify "events" table
-ALTER TABLE "events" ALTER COLUMN "created_at", ALTER COLUMN "updated_at";
 -- Modify "fighter_alias" table
 ALTER TABLE "fighter_alias" ADD COLUMN "created_at" timestamptz NOT NULL, ADD COLUMN "updated_at" timestamptz NOT NULL;
 -- Modify "fighter_results" table

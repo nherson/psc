@@ -30,19 +30,23 @@ const timestampFormat = "2006-01-02T15:04Z"
 type Import mg.Namespace
 
 func (Import) Event(idString string) error {
+	ctx := context.Background()
 	loadEnv()
 	dbClient := db.MustFromEnv()
 
-	return importEvent(dbClient, idString)
+	return importEvent(ctx, dbClient, idString)
 }
 
 // All imports cached UFC stats found locally on disk. Idempotent.
 func (Import) All() error {
+	ctx := context.Background()
 	loadEnv()
 	dbClient := db.MustFromEnv()
 
+	var eventIDs []string
+
 	r := regexp.MustCompile(`^data\/final\/events\/event-([0-9]+)\.json`)
-	return filepath.Walk("data/final/events",
+	err := filepath.Walk("data/final/events",
 		func(path string, info os.FileInfo, err error) error {
 			if path == "data/final/events" {
 				return nil
@@ -53,13 +57,41 @@ func (Import) All() error {
 				return errors.New("bad file name " + path)
 			}
 
-			return importEvent(dbClient, matches[1])
-		})
+			eventIDs = append(eventIDs, matches[1])
+
+			return nil
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, e := range eventIDs {
+		err := importEvent(ctx, dbClient, e)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func importEvent(dbClient *ent.Client, idString string) error {
-	ctx := context.Background()
+func importEvent(ctx context.Context, dbClient *ent.Client, idString string) error {
+	tx, err := dbClient.Tx(ctx)
+	if err != nil {
+		return err
+	}
 
+	err = importEventTx(ctx, tx, dbClient, idString)
+	if err != nil {
+		db.Rollback(tx, err)
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func importEventTx(ctx context.Context, tx *ent.Tx, dbClient *ent.Client, idString string) error {
 	id64, err := strconv.ParseInt(idString, 10, 32)
 	if err != nil {
 		return err
@@ -70,11 +102,6 @@ func importEvent(dbClient *ent.Client, idString string) error {
 
 	client := ufc.NewCacheClient()
 	eventData, err := client.EventByID(id)
-	if err != nil {
-		return err
-	}
-
-	tx, err := dbClient.Tx(ctx)
 	if err != nil {
 		return err
 	}
@@ -93,7 +120,7 @@ func importEvent(dbClient *ent.Client, idString string) error {
 		UpdateNewValues().
 		ID(ctx)
 	if err != nil {
-		return db.Rollback(tx, err)
+		return err
 	}
 
 	// For each fight, upsert both fighters, upsert the fight, link them together
@@ -122,7 +149,7 @@ func importEvent(dbClient *ent.Client, idString string) error {
 			UpdateNewValues().
 			ID(ctx)
 		if err != nil {
-			return db.Rollback(tx, err)
+			return err
 		}
 
 		if len(eventFightData.Fighters) != 2 {
@@ -144,17 +171,22 @@ func importEvent(dbClient *ent.Client, idString string) error {
 				UpdateNewValues().
 				ID(ctx)
 			if err != nil {
-				return db.Rollback(tx, err)
+				return err
 			}
 
 			// Determine the fight outcome for this fighter
 			var stoppage bool
+			var win bool
 			var winByStoppage bool
 			var lossByStoppage bool
 			if strings.ToUpper(eventFightData.Result.Method) == "KO/TKO" ||
 				strings.ToUpper(eventFightData.Result.Method) == "SUBMISSION" ||
 				strings.ToUpper(eventFightData.Result.Method) == "DQ" {
 				stoppage = true
+			}
+
+			if f.Outcome.OutcomeID == 1 {
+				win = true
 			}
 
 			if stoppage && f.Outcome.OutcomeID == 2 {
@@ -173,6 +205,16 @@ func importEvent(dbClient *ent.Client, idString string) error {
 				return errors.New("fighter not found in FightStats")
 			}
 
+			// Get the fighter's corner to get consistent rendering in the UI
+			var corner fighterresults.Corner
+			if strings.ToLower(f.Corner) == "red" {
+				corner = fighterresults.CornerRed
+			} else if strings.ToLower(f.Corner) == "blue" {
+				corner = fighterresults.CornerBlue
+			} else {
+				return errors.New("unrecognized corner: '" + f.Corner + "'")
+			}
+
 			// link fighter to fight via M2M relationship
 			err = tx.FighterResults.Create().
 				SetFightID(fightID).
@@ -183,19 +225,21 @@ func importEvent(dbClient *ent.Client, idString string) error {
 				SetTakedowns(fighterStats.TakedownsLanded).
 				SetWinByStoppage(winByStoppage).
 				SetLossByStoppage(lossByStoppage).
+				SetWin(win).
+				SetCorner(corner).
 				OnConflict(
 					sql.ConflictColumns(fighterresults.FieldFightID, fighterresults.FieldFighterID),
 				).
 				UpdateNewValues().
 				Exec(ctx)
 			if err != nil {
-				return db.Rollback(tx, err)
+				return err
 			}
 		}
 
 	}
 
-	return tx.Commit()
+	return nil
 }
 
 func loadEnv() {

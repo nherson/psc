@@ -3,6 +3,7 @@
 package fighterresults
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +23,8 @@ const (
 	FieldFighterID = "fighter_id"
 	// FieldFightID holds the string denoting the fight_id field in the database.
 	FieldFightID = "fight_id"
+	// FieldCorner holds the string denoting the corner field in the database.
+	FieldCorner = "corner"
 	// FieldSignificantStrikesLanded holds the string denoting the significant_strikes_landed field in the database.
 	FieldSignificantStrikesLanded = "significant_strikes_landed"
 	// FieldTakedowns holds the string denoting the takedowns field in the database.
@@ -30,6 +33,8 @@ const (
 	FieldKnockdowns = "knockdowns"
 	// FieldControlTimeSeconds holds the string denoting the control_time_seconds field in the database.
 	FieldControlTimeSeconds = "control_time_seconds"
+	// FieldWin holds the string denoting the win field in the database.
+	FieldWin = "win"
 	// FieldWinByStoppage holds the string denoting the win_by_stoppage field in the database.
 	FieldWinByStoppage = "win_by_stoppage"
 	// FieldLossByStoppage holds the string denoting the loss_by_stoppage field in the database.
@@ -65,10 +70,12 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldFighterID,
 	FieldFightID,
+	FieldCorner,
 	FieldSignificantStrikesLanded,
 	FieldTakedowns,
 	FieldKnockdowns,
 	FieldControlTimeSeconds,
+	FieldWin,
 	FieldWinByStoppage,
 	FieldLossByStoppage,
 	FieldMissedWeight,
@@ -91,9 +98,37 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultWin holds the default value on creation for the "win" field.
+	DefaultWin bool
 	// DefaultMissedWeight holds the default value on creation for the "missed_weight" field.
 	DefaultMissedWeight bool
 )
+
+// Corner defines the type for the "corner" enum field.
+type Corner string
+
+// CornerRed is the default value of the Corner enum.
+const DefaultCorner = CornerRed
+
+// Corner values.
+const (
+	CornerRed  Corner = "red"
+	CornerBlue Corner = "blue"
+)
+
+func (c Corner) String() string {
+	return string(c)
+}
+
+// CornerValidator is a validator for the "corner" field enum values. It is called by the builders before save.
+func CornerValidator(c Corner) error {
+	switch c {
+	case CornerRed, CornerBlue:
+		return nil
+	default:
+		return fmt.Errorf("fighterresults: invalid enum value for corner field: %q", c)
+	}
+}
 
 // Order defines the ordering method for the FighterResults queries.
 type Order func(*sql.Selector)
@@ -123,6 +158,11 @@ func ByFightID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldFightID, opts...).ToFunc()
 }
 
+// ByCorner orders the results by the corner field.
+func ByCorner(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldCorner, opts...).ToFunc()
+}
+
 // BySignificantStrikesLanded orders the results by the significant_strikes_landed field.
 func BySignificantStrikesLanded(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldSignificantStrikesLanded, opts...).ToFunc()
@@ -141,6 +181,11 @@ func ByKnockdowns(opts ...sql.OrderTermOption) Order {
 // ByControlTimeSeconds orders the results by the control_time_seconds field.
 func ByControlTimeSeconds(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldControlTimeSeconds, opts...).ToFunc()
+}
+
+// ByWin orders the results by the win field.
+func ByWin(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldWin, opts...).ToFunc()
 }
 
 // ByWinByStoppage orders the results by the win_by_stoppage field.

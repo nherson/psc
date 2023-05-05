@@ -64,6 +64,20 @@ func (frc *FighterResultsCreate) SetFightID(i int) *FighterResultsCreate {
 	return frc
 }
 
+// SetCorner sets the "corner" field.
+func (frc *FighterResultsCreate) SetCorner(f fighterresults.Corner) *FighterResultsCreate {
+	frc.mutation.SetCorner(f)
+	return frc
+}
+
+// SetNillableCorner sets the "corner" field if the given value is not nil.
+func (frc *FighterResultsCreate) SetNillableCorner(f *fighterresults.Corner) *FighterResultsCreate {
+	if f != nil {
+		frc.SetCorner(*f)
+	}
+	return frc
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (frc *FighterResultsCreate) SetSignificantStrikesLanded(i int) *FighterResultsCreate {
 	frc.mutation.SetSignificantStrikesLanded(i)
@@ -85,6 +99,20 @@ func (frc *FighterResultsCreate) SetKnockdowns(i int) *FighterResultsCreate {
 // SetControlTimeSeconds sets the "control_time_seconds" field.
 func (frc *FighterResultsCreate) SetControlTimeSeconds(i int) *FighterResultsCreate {
 	frc.mutation.SetControlTimeSeconds(i)
+	return frc
+}
+
+// SetWin sets the "win" field.
+func (frc *FighterResultsCreate) SetWin(b bool) *FighterResultsCreate {
+	frc.mutation.SetWin(b)
+	return frc
+}
+
+// SetNillableWin sets the "win" field if the given value is not nil.
+func (frc *FighterResultsCreate) SetNillableWin(b *bool) *FighterResultsCreate {
+	if b != nil {
+		frc.SetWin(*b)
+	}
 	return frc
 }
 
@@ -167,6 +195,14 @@ func (frc *FighterResultsCreate) defaults() {
 		v := fighterresults.DefaultUpdatedAt()
 		frc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := frc.mutation.Corner(); !ok {
+		v := fighterresults.DefaultCorner
+		frc.mutation.SetCorner(v)
+	}
+	if _, ok := frc.mutation.Win(); !ok {
+		v := fighterresults.DefaultWin
+		frc.mutation.SetWin(v)
+	}
 	if _, ok := frc.mutation.MissedWeight(); !ok {
 		v := fighterresults.DefaultMissedWeight
 		frc.mutation.SetMissedWeight(v)
@@ -187,6 +223,14 @@ func (frc *FighterResultsCreate) check() error {
 	if _, ok := frc.mutation.FightID(); !ok {
 		return &ValidationError{Name: "fight_id", err: errors.New(`ent: missing required field "FighterResults.fight_id"`)}
 	}
+	if _, ok := frc.mutation.Corner(); !ok {
+		return &ValidationError{Name: "corner", err: errors.New(`ent: missing required field "FighterResults.corner"`)}
+	}
+	if v, ok := frc.mutation.Corner(); ok {
+		if err := fighterresults.CornerValidator(v); err != nil {
+			return &ValidationError{Name: "corner", err: fmt.Errorf(`ent: validator failed for field "FighterResults.corner": %w`, err)}
+		}
+	}
 	if _, ok := frc.mutation.SignificantStrikesLanded(); !ok {
 		return &ValidationError{Name: "significant_strikes_landed", err: errors.New(`ent: missing required field "FighterResults.significant_strikes_landed"`)}
 	}
@@ -198,6 +242,9 @@ func (frc *FighterResultsCreate) check() error {
 	}
 	if _, ok := frc.mutation.ControlTimeSeconds(); !ok {
 		return &ValidationError{Name: "control_time_seconds", err: errors.New(`ent: missing required field "FighterResults.control_time_seconds"`)}
+	}
+	if _, ok := frc.mutation.Win(); !ok {
+		return &ValidationError{Name: "win", err: errors.New(`ent: missing required field "FighterResults.win"`)}
 	}
 	if _, ok := frc.mutation.WinByStoppage(); !ok {
 		return &ValidationError{Name: "win_by_stoppage", err: errors.New(`ent: missing required field "FighterResults.win_by_stoppage"`)}
@@ -246,6 +293,10 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 		_spec.SetField(fighterresults.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := frc.mutation.Corner(); ok {
+		_spec.SetField(fighterresults.FieldCorner, field.TypeEnum, value)
+		_node.Corner = value
+	}
 	if value, ok := frc.mutation.SignificantStrikesLanded(); ok {
 		_spec.SetField(fighterresults.FieldSignificantStrikesLanded, field.TypeInt, value)
 		_node.SignificantStrikesLanded = value
@@ -261,6 +312,10 @@ func (frc *FighterResultsCreate) createSpec() (*FighterResults, *sqlgraph.Create
 	if value, ok := frc.mutation.ControlTimeSeconds(); ok {
 		_spec.SetField(fighterresults.FieldControlTimeSeconds, field.TypeInt, value)
 		_node.ControlTimeSeconds = value
+	}
+	if value, ok := frc.mutation.Win(); ok {
+		_spec.SetField(fighterresults.FieldWin, field.TypeBool, value)
+		_node.Win = value
 	}
 	if value, ok := frc.mutation.WinByStoppage(); ok {
 		_spec.SetField(fighterresults.FieldWinByStoppage, field.TypeBool, value)
@@ -396,6 +451,18 @@ func (u *FighterResultsUpsert) UpdateFightID() *FighterResultsUpsert {
 	return u
 }
 
+// SetCorner sets the "corner" field.
+func (u *FighterResultsUpsert) SetCorner(v fighterresults.Corner) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldCorner, v)
+	return u
+}
+
+// UpdateCorner sets the "corner" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateCorner() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldCorner)
+	return u
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (u *FighterResultsUpsert) SetSignificantStrikesLanded(v int) *FighterResultsUpsert {
 	u.Set(fighterresults.FieldSignificantStrikesLanded, v)
@@ -465,6 +532,18 @@ func (u *FighterResultsUpsert) UpdateControlTimeSeconds() *FighterResultsUpsert 
 // AddControlTimeSeconds adds v to the "control_time_seconds" field.
 func (u *FighterResultsUpsert) AddControlTimeSeconds(v int) *FighterResultsUpsert {
 	u.Add(fighterresults.FieldControlTimeSeconds, v)
+	return u
+}
+
+// SetWin sets the "win" field.
+func (u *FighterResultsUpsert) SetWin(v bool) *FighterResultsUpsert {
+	u.Set(fighterresults.FieldWin, v)
+	return u
+}
+
+// UpdateWin sets the "win" field to the value that was provided on create.
+func (u *FighterResultsUpsert) UpdateWin() *FighterResultsUpsert {
+	u.SetExcluded(fighterresults.FieldWin)
 	return u
 }
 
@@ -597,6 +676,20 @@ func (u *FighterResultsUpsertOne) UpdateFightID() *FighterResultsUpsertOne {
 	})
 }
 
+// SetCorner sets the "corner" field.
+func (u *FighterResultsUpsertOne) SetCorner(v fighterresults.Corner) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetCorner(v)
+	})
+}
+
+// UpdateCorner sets the "corner" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateCorner() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateCorner()
+	})
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (u *FighterResultsUpsertOne) SetSignificantStrikesLanded(v int) *FighterResultsUpsertOne {
 	return u.Update(func(s *FighterResultsUpsert) {
@@ -678,6 +771,20 @@ func (u *FighterResultsUpsertOne) AddControlTimeSeconds(v int) *FighterResultsUp
 func (u *FighterResultsUpsertOne) UpdateControlTimeSeconds() *FighterResultsUpsertOne {
 	return u.Update(func(s *FighterResultsUpsert) {
 		s.UpdateControlTimeSeconds()
+	})
+}
+
+// SetWin sets the "win" field.
+func (u *FighterResultsUpsertOne) SetWin(v bool) *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetWin(v)
+	})
+}
+
+// UpdateWin sets the "win" field to the value that was provided on create.
+func (u *FighterResultsUpsertOne) UpdateWin() *FighterResultsUpsertOne {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateWin()
 	})
 }
 
@@ -979,6 +1086,20 @@ func (u *FighterResultsUpsertBulk) UpdateFightID() *FighterResultsUpsertBulk {
 	})
 }
 
+// SetCorner sets the "corner" field.
+func (u *FighterResultsUpsertBulk) SetCorner(v fighterresults.Corner) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetCorner(v)
+	})
+}
+
+// UpdateCorner sets the "corner" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateCorner() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateCorner()
+	})
+}
+
 // SetSignificantStrikesLanded sets the "significant_strikes_landed" field.
 func (u *FighterResultsUpsertBulk) SetSignificantStrikesLanded(v int) *FighterResultsUpsertBulk {
 	return u.Update(func(s *FighterResultsUpsert) {
@@ -1060,6 +1181,20 @@ func (u *FighterResultsUpsertBulk) AddControlTimeSeconds(v int) *FighterResultsU
 func (u *FighterResultsUpsertBulk) UpdateControlTimeSeconds() *FighterResultsUpsertBulk {
 	return u.Update(func(s *FighterResultsUpsert) {
 		s.UpdateControlTimeSeconds()
+	})
+}
+
+// SetWin sets the "win" field.
+func (u *FighterResultsUpsertBulk) SetWin(v bool) *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.SetWin(v)
+	})
+}
+
+// UpdateWin sets the "win" field to the value that was provided on create.
+func (u *FighterResultsUpsertBulk) UpdateWin() *FighterResultsUpsertBulk {
+	return u.Update(func(s *FighterResultsUpsert) {
+		s.UpdateWin()
 	})
 }
 

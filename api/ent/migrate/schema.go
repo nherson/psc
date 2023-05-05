@@ -94,10 +94,12 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "corner", Type: field.TypeEnum, Enums: []string{"red", "blue"}, Default: "red"},
 		{Name: "significant_strikes_landed", Type: field.TypeInt},
 		{Name: "takedowns", Type: field.TypeInt},
 		{Name: "knockdowns", Type: field.TypeInt},
 		{Name: "control_time_seconds", Type: field.TypeInt},
+		{Name: "win", Type: field.TypeBool, Default: false},
 		{Name: "win_by_stoppage", Type: field.TypeBool},
 		{Name: "loss_by_stoppage", Type: field.TypeBool},
 		{Name: "missed_weight", Type: field.TypeBool, Nullable: true, Default: false},
@@ -112,13 +114,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "fighter_results_fighters_fighter",
-				Columns:    []*schema.Column{FighterResultsColumns[10]},
+				Columns:    []*schema.Column{FighterResultsColumns[12]},
 				RefColumns: []*schema.Column{FightersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "fighter_results_fights_fight",
-				Columns:    []*schema.Column{FighterResultsColumns[11]},
+				Columns:    []*schema.Column{FighterResultsColumns[13]},
 				RefColumns: []*schema.Column{FightsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -127,7 +129,7 @@ var (
 			{
 				Name:    "fighterresults_fighter_id_fight_id",
 				Unique:  true,
-				Columns: []*schema.Column{FighterResultsColumns[10], FighterResultsColumns[11]},
+				Columns: []*schema.Column{FighterResultsColumns[12], FighterResultsColumns[13]},
 			},
 		},
 	}

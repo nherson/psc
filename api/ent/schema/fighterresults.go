@@ -24,10 +24,12 @@ func (FighterResults) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("fighter_id").Comment("Required for M2M relationship between Fights and Fighters. NOT UFC assigned identifier!"),
 		field.Int("fight_id").Comment("Required for M2M relationship between Fights and Fighters. NOT UFC assigned identifier!"),
+		field.Enum("corner").Values("red", "blue").Default("red"),
 		field.Int("significant_strikes_landed"),
 		field.Int("takedowns"),
 		field.Int("knockdowns"),
 		field.Int("control_time_seconds"),
+		field.Bool("win").Default(false),
 		field.Bool("win_by_stoppage"),
 		field.Bool("loss_by_stoppage"),
 		field.Bool("missed_weight").Optional().Default(false),

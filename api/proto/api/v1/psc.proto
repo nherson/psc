@@ -39,6 +39,8 @@ message ListResultsForFighterResponse {
 message FightResult {
   repeated FighterResult fighter_results = 1;
   Event event = 2;
+  int32 result_ending_round = 3;
+  int32 result_ending_time_seconds = 4;
 }
 
 message FighterResult {
@@ -48,6 +50,16 @@ message FighterResult {
   int32 knockdowns = 4;
   int32 control_time_seconds = 5;
   float score = 6;
+  // True if the fighter won the fight
+  bool win = 7;
+  // True if the fighter won the fight via stoppage
+  bool win_by_stoppage = 8;
+  // If the fighter won, this will be a string representing the method
+  // of victory, e.g. "Decision - Unanimous" or "Submission" or "TKO/KO".bool
+  // If the fighter did not win, will be an empty string
+  string win_method = 9;
+  // The corner the fighter was in, should be either 'red' or 'blue'
+  string corner = 10;
 }
 
 message Fighter {
