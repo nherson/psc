@@ -18,6 +18,15 @@ func dbEventToApi(event *ent.Event) *apiv1.Event {
 	}
 }
 
+func dbFighterToApi(fighter *ent.Fighter) *apiv1.Fighter {
+	return &apiv1.Fighter{
+		Id:        strconv.Itoa(fighter.ID),
+		FirstName: fighter.FirstName,
+		LastName:  fighter.LastName,
+		NickName:  fighter.NickName,
+	}
+}
+
 // Assumes eager loading of related FighterResults and FighterResults.Fighter edges
 // and also there are exactly two Fight.Edges.FighterResults
 func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.FightResult {
@@ -45,11 +54,7 @@ func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.Fight
 		Event: dbEventToApi(event),
 		FighterResults: []*apiv1.FighterResult{
 			{
-				Fighter: &apiv1.Fighter{
-					FirstName: f0.Edges.Fighter.FirstName,
-					LastName:  f0.Edges.Fighter.LastName,
-					NickName:  f0.Edges.Fighter.NickName,
-				},
+				Fighter:            dbFighterToApi(f0.Edges.Fighter),
 				SignificantStrikes: int32(f0.SignificantStrikesLanded),
 				Takedowns:          int32(f0.Takedowns),
 				Knockdowns:         int32(f0.Knockdowns),
@@ -61,11 +66,7 @@ func dbFightResultsToApi(fightResults *ent.Fight, event *ent.Event) *apiv1.Fight
 				Corner:             f0.Corner.String(),
 			},
 			{
-				Fighter: &apiv1.Fighter{
-					FirstName: f1.Edges.Fighter.FirstName,
-					LastName:  f1.Edges.Fighter.LastName,
-					NickName:  f1.Edges.Fighter.NickName,
-				},
+				Fighter:            dbFighterToApi(f1.Edges.Fighter),
 				SignificantStrikes: int32(f1.SignificantStrikesLanded),
 				Takedowns:          int32(f1.Takedowns),
 				Knockdowns:         int32(f1.Knockdowns),

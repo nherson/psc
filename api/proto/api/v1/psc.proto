@@ -10,6 +10,7 @@ service PSCService {
 
   rpc ListEvents(ListEventsRequest) returns (ListEventsResponse) {}
   rpc ListResultsForEvent(ListResultsForEventRequest) returns (ListResultsForEventResponse) {}
+  rpc ListFighters(ListFightersRequest) returns (ListFightersResponse) {}
   rpc ListResultsForFighter(ListResultsForFighterRequest) returns (ListResultsForFighterResponse) {}
 }
 
@@ -28,12 +29,19 @@ message ListResultsForEventResponse {
   repeated FightResult fight_results = 2;
 }
 
+message ListFightersRequest {}
+
+message ListFightersResponse {
+  repeated Fighter fighters = 1;
+}
+
 message ListResultsForFighterRequest {
   int32 fighter_id = 1;
 }
 
 message ListResultsForFighterResponse {
-  repeated FightResult fight_results = 1;
+  Fighter fighter = 1;
+  repeated FightResult fight_results = 2;
 }
 
 message FightResult {
@@ -63,9 +71,10 @@ message FighterResult {
 }
 
 message Fighter {
-  string first_name = 1;
-  string last_name = 2;
-  string nick_name = 3;
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string nick_name = 4;
 }
 
 message Event {

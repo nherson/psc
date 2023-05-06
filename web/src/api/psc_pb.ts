@@ -155,6 +155,74 @@ export class ListResultsForEventResponse extends Message<ListResultsForEventResp
 }
 
 /**
+ * @generated from message api.v1.ListFightersRequest
+ */
+export class ListFightersRequest extends Message<ListFightersRequest> {
+  constructor(data?: PartialMessage<ListFightersRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "api.v1.ListFightersRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListFightersRequest {
+    return new ListFightersRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListFightersRequest {
+    return new ListFightersRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListFightersRequest {
+    return new ListFightersRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListFightersRequest | PlainMessage<ListFightersRequest> | undefined, b: ListFightersRequest | PlainMessage<ListFightersRequest> | undefined): boolean {
+    return proto3.util.equals(ListFightersRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message api.v1.ListFightersResponse
+ */
+export class ListFightersResponse extends Message<ListFightersResponse> {
+  /**
+   * @generated from field: repeated api.v1.Fighter fighters = 1;
+   */
+  fighters: Fighter[] = [];
+
+  constructor(data?: PartialMessage<ListFightersResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "api.v1.ListFightersResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "fighters", kind: "message", T: Fighter, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListFightersResponse {
+    return new ListFightersResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListFightersResponse {
+    return new ListFightersResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListFightersResponse {
+    return new ListFightersResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListFightersResponse | PlainMessage<ListFightersResponse> | undefined, b: ListFightersResponse | PlainMessage<ListFightersResponse> | undefined): boolean {
+    return proto3.util.equals(ListFightersResponse, a, b);
+  }
+}
+
+/**
  * @generated from message api.v1.ListResultsForFighterRequest
  */
 export class ListResultsForFighterRequest extends Message<ListResultsForFighterRequest> {
@@ -196,7 +264,12 @@ export class ListResultsForFighterRequest extends Message<ListResultsForFighterR
  */
 export class ListResultsForFighterResponse extends Message<ListResultsForFighterResponse> {
   /**
-   * @generated from field: repeated api.v1.FightResult fight_results = 1;
+   * @generated from field: api.v1.Fighter fighter = 1;
+   */
+  fighter?: Fighter;
+
+  /**
+   * @generated from field: repeated api.v1.FightResult fight_results = 2;
    */
   fightResults: FightResult[] = [];
 
@@ -208,7 +281,8 @@ export class ListResultsForFighterResponse extends Message<ListResultsForFighter
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "api.v1.ListResultsForFighterResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "fight_results", kind: "message", T: FightResult, repeated: true },
+    { no: 1, name: "fighter", kind: "message", T: Fighter },
+    { no: 2, name: "fight_results", kind: "message", T: FightResult, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListResultsForFighterResponse {
@@ -389,17 +463,22 @@ export class FighterResult extends Message<FighterResult> {
  */
 export class Fighter extends Message<Fighter> {
   /**
-   * @generated from field: string first_name = 1;
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string first_name = 2;
    */
   firstName = "";
 
   /**
-   * @generated from field: string last_name = 2;
+   * @generated from field: string last_name = 3;
    */
   lastName = "";
 
   /**
-   * @generated from field: string nick_name = 3;
+   * @generated from field: string nick_name = 4;
    */
   nickName = "";
 
@@ -411,9 +490,10 @@ export class Fighter extends Message<Fighter> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "api.v1.Fighter";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "nick_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "nick_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Fighter {

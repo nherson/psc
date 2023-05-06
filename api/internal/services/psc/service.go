@@ -71,6 +71,27 @@ func (s *PSCServer) ListResultsForEvent(
 	return connect.NewResponse(&resp), nil
 }
 
+func (s *PSCServer) ListFighters(
+	ctx context.Context,
+	req *connect.Request[apiv1.ListFightersRequest],
+) (*connect.Response[apiv1.ListFightersResponse], error) {
+	events, err := s.DB.Fighter.Query().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var apiFighters []*apiv1.Fighter
+	for _, e := range events {
+		apiFighters = append(apiFighters, dbFighterToApi(e))
+	}
+
+	res := connect.NewResponse(&apiv1.ListFightersResponse{
+		Fighters: apiFighters,
+	})
+
+	return res, nil
+}
+
 func (s *PSCServer) ListResultsForFighter(
 	ctx context.Context,
 	req *connect.Request[apiv1.ListResultsForFighterRequest],
@@ -97,6 +118,7 @@ func (s *PSCServer) ListResultsForFighter(
 	for _, fight := range f.Edges.Fights {
 		resp.FightResults = append(resp.FightResults, dbFightResultsToApi(fight, fight.Edges.Event))
 	}
+	resp.Fighter = dbFighterToApi(f)
 
 	return connect.NewResponse(&resp), nil
 }

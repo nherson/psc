@@ -5,6 +5,7 @@ import NavBar from "./components/NavBar";
 import { Fighters } from "./pages/Fighters";
 import { Events } from "./pages/Events";
 import { Event } from "./pages/Event";
+import { Fighter } from "./pages/Fighter";
 
 export const App = () => (
   <ChakraProvider theme={theme}>
@@ -17,6 +18,7 @@ export const App = () => (
             <Route path="/fighters" element={<Fighters />} />
             <Route path="/events" element={<Events />} />
             <Route path="/events/:id" element={<Event />} />
+            <Route path="/fighters/:id" element={<Fighter />} />
           </Routes>
         </Grid>
       </Box>

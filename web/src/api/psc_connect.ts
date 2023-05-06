@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { ListEventsRequest, ListEventsResponse, ListResultsForEventRequest, ListResultsForEventResponse, ListResultsForFighterRequest, ListResultsForFighterResponse } from "./psc_pb";
+import { ListEventsRequest, ListEventsResponse, ListFightersRequest, ListFightersResponse, ListResultsForEventRequest, ListResultsForEventResponse, ListResultsForFighterRequest, ListResultsForFighterResponse } from "./psc_pb";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -28,6 +28,15 @@ export const PSCService = {
       name: "ListResultsForEvent",
       I: ListResultsForEventRequest,
       O: ListResultsForEventResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc api.v1.PSCService.ListFighters
+     */
+    listFighters: {
+      name: "ListFighters",
+      I: ListFightersRequest,
+      O: ListFightersResponse,
       kind: MethodKind.Unary,
     },
     /**

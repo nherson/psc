@@ -13,6 +13,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FightResult, FighterResult } from "../api/psc_pb";
+import { Link as RouteLink } from "react-router-dom";
 
 export const FightResultRow = ({
   fightResult,
@@ -55,9 +56,11 @@ const FighterResultCard = ({
     />
     <CardHeader>
       <Box>
-        <Heading size="md">
-          {fighterResult.fighter?.firstName} {fighterResult.fighter?.lastName}
-        </Heading>
+        <RouteLink to={`/fighters/${fighterResult.fighter?.id}`}>
+          <Heading size="md">
+            {fighterResult.fighter?.firstName} {fighterResult.fighter?.lastName}
+          </Heading>
+        </RouteLink>
       </Box>
     </CardHeader>
     <Divider />

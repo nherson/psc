@@ -22,7 +22,7 @@ export const Event = () => {
       setFightResults(resp.fightResults);
       setLoading(false);
     })();
-  }, []);
+  }, [eventId]);
 
   if (loading) {
     return <PageLoading />;

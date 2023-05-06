@@ -38,6 +38,8 @@ const (
 	// PSCServiceListResultsForEventProcedure is the fully-qualified name of the PSCService's
 	// ListResultsForEvent RPC.
 	PSCServiceListResultsForEventProcedure = "/api.v1.PSCService/ListResultsForEvent"
+	// PSCServiceListFightersProcedure is the fully-qualified name of the PSCService's ListFighters RPC.
+	PSCServiceListFightersProcedure = "/api.v1.PSCService/ListFighters"
 	// PSCServiceListResultsForFighterProcedure is the fully-qualified name of the PSCService's
 	// ListResultsForFighter RPC.
 	PSCServiceListResultsForFighterProcedure = "/api.v1.PSCService/ListResultsForFighter"
@@ -47,6 +49,7 @@ const (
 type PSCServiceClient interface {
 	ListEvents(context.Context, *connect_go.Request[v1.ListEventsRequest]) (*connect_go.Response[v1.ListEventsResponse], error)
 	ListResultsForEvent(context.Context, *connect_go.Request[v1.ListResultsForEventRequest]) (*connect_go.Response[v1.ListResultsForEventResponse], error)
+	ListFighters(context.Context, *connect_go.Request[v1.ListFightersRequest]) (*connect_go.Response[v1.ListFightersResponse], error)
 	ListResultsForFighter(context.Context, *connect_go.Request[v1.ListResultsForFighterRequest]) (*connect_go.Response[v1.ListResultsForFighterResponse], error)
 }
 
@@ -70,6 +73,11 @@ func NewPSCServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts 
 			baseURL+PSCServiceListResultsForEventProcedure,
 			opts...,
 		),
+		listFighters: connect_go.NewClient[v1.ListFightersRequest, v1.ListFightersResponse](
+			httpClient,
+			baseURL+PSCServiceListFightersProcedure,
+			opts...,
+		),
 		listResultsForFighter: connect_go.NewClient[v1.ListResultsForFighterRequest, v1.ListResultsForFighterResponse](
 			httpClient,
 			baseURL+PSCServiceListResultsForFighterProcedure,
@@ -82,6 +90,7 @@ func NewPSCServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts 
 type pSCServiceClient struct {
 	listEvents            *connect_go.Client[v1.ListEventsRequest, v1.ListEventsResponse]
 	listResultsForEvent   *connect_go.Client[v1.ListResultsForEventRequest, v1.ListResultsForEventResponse]
+	listFighters          *connect_go.Client[v1.ListFightersRequest, v1.ListFightersResponse]
 	listResultsForFighter *connect_go.Client[v1.ListResultsForFighterRequest, v1.ListResultsForFighterResponse]
 }
 
@@ -95,6 +104,11 @@ func (c *pSCServiceClient) ListResultsForEvent(ctx context.Context, req *connect
 	return c.listResultsForEvent.CallUnary(ctx, req)
 }
 
+// ListFighters calls api.v1.PSCService.ListFighters.
+func (c *pSCServiceClient) ListFighters(ctx context.Context, req *connect_go.Request[v1.ListFightersRequest]) (*connect_go.Response[v1.ListFightersResponse], error) {
+	return c.listFighters.CallUnary(ctx, req)
+}
+
 // ListResultsForFighter calls api.v1.PSCService.ListResultsForFighter.
 func (c *pSCServiceClient) ListResultsForFighter(ctx context.Context, req *connect_go.Request[v1.ListResultsForFighterRequest]) (*connect_go.Response[v1.ListResultsForFighterResponse], error) {
 	return c.listResultsForFighter.CallUnary(ctx, req)
@@ -104,6 +118,7 @@ func (c *pSCServiceClient) ListResultsForFighter(ctx context.Context, req *conne
 type PSCServiceHandler interface {
 	ListEvents(context.Context, *connect_go.Request[v1.ListEventsRequest]) (*connect_go.Response[v1.ListEventsResponse], error)
 	ListResultsForEvent(context.Context, *connect_go.Request[v1.ListResultsForEventRequest]) (*connect_go.Response[v1.ListResultsForEventResponse], error)
+	ListFighters(context.Context, *connect_go.Request[v1.ListFightersRequest]) (*connect_go.Response[v1.ListFightersResponse], error)
 	ListResultsForFighter(context.Context, *connect_go.Request[v1.ListResultsForFighterRequest]) (*connect_go.Response[v1.ListResultsForFighterResponse], error)
 }
 
@@ -124,6 +139,11 @@ func NewPSCServiceHandler(svc PSCServiceHandler, opts ...connect_go.HandlerOptio
 		svc.ListResultsForEvent,
 		opts...,
 	))
+	mux.Handle(PSCServiceListFightersProcedure, connect_go.NewUnaryHandler(
+		PSCServiceListFightersProcedure,
+		svc.ListFighters,
+		opts...,
+	))
 	mux.Handle(PSCServiceListResultsForFighterProcedure, connect_go.NewUnaryHandler(
 		PSCServiceListResultsForFighterProcedure,
 		svc.ListResultsForFighter,
@@ -141,6 +161,10 @@ func (UnimplementedPSCServiceHandler) ListEvents(context.Context, *connect_go.Re
 
 func (UnimplementedPSCServiceHandler) ListResultsForEvent(context.Context, *connect_go.Request[v1.ListResultsForEventRequest]) (*connect_go.Response[v1.ListResultsForEventResponse], error) {
 	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.v1.PSCService.ListResultsForEvent is not implemented"))
+}
+
+func (UnimplementedPSCServiceHandler) ListFighters(context.Context, *connect_go.Request[v1.ListFightersRequest]) (*connect_go.Response[v1.ListFightersResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.v1.PSCService.ListFighters is not implemented"))
 }
 
 func (UnimplementedPSCServiceHandler) ListResultsForFighter(context.Context, *connect_go.Request[v1.ListResultsForFighterRequest]) (*connect_go.Response[v1.ListResultsForFighterResponse], error) {
