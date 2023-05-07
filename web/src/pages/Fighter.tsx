@@ -2,10 +2,16 @@ import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { client } from "../api/client";
-import { Event as EventData, FightResult, Fighter } from "../api/psc_pb";
+import {
+  Event as EventData,
+  FightResult,
+  Fighter,
+  FighterResult,
+} from "../api/psc_pb";
 import { FightResultRow } from "../components/FightResultCard";
 import { PageLoading } from "../components/PageLoading";
 import { Link as RouteLink } from "react-router-dom";
+import { FighterOverview } from "../components/FighterOverview";
 
 const FighterPage = () => {
   const { id } = useParams();
@@ -30,6 +36,24 @@ const FighterPage = () => {
     return <PageLoading />;
   }
 
+  // Find this fighter's fight results to create an overview
+  const fighterResults =
+    fightResults?.map((f) => {
+      // should never happen
+      if (f.fighterResults.length != 2) {
+        throw new Error("unexpected fighterResults for fight");
+      }
+
+      if (f.fighterResults[0].fighter?.id === id) {
+        return f.fighterResults[0];
+      } else if (f.fighterResults[1].fighter?.id === id) {
+        return f.fighterResults[1];
+      } else {
+        // should never happen
+        throw new Error("fighter not found in fight results");
+      }
+    }) || [];
+
   return (
     <Box>
       <Box pb="5">
@@ -40,6 +64,9 @@ const FighterPage = () => {
       </Box>
 
       <VStack>
+        <Box pb={5}>
+          <FighterOverview fighterResults={fighterResults} />
+        </Box>
         {fightResults?.map((fr) => (
           <Box>
             <Box py="2">
