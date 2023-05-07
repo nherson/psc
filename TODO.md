@@ -8,7 +8,7 @@ Base work
 * ~~Add timestamps to events for when they happened~~
 * Clean up multiple connection functions (and rollback function)
 * ~~Setup Chakra UI basics~~
-* Build UI parity with old site
+* ~~Build UI parity with old site~~
 
 Monthly process
 ---
