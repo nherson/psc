@@ -83,6 +83,34 @@ func (fc *FighterCreate) SetNickName(s string) *FighterCreate {
 	return fc
 }
 
+// SetFightinsiderID sets the "fightinsider_id" field.
+func (fc *FighterCreate) SetFightinsiderID(s string) *FighterCreate {
+	fc.mutation.SetFightinsiderID(s)
+	return fc
+}
+
+// SetNillableFightinsiderID sets the "fightinsider_id" field if the given value is not nil.
+func (fc *FighterCreate) SetNillableFightinsiderID(s *string) *FighterCreate {
+	if s != nil {
+		fc.SetFightinsiderID(*s)
+	}
+	return fc
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (fc *FighterCreate) SetTapologyID(s string) *FighterCreate {
+	fc.mutation.SetTapologyID(s)
+	return fc
+}
+
+// SetNillableTapologyID sets the "tapology_id" field if the given value is not nil.
+func (fc *FighterCreate) SetNillableTapologyID(s *string) *FighterCreate {
+	if s != nil {
+		fc.SetTapologyID(*s)
+	}
+	return fc
+}
+
 // AddFightIDs adds the "fights" edge to the Fight entity by IDs.
 func (fc *FighterCreate) AddFightIDs(ids ...int) *FighterCreate {
 	fc.mutation.AddFightIDs(ids...)
@@ -255,6 +283,14 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 	if value, ok := fc.mutation.NickName(); ok {
 		_spec.SetField(fighter.FieldNickName, field.TypeString, value)
 		_node.NickName = value
+	}
+	if value, ok := fc.mutation.FightinsiderID(); ok {
+		_spec.SetField(fighter.FieldFightinsiderID, field.TypeString, value)
+		_node.FightinsiderID = value
+	}
+	if value, ok := fc.mutation.TapologyID(); ok {
+		_spec.SetField(fighter.FieldTapologyID, field.TypeString, value)
+		_node.TapologyID = value
 	}
 	if nodes := fc.mutation.FightsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -438,6 +474,42 @@ func (u *FighterUpsert) UpdateNickName() *FighterUpsert {
 	return u
 }
 
+// SetFightinsiderID sets the "fightinsider_id" field.
+func (u *FighterUpsert) SetFightinsiderID(v string) *FighterUpsert {
+	u.Set(fighter.FieldFightinsiderID, v)
+	return u
+}
+
+// UpdateFightinsiderID sets the "fightinsider_id" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateFightinsiderID() *FighterUpsert {
+	u.SetExcluded(fighter.FieldFightinsiderID)
+	return u
+}
+
+// ClearFightinsiderID clears the value of the "fightinsider_id" field.
+func (u *FighterUpsert) ClearFightinsiderID() *FighterUpsert {
+	u.SetNull(fighter.FieldFightinsiderID)
+	return u
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (u *FighterUpsert) SetTapologyID(v string) *FighterUpsert {
+	u.Set(fighter.FieldTapologyID, v)
+	return u
+}
+
+// UpdateTapologyID sets the "tapology_id" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateTapologyID() *FighterUpsert {
+	u.SetExcluded(fighter.FieldTapologyID)
+	return u
+}
+
+// ClearTapologyID clears the value of the "tapology_id" field.
+func (u *FighterUpsert) ClearTapologyID() *FighterUpsert {
+	u.SetNull(fighter.FieldTapologyID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -571,6 +643,48 @@ func (u *FighterUpsertOne) SetNickName(v string) *FighterUpsertOne {
 func (u *FighterUpsertOne) UpdateNickName() *FighterUpsertOne {
 	return u.Update(func(s *FighterUpsert) {
 		s.UpdateNickName()
+	})
+}
+
+// SetFightinsiderID sets the "fightinsider_id" field.
+func (u *FighterUpsertOne) SetFightinsiderID(v string) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetFightinsiderID(v)
+	})
+}
+
+// UpdateFightinsiderID sets the "fightinsider_id" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateFightinsiderID() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateFightinsiderID()
+	})
+}
+
+// ClearFightinsiderID clears the value of the "fightinsider_id" field.
+func (u *FighterUpsertOne) ClearFightinsiderID() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.ClearFightinsiderID()
+	})
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (u *FighterUpsertOne) SetTapologyID(v string) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetTapologyID(v)
+	})
+}
+
+// UpdateTapologyID sets the "tapology_id" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateTapologyID() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateTapologyID()
+	})
+}
+
+// ClearTapologyID clears the value of the "tapology_id" field.
+func (u *FighterUpsertOne) ClearTapologyID() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.ClearTapologyID()
 	})
 }
 
@@ -869,6 +983,48 @@ func (u *FighterUpsertBulk) SetNickName(v string) *FighterUpsertBulk {
 func (u *FighterUpsertBulk) UpdateNickName() *FighterUpsertBulk {
 	return u.Update(func(s *FighterUpsert) {
 		s.UpdateNickName()
+	})
+}
+
+// SetFightinsiderID sets the "fightinsider_id" field.
+func (u *FighterUpsertBulk) SetFightinsiderID(v string) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetFightinsiderID(v)
+	})
+}
+
+// UpdateFightinsiderID sets the "fightinsider_id" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateFightinsiderID() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateFightinsiderID()
+	})
+}
+
+// ClearFightinsiderID clears the value of the "fightinsider_id" field.
+func (u *FighterUpsertBulk) ClearFightinsiderID() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.ClearFightinsiderID()
+	})
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (u *FighterUpsertBulk) SetTapologyID(v string) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetTapologyID(v)
+	})
+}
+
+// UpdateTapologyID sets the "tapology_id" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateTapologyID() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateTapologyID()
+	})
+}
+
+// ClearTapologyID clears the value of the "tapology_id" field.
+func (u *FighterUpsertBulk) ClearTapologyID() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.ClearTapologyID()
 	})
 }
 

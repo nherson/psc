@@ -74,6 +74,46 @@ func (fu *FighterUpdate) SetNickName(s string) *FighterUpdate {
 	return fu
 }
 
+// SetFightinsiderID sets the "fightinsider_id" field.
+func (fu *FighterUpdate) SetFightinsiderID(s string) *FighterUpdate {
+	fu.mutation.SetFightinsiderID(s)
+	return fu
+}
+
+// SetNillableFightinsiderID sets the "fightinsider_id" field if the given value is not nil.
+func (fu *FighterUpdate) SetNillableFightinsiderID(s *string) *FighterUpdate {
+	if s != nil {
+		fu.SetFightinsiderID(*s)
+	}
+	return fu
+}
+
+// ClearFightinsiderID clears the value of the "fightinsider_id" field.
+func (fu *FighterUpdate) ClearFightinsiderID() *FighterUpdate {
+	fu.mutation.ClearFightinsiderID()
+	return fu
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (fu *FighterUpdate) SetTapologyID(s string) *FighterUpdate {
+	fu.mutation.SetTapologyID(s)
+	return fu
+}
+
+// SetNillableTapologyID sets the "tapology_id" field if the given value is not nil.
+func (fu *FighterUpdate) SetNillableTapologyID(s *string) *FighterUpdate {
+	if s != nil {
+		fu.SetTapologyID(*s)
+	}
+	return fu
+}
+
+// ClearTapologyID clears the value of the "tapology_id" field.
+func (fu *FighterUpdate) ClearTapologyID() *FighterUpdate {
+	fu.mutation.ClearTapologyID()
+	return fu
+}
+
 // AddFightIDs adds the "fights" edge to the Fight entity by IDs.
 func (fu *FighterUpdate) AddFightIDs(ids ...int) *FighterUpdate {
 	fu.mutation.AddFightIDs(ids...)
@@ -265,6 +305,18 @@ func (fu *FighterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := fu.mutation.NickName(); ok {
 		_spec.SetField(fighter.FieldNickName, field.TypeString, value)
+	}
+	if value, ok := fu.mutation.FightinsiderID(); ok {
+		_spec.SetField(fighter.FieldFightinsiderID, field.TypeString, value)
+	}
+	if fu.mutation.FightinsiderIDCleared() {
+		_spec.ClearField(fighter.FieldFightinsiderID, field.TypeString)
+	}
+	if value, ok := fu.mutation.TapologyID(); ok {
+		_spec.SetField(fighter.FieldTapologyID, field.TypeString, value)
+	}
+	if fu.mutation.TapologyIDCleared() {
+		_spec.ClearField(fighter.FieldTapologyID, field.TypeString)
 	}
 	if fu.mutation.FightsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -473,6 +525,46 @@ func (fuo *FighterUpdateOne) SetLastName(s string) *FighterUpdateOne {
 // SetNickName sets the "nick_name" field.
 func (fuo *FighterUpdateOne) SetNickName(s string) *FighterUpdateOne {
 	fuo.mutation.SetNickName(s)
+	return fuo
+}
+
+// SetFightinsiderID sets the "fightinsider_id" field.
+func (fuo *FighterUpdateOne) SetFightinsiderID(s string) *FighterUpdateOne {
+	fuo.mutation.SetFightinsiderID(s)
+	return fuo
+}
+
+// SetNillableFightinsiderID sets the "fightinsider_id" field if the given value is not nil.
+func (fuo *FighterUpdateOne) SetNillableFightinsiderID(s *string) *FighterUpdateOne {
+	if s != nil {
+		fuo.SetFightinsiderID(*s)
+	}
+	return fuo
+}
+
+// ClearFightinsiderID clears the value of the "fightinsider_id" field.
+func (fuo *FighterUpdateOne) ClearFightinsiderID() *FighterUpdateOne {
+	fuo.mutation.ClearFightinsiderID()
+	return fuo
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (fuo *FighterUpdateOne) SetTapologyID(s string) *FighterUpdateOne {
+	fuo.mutation.SetTapologyID(s)
+	return fuo
+}
+
+// SetNillableTapologyID sets the "tapology_id" field if the given value is not nil.
+func (fuo *FighterUpdateOne) SetNillableTapologyID(s *string) *FighterUpdateOne {
+	if s != nil {
+		fuo.SetTapologyID(*s)
+	}
+	return fuo
+}
+
+// ClearTapologyID clears the value of the "tapology_id" field.
+func (fuo *FighterUpdateOne) ClearTapologyID() *FighterUpdateOne {
+	fuo.mutation.ClearTapologyID()
 	return fuo
 }
 
@@ -697,6 +789,18 @@ func (fuo *FighterUpdateOne) sqlSave(ctx context.Context) (_node *Fighter, err e
 	}
 	if value, ok := fuo.mutation.NickName(); ok {
 		_spec.SetField(fighter.FieldNickName, field.TypeString, value)
+	}
+	if value, ok := fuo.mutation.FightinsiderID(); ok {
+		_spec.SetField(fighter.FieldFightinsiderID, field.TypeString, value)
+	}
+	if fuo.mutation.FightinsiderIDCleared() {
+		_spec.ClearField(fighter.FieldFightinsiderID, field.TypeString)
+	}
+	if value, ok := fuo.mutation.TapologyID(); ok {
+		_spec.SetField(fighter.FieldTapologyID, field.TypeString, value)
+	}
+	if fuo.mutation.TapologyIDCleared() {
+		_spec.ClearField(fighter.FieldTapologyID, field.TypeString)
 	}
 	if fuo.mutation.FightsCleared() {
 		edge := &sqlgraph.EdgeSpec{

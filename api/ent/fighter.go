@@ -31,6 +31,10 @@ type Fighter struct {
 	LastName string `json:"last_name,omitempty"`
 	// NickName holds the value of the "nick_name" field.
 	NickName string `json:"nick_name,omitempty"`
+	// FightinsiderID holds the value of the "fightinsider_id" field.
+	FightinsiderID string `json:"fightinsider_id,omitempty"`
+	// TapologyID holds the value of the "tapology_id" field.
+	TapologyID string `json:"tapology_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FighterQuery when eager-loading is set.
 	Edges        FighterEdges `json:"edges"`
@@ -84,7 +88,7 @@ func (*Fighter) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case fighter.FieldID, fighter.FieldMmaID:
 			values[i] = new(sql.NullInt64)
-		case fighter.FieldUfcFighterID, fighter.FieldFirstName, fighter.FieldLastName, fighter.FieldNickName:
+		case fighter.FieldUfcFighterID, fighter.FieldFirstName, fighter.FieldLastName, fighter.FieldNickName, fighter.FieldFightinsiderID, fighter.FieldTapologyID:
 			values[i] = new(sql.NullString)
 		case fighter.FieldCreatedAt, fighter.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -150,6 +154,18 @@ func (f *Fighter) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field nick_name", values[i])
 			} else if value.Valid {
 				f.NickName = value.String
+			}
+		case fighter.FieldFightinsiderID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field fightinsider_id", values[i])
+			} else if value.Valid {
+				f.FightinsiderID = value.String
+			}
+		case fighter.FieldTapologyID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tapology_id", values[i])
+			} else if value.Valid {
+				f.TapologyID = value.String
 			}
 		default:
 			f.selectValues.Set(columns[i], values[i])
@@ -222,6 +238,12 @@ func (f *Fighter) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("nick_name=")
 	builder.WriteString(f.NickName)
+	builder.WriteString(", ")
+	builder.WriteString("fightinsider_id=")
+	builder.WriteString(f.FightinsiderID)
+	builder.WriteString(", ")
+	builder.WriteString("tapology_id=")
+	builder.WriteString(f.TapologyID)
 	builder.WriteByte(')')
 	return builder.String()
 }

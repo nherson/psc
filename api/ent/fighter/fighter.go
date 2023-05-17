@@ -28,6 +28,10 @@ const (
 	FieldLastName = "last_name"
 	// FieldNickName holds the string denoting the nick_name field in the database.
 	FieldNickName = "nick_name"
+	// FieldFightinsiderID holds the string denoting the fightinsider_id field in the database.
+	FieldFightinsiderID = "fightinsider_id"
+	// FieldTapologyID holds the string denoting the tapology_id field in the database.
+	FieldTapologyID = "tapology_id"
 	// EdgeFights holds the string denoting the fights edge name in mutations.
 	EdgeFights = "fights"
 	// EdgeFighterAliases holds the string denoting the fighter_aliases edge name in mutations.
@@ -67,6 +71,8 @@ var Columns = []string{
 	FieldFirstName,
 	FieldLastName,
 	FieldNickName,
+	FieldFightinsiderID,
+	FieldTapologyID,
 }
 
 var (
@@ -137,6 +143,16 @@ func ByLastName(opts ...sql.OrderTermOption) Order {
 // ByNickName orders the results by the nick_name field.
 func ByNickName(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldNickName, opts...).ToFunc()
+}
+
+// ByFightinsiderID orders the results by the fightinsider_id field.
+func ByFightinsiderID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldFightinsiderID, opts...).ToFunc()
+}
+
+// ByTapologyID orders the results by the tapology_id field.
+func ByTapologyID(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldTapologyID, opts...).ToFunc()
 }
 
 // ByFightsCount orders the results by fights count.

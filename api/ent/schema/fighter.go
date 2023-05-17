@@ -26,6 +26,8 @@ func (Fighter) Fields() []ent.Field {
 		field.String("first_name"),
 		field.String("last_name"),
 		field.String("nick_name"),
+		field.String("fightinsider_id").Optional(),
+		field.String("tapology_id").Optional(),
 	}
 }
 

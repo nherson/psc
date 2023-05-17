@@ -1,4 +1,4 @@
-h1:aT4XKqMH7sS2oaJzXLGFV0eEv/SWqNaN7Y3o7XhAMic=
+h1:45JpYijnV7Jb/SkLevV+Z9Ohole6WwRoa2NBxXJEgaY=
 20230409220322_initial_schema.sql h1:6YA2D6EMqSNhsREcbipuGImfRExwjYymuHPMBXUi+iE=
 20230411032334_basic_fields_and_edges.sql h1:GYHtCGx4YocROWW6Yfa3bFT/WXEzm/Jc8lYQte7BfQk=
 20230412041400_fighter_fields.sql h1:mUjLc43lS+t5Lbq7t68bMQDboQ3neKFTVnm9R4mxP7w=
@@ -8,3 +8,4 @@ h1:aT4XKqMH7sS2oaJzXLGFV0eEv/SWqNaN7Y3o7XhAMic=
 20230413032345_timestamps.sql h1:5FUuEkZtmcs/J6hwcQK9+O2/0xLDeGxIkv4wdJYI/zA=
 20230413032647_more_timestamps.sql h1:Et9RIQkNu3YMulpeOGKO/92WPwrisUOzSacpJ8RhSpw=
 20230505181114_corner_and_winner.sql h1:iEyqRS9Z1Yq5LJrUtg+Ukh+1Hdz568vJS8tKnaK4Rn4=
+20230517040349_fighter_external_ids.sql h1:pKoWvZ83crQ4SOBxn5VazRgYuQ0wHeh2AJPwCzvVumc=

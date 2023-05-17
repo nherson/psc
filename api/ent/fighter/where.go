@@ -90,6 +90,16 @@ func NickName(v string) predicate.Fighter {
 	return predicate.Fighter(sql.FieldEQ(FieldNickName, v))
 }
 
+// FightinsiderID applies equality check predicate on the "fightinsider_id" field. It's identical to FightinsiderIDEQ.
+func FightinsiderID(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldFightinsiderID, v))
+}
+
+// TapologyID applies equality check predicate on the "tapology_id" field. It's identical to TapologyIDEQ.
+func TapologyID(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldTapologyID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Fighter {
 	return predicate.Fighter(sql.FieldEQ(FieldCreatedAt, v))
@@ -468,6 +478,156 @@ func NickNameEqualFold(v string) predicate.Fighter {
 // NickNameContainsFold applies the ContainsFold predicate on the "nick_name" field.
 func NickNameContainsFold(v string) predicate.Fighter {
 	return predicate.Fighter(sql.FieldContainsFold(FieldNickName, v))
+}
+
+// FightinsiderIDEQ applies the EQ predicate on the "fightinsider_id" field.
+func FightinsiderIDEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDNEQ applies the NEQ predicate on the "fightinsider_id" field.
+func FightinsiderIDNEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDIn applies the In predicate on the "fightinsider_id" field.
+func FightinsiderIDIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldFightinsiderID, vs...))
+}
+
+// FightinsiderIDNotIn applies the NotIn predicate on the "fightinsider_id" field.
+func FightinsiderIDNotIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldFightinsiderID, vs...))
+}
+
+// FightinsiderIDGT applies the GT predicate on the "fightinsider_id" field.
+func FightinsiderIDGT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDGTE applies the GTE predicate on the "fightinsider_id" field.
+func FightinsiderIDGTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDLT applies the LT predicate on the "fightinsider_id" field.
+func FightinsiderIDLT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDLTE applies the LTE predicate on the "fightinsider_id" field.
+func FightinsiderIDLTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDContains applies the Contains predicate on the "fightinsider_id" field.
+func FightinsiderIDContains(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContains(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDHasPrefix applies the HasPrefix predicate on the "fightinsider_id" field.
+func FightinsiderIDHasPrefix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasPrefix(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDHasSuffix applies the HasSuffix predicate on the "fightinsider_id" field.
+func FightinsiderIDHasSuffix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasSuffix(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDIsNil applies the IsNil predicate on the "fightinsider_id" field.
+func FightinsiderIDIsNil() predicate.Fighter {
+	return predicate.Fighter(sql.FieldIsNull(FieldFightinsiderID))
+}
+
+// FightinsiderIDNotNil applies the NotNil predicate on the "fightinsider_id" field.
+func FightinsiderIDNotNil() predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotNull(FieldFightinsiderID))
+}
+
+// FightinsiderIDEqualFold applies the EqualFold predicate on the "fightinsider_id" field.
+func FightinsiderIDEqualFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEqualFold(FieldFightinsiderID, v))
+}
+
+// FightinsiderIDContainsFold applies the ContainsFold predicate on the "fightinsider_id" field.
+func FightinsiderIDContainsFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContainsFold(FieldFightinsiderID, v))
+}
+
+// TapologyIDEQ applies the EQ predicate on the "tapology_id" field.
+func TapologyIDEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldTapologyID, v))
+}
+
+// TapologyIDNEQ applies the NEQ predicate on the "tapology_id" field.
+func TapologyIDNEQ(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldTapologyID, v))
+}
+
+// TapologyIDIn applies the In predicate on the "tapology_id" field.
+func TapologyIDIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldIn(FieldTapologyID, vs...))
+}
+
+// TapologyIDNotIn applies the NotIn predicate on the "tapology_id" field.
+func TapologyIDNotIn(vs ...string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotIn(FieldTapologyID, vs...))
+}
+
+// TapologyIDGT applies the GT predicate on the "tapology_id" field.
+func TapologyIDGT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGT(FieldTapologyID, v))
+}
+
+// TapologyIDGTE applies the GTE predicate on the "tapology_id" field.
+func TapologyIDGTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldGTE(FieldTapologyID, v))
+}
+
+// TapologyIDLT applies the LT predicate on the "tapology_id" field.
+func TapologyIDLT(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLT(FieldTapologyID, v))
+}
+
+// TapologyIDLTE applies the LTE predicate on the "tapology_id" field.
+func TapologyIDLTE(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldLTE(FieldTapologyID, v))
+}
+
+// TapologyIDContains applies the Contains predicate on the "tapology_id" field.
+func TapologyIDContains(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContains(FieldTapologyID, v))
+}
+
+// TapologyIDHasPrefix applies the HasPrefix predicate on the "tapology_id" field.
+func TapologyIDHasPrefix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasPrefix(FieldTapologyID, v))
+}
+
+// TapologyIDHasSuffix applies the HasSuffix predicate on the "tapology_id" field.
+func TapologyIDHasSuffix(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldHasSuffix(FieldTapologyID, v))
+}
+
+// TapologyIDIsNil applies the IsNil predicate on the "tapology_id" field.
+func TapologyIDIsNil() predicate.Fighter {
+	return predicate.Fighter(sql.FieldIsNull(FieldTapologyID))
+}
+
+// TapologyIDNotNil applies the NotNil predicate on the "tapology_id" field.
+func TapologyIDNotNil() predicate.Fighter {
+	return predicate.Fighter(sql.FieldNotNull(FieldTapologyID))
+}
+
+// TapologyIDEqualFold applies the EqualFold predicate on the "tapology_id" field.
+func TapologyIDEqualFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEqualFold(FieldTapologyID, v))
+}
+
+// TapologyIDContainsFold applies the ContainsFold predicate on the "tapology_id" field.
+func TapologyIDContainsFold(v string) predicate.Fighter {
+	return predicate.Fighter(sql.FieldContainsFold(FieldTapologyID, v))
 }
 
 // HasFights applies the HasEdge predicate on the "fights" edge.
