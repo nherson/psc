@@ -10,6 +10,8 @@ import (
 
 	//mage:import data
 	_ "github.com/nherson/psc/api/magefiles/data"
+	//mage:import fightodds
+	_ "github.com/nherson/psc/api/magefiles/fightodds"
 )
 
 type Ent mg.Namespace

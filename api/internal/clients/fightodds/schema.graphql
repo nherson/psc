@@ -1,0 +1,3070 @@
+schema {
+  query: Queries
+  mutation: Mutation
+}
+
+input AddBankrollInput {
+  bankrollType: String!
+  clientMutationId: String
+  isPublic: Boolean!
+  name: String!
+  startingAmount: Float
+  unitSize: Float
+}
+
+type AddBankrollPayload {
+  bankroll: BankrollNode
+  clientMutationId: String
+}
+
+input AddEmailNotificationInput {
+  clientMutationId: String
+  fighterId: ID
+  fightId: ID!
+  isNot: Boolean
+  odds: Int
+  offerTypeId: ID!
+  sportsbookId: ID
+}
+
+type AddEmailNotificationPayload {
+  clientMutationId: String
+  emailNotification: EmailNotificationNode
+}
+
+type ArchiveAccount {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+enum ArticleArticleType {
+  LO
+  BP
+  WB
+  EN
+  ME
+  MC
+  PL
+  FC
+  AP
+  FN
+  DK
+}
+
+type ArticleNode implements Node {
+  author: AuthorNode
+  content: String
+  feed: FeedNode!
+  id: ID!
+  publishedDate: DateTime!
+  title: String!
+  updatedDate: DateTime!
+  url: String!
+}
+
+type ArticleNodeConnection {
+  edges: [ArticleNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type ArticleNodeEdge {
+  cursor: String!
+  node: ArticleNode
+}
+
+type AuthorNode implements Node {
+  articleSet(after: String, before: String, feed: ID, first: Int, last: Int, offset: Int): ArticleNodeConnection!
+  feed: FeedNode!
+  id: ID!
+  name: String!
+}
+
+type AuthorNodeConnection {
+  edges: [AuthorNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type AuthorNodeEdge {
+  cursor: String!
+  node: AuthorNode
+}
+
+enum BankrollBankrollType {
+  UN
+  DO
+}
+
+type BankrollNode implements Node {
+  bankrollType: BankrollBankrollType!
+  dateCreated: Date!
+  id: ID!
+  isDeleted: Boolean!
+  isPublic: Boolean!
+  name: String!
+  slug: String!
+  startingAmount: Decimal!
+  statistics: BankrollStatistics
+  ticketSet(after: String, bankroll: ID, bankroll_Slug: String, before: String, deleted: Boolean, first: Int, last: Int, offset: Int, user: ID): TicketNodeConnection!
+  unitSize: Decimal!
+  user: UserAuthorNode!
+}
+
+type BankrollNodeConnection {
+  edges: [BankrollNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BankrollNodeEdge {
+  cursor: String!
+  node: BankrollNode
+}
+
+type BankrollStatistics {
+  losses: Int
+  pending: Int
+  pendingAmount: Float
+  profit: Float
+  pushes: Int
+  roi: Float
+  unitAmount: Float
+  wins: Int
+}
+
+type BannerNode implements Node {
+  description: String!
+  enabled: Boolean!
+  id: ID!
+  isMobile: Boolean!
+  script: String!
+  scriptUrl: String!
+  size: BannerSize!
+  sportsbook: SportsbookNode!
+}
+
+type BannerNodeConnection {
+  edges: [BannerNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BannerNodeEdge {
+  cursor: String!
+  node: BannerNode
+}
+
+enum BannerSize {
+  A_250X250
+  A_300X250
+  A_728X90
+  A_468X60
+  A_160X600
+}
+
+enum BetAttributesConfidence {
+  LOW
+  HIGH
+}
+
+type BetAttributesNode implements Node {
+  bet: BetNode!
+  confidence: BetAttributesConfidence!
+  id: ID!
+  outcome: String
+  value: BetAttributesValue!
+  warnings: Boolean!
+}
+
+type BetAttributesNodeConnection {
+  edges: [BetAttributesNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BetAttributesNodeEdge {
+  cursor: String!
+  node: BetAttributesNode
+}
+
+enum BetAttributesValue {
+  LOW
+  HIGH
+}
+
+type BetFollowNode implements Node {
+  fight: FightNode!
+  fighter: FighterNode
+  id: ID!
+  isNot: Boolean!
+  offerType: OfferTypeNode!
+  user: UserAuthorNode!
+}
+
+type BetFollowNodeConnection {
+  edges: [BetFollowNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BetFollowNodeEdge {
+  cursor: String!
+  node: BetFollowNode
+}
+
+enum BetGrade {
+  PE
+  GO
+  BA
+  LU
+  UL
+}
+
+type BetNode implements Node {
+  attributes(after: String, before: String, first: Int, last: Int, offset: Int): BetAttributesNodeConnection!
+  fighter: FighterNode
+  grade: BetGrade!
+  id: ID!
+  notes(after: String, before: String, first: Int, last: Int, offset: Int): BetNotesNodeConnection!
+  odds: Int!
+  outcome: OutcomeNode!
+  result: BetResult!
+  ticket: TicketNode!
+}
+
+type BetNodeConnection {
+  edges: [BetNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BetNodeEdge {
+  cursor: String!
+  node: BetNode
+}
+
+type BetNotesNode implements Node {
+  bet: BetNode!
+  id: ID!
+  postfightNote: String!
+  prefightNote: String!
+}
+
+type BetNotesNodeConnection {
+  edges: [BetNotesNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BetNotesNodeEdge {
+  cursor: String!
+  node: BetNotesNode
+}
+
+enum BetResult {
+  PE
+  WI
+  LO
+  PU
+  CA
+}
+
+type BonusNode implements Node {
+  current: Boolean!
+  id: ID!
+  name: String!
+  sportsbook: SportsbookNode!
+  type: BonusTypeNode
+  url: String!
+  value: Int
+}
+
+type BonusNodeConnection {
+  edges: [BonusNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type BonusNodeEdge {
+  cursor: String!
+  node: BonusNode
+}
+
+type BonusTypeNode implements Node {
+  bonusSet(after: String, before: String, current: Boolean, first: Int, last: Int, offset: Int, sportsbook: ID, type: ID): BonusNodeConnection!
+  id: ID!
+  name: String!
+}
+
+type CampNode implements Node {
+  country: String!
+  fighters(after: String, before: String, first: Int, firstName: String, firstName_Icontains: String, firstName_Istartswith: String, last: Int, lastName: String, lastName_Icontains: String, lastName_Istartswith: String, offset: Int): FighterNodeConnection!
+  fighterSet(after: String, before: String, first: Int, firstName: String, firstName_Icontains: String, firstName_Istartswith: String, last: Int, lastName: String, lastName_Icontains: String, lastName_Istartswith: String, offset: Int): FighterNodeConnection!
+  foundedYear: Date
+  founder: String!
+  id: ID!
+  isTopCamp: Boolean!
+  location: String!
+  logoTapologyUrl: String!
+  myNotes(after: String, before: String, first: Int, last: Int, offset: Int): NoteNodeConnection
+  name: String!
+  otherNames: String!
+  sherdogUrl: String!
+  slug: String!
+  tapologyUrl: String!
+  temp: Boolean!
+  trainers: String!
+  website: String!
+}
+
+type CampNodeConnection {
+  edges: [CampNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type CampNodeEdge {
+  cursor: String!
+  node: CampNode
+}
+
+type ContestOwnershipNode implements Node {
+  dfsContest: DfsContestNode!
+  id: ID!
+  ownership: Decimal!
+  selection: SelectionNode!
+}
+
+type ContestOwnershipNodeConnection {
+  edges: [ContestOwnershipNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type ContestOwnershipNodeEdge {
+  cursor: String!
+  node: ContestOwnershipNode
+}
+
+type ContestPayoutNode implements Node {
+  dfsContest: DfsContestNode!
+  id: ID!
+  maxPosition: Int!
+  minPosition: Int!
+  prize: Decimal!
+}
+
+type ContestPayoutNodeConnection {
+  edges: [ContestPayoutNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type ContestPayoutNodeEdge {
+  cursor: String!
+  node: ContestPayoutNode
+}
+
+type CryptoCurrencyNode implements Node {
+  acceptedCryptoCurrencies(after: String, before: String, first: Int, hasOdds: Boolean, isAffiliate: Boolean, isDisabled: Boolean, last: Int, offset: Int, shortName: String, shortName_Icontains: String, shortName_Istartswith: String): SportsbookNodeConnection!
+  icon: String!
+  id: ID!
+  name: String!
+  symbol: String!
+}
+
+type CryptoCurrencyNodeConnection {
+  edges: [CryptoCurrencyNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type CryptoCurrencyNodeEdge {
+  cursor: String!
+  node: CryptoCurrencyNode
+}
+
+type CustomObtainJSONWebToken {
+  token: String
+}
+
+scalar Date
+
+scalar DateTime
+
+scalar Decimal
+
+type DeleteAccount {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+input DeleteTicketInput {
+  clientMutationId: String
+  ticketId: String
+}
+
+type DeleteTicketPayload {
+  clientMutationId: String
+  deletedTicketId: ID
+}
+
+type DfsContestNode implements Node {
+  dfsGroupId: Int
+  dfsId: String!
+  dfsSite: DfsSiteNode!
+  entryFee: Decimal
+  event: EventNode!
+  id: ID!
+  maximumEntries: Int!
+  maximumEntriesPerUser: Int!
+  name: String!
+  ownership(after: String, before: String, dfsContest: ID, first: Int, last: Int, offset: Int): ContestOwnershipNodeConnection!
+  payouts(after: String, before: String, dfsContest: ID, first: Int, last: Int, offset: Int): ContestPayoutNodeConnection!
+  userlineupSet(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): UserLineupNodeConnection!
+}
+
+type DfsContestNodeConnection {
+  edges: [DfsContestNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type DfsContestNodeEdge {
+  cursor: String!
+  node: DfsContestNode
+}
+
+type DfsSiteNode implements Node {
+  affiliateUrl: String!
+  dfsContest(after: String, before: String, event: ID, first: Int, last: Int, offset: Int): DfsContestNodeConnection!
+  id: ID!
+  name: String!
+  optimallineupSet(after: String, before: String, first: Int, last: Int, offset: Int): OptimalLineupNodeConnection!
+  pk: Int
+  selectionSet(after: String, before: String, dfsSite: ID, event: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): SelectionNodeConnection!
+  shortName: String!
+  url: String!
+  userlineupSet(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): UserLineupNodeConnection!
+}
+
+type DfsSiteNodeConnection {
+  edges: [DfsSiteNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type DfsSiteNodeEdge {
+  cursor: String!
+  node: DfsSiteNode
+}
+
+type DfsSourceNode implements Node {
+  dfsSource(after: String, before: String, first: Int, last: Int, offset: Int, selection: ID, source: ID): SourceProjectionNodeConnection!
+  id: ID!
+  name: String!
+  shortName: String!
+}
+
+type DjangoDebug {
+  sql: [DjangoDebugSQL]
+}
+
+type DjangoDebugSQL {
+  alias: String!
+  duration: Float!
+  encoding: String
+  isoLevel: String
+  isSelect: Boolean!
+  isSlow: Boolean!
+  params: String!
+  rawSql: String!
+  sql: String
+  startTime: Float!
+  stopTime: Float!
+  transId: String
+  transStatus: String
+  vendor: String!
+}
+
+input EditBetInput {
+  betId: ID!
+  clientMutationId: String
+  grade: String
+  odds: Float
+  result: String
+}
+
+type EditBetPayload {
+  bet: BetNode
+  clientMutationId: String
+}
+
+input EditEmailNotificationInput {
+  clientMutationId: String
+  emailNotificationId: ID
+  odds: Int
+  sportsbookId: ID
+}
+
+type EditEmailNotificationPayload {
+  clientMutationId: String
+  emailNotification: EmailNotificationNode
+}
+
+input EditTicketInput {
+  clientMutationId: String
+  result: String
+  stake: Float
+  ticketId: String
+}
+
+type EditTicketPayload {
+  clientMutationId: String
+  ticket: TicketNode
+}
+
+type EmailNotificationNode implements Node {
+  fight: FightNode!
+  fighter: FighterNode
+  id: ID!
+  isNot: Boolean!
+  notified: Boolean!
+  odds: Int
+  offerType: OfferTypeNode!
+  sportsbook: SportsbookNode
+  timeAdded: DateTime!
+  timeNotified: DateTime
+  user: UserAuthorNode!
+}
+
+type EmailNotificationNodeConnection {
+  edges: [EmailNotificationNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type EmailNotificationNodeEdge {
+  cursor: String!
+  node: EmailNotificationNode
+}
+
+type EventNode implements Node {
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  broadcast: String!
+  city: String!
+  date: Date
+  dfsContest(after: String, before: String, event: ID, first: Int, last: Int, offset: Int): DfsContestNodeConnection!
+  fights(after: String, before: String, first: Int, isCancelled: Boolean, last: Int, offset: Int): FightNodeConnection
+  id: ID!
+  isCancelled: Boolean!
+  name: String!
+  offerSet(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection!
+  optimalLineups(after: String, before: String, first: Int, last: Int, offset: Int): OptimalLineupNodeConnection!
+  optimizerBuilds(after: String, before: String, event: ID, first: Int, last: Int, offset: Int): OptimizerBuildNodeConnection!
+  pk: Int
+  poster: String!
+  posterTapologyUrl: String!
+  posterWide: String!
+  promotion: PromotionNode!
+  selectionSet(after: String, before: String, dfsSite: ID, event: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): SelectionNodeConnection!
+  sherdogId: Int
+  sherdogUrl: String!
+  slug: String!
+  startTime: DateTime
+  straightOfferCount: Int
+  tapologyId: Int
+  tapologyUrl: String!
+  temp: Boolean!
+  ufctvUrl: String!
+  userlineupSet(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): UserLineupNodeConnection!
+  venue: String!
+  wikipediaUrl: String!
+}
+
+type EventNodeConnection {
+  edges: [EventNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type EventNodeEdge {
+  cursor: String!
+  node: EventNode
+}
+
+type EventOfferTableNode implements Node {
+  date: Date
+  fightOffers(after: String, before: String, first: Int, last: Int): FightOfferTableConnection
+  id: ID!
+  name: String
+  pk: Int
+  slug: String
+}
+
+type EventOfferTableNodeConnection {
+  edges: [EventOfferTableNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type EventOfferTableNodeEdge {
+  cursor: String!
+  node: EventOfferTableNode
+}
+
+type ExitPromoNode implements Node {
+  active: Boolean!
+  affiliateUrl: String!
+  desktopImage: String!
+  id: ID!
+  mobileImage: String!
+  sportsbook: SportsbookNode!
+}
+
+type ExitPromoNodeConnection {
+  edges: [ExitPromoNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type ExitPromoNodeEdge {
+  cursor: String!
+  node: ExitPromoNode
+}
+
+scalar ExpectedErrorType
+
+type FeedNode implements Node {
+  articleSet(after: String, before: String, feed: ID, first: Int, last: Int, offset: Int): ArticleNodeConnection!
+  authorSet(after: String, before: String, feed: ID, first: Int, last: Int, offset: Int): AuthorNodeConnection!
+  id: ID!
+  isActive: Boolean!
+  isFullArticle: Boolean!
+  isIframe: Boolean!
+  logo: String!
+  name: String!
+  rssUrl: String!
+  slug: String!
+  type: FeedType!
+  url: String!
+}
+
+type FeedNodeConnection {
+  edges: [FeedNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FeedNodeEdge {
+  cursor: String!
+  node: FeedNode
+}
+
+enum FeedType {
+  WEB
+  VID
+  POD
+}
+
+type FiatCurrencyNode implements Node {
+  acceptedCurrencies(after: String, before: String, first: Int, hasOdds: Boolean, isAffiliate: Boolean, isDisabled: Boolean, last: Int, offset: Int, shortName: String, shortName_Icontains: String, shortName_Istartswith: String): SportsbookNodeConnection!
+  id: ID!
+  name: String!
+  symbol: String!
+}
+
+type FiatCurrencyNodeConnection {
+  edges: [FiatCurrencyNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FiatCurrencyNodeEdge {
+  cursor: String!
+  node: FiatCurrencyNode
+}
+
+type FighterAttributeCategoryNode implements Node {
+  fighterattributeSet(after: String, before: String, category: ID, first: Int, last: Int, offset: Int): FighterAttributeNodeConnection!
+  fighterstyleSet(after: String, before: String, first: Int, last: Int, offset: Int): FighterStyleNodeConnection!
+  id: ID!
+  myfighterstyleSet(after: String, before: String, category_Name_Icontains: String, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterStyleNodeConnection!
+  name: String!
+}
+
+type FighterAttributeCategoryNodeConnection {
+  edges: [FighterAttributeCategoryNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FighterAttributeCategoryNodeEdge {
+  cursor: String!
+  node: FighterAttributeCategoryNode
+}
+
+type FighterAttributeNode implements Node {
+  category: FighterAttributeCategoryNode!
+  id: ID!
+  myfighterattributesSet(after: String, before: String, choice_Level: Int, choice_Level_Gte: Int, choice_Level_Lte: Int, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterAttributesNodeConnection!
+  name: String!
+  options(after: String, before: String, first: Int, last: Int, level: Int, level_Gte: Int, level_Lte: Int, offset: Int): FighterAttributeOptionNodeConnection!
+}
+
+type FighterAttributeNodeConnection {
+  edges: [FighterAttributeNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FighterAttributeNodeEdge {
+  cursor: String!
+  node: FighterAttributeNode
+}
+
+type FighterAttributeOptionNode implements Node {
+  fighterattributeSet(after: String, before: String, category: ID, first: Int, last: Int, offset: Int): FighterAttributeNodeConnection!
+  id: ID!
+  level: Int
+  myfighterattributesSet(after: String, before: String, choice_Level: Int, choice_Level_Gte: Int, choice_Level_Lte: Int, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterAttributesNodeConnection!
+  name: String!
+}
+
+type FighterAttributeOptionNodeConnection {
+  edges: [FighterAttributeOptionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FighterAttributeOptionNodeEdge {
+  cursor: String!
+  node: FighterAttributeOptionNode
+}
+
+enum FighterGender {
+  M
+  F
+}
+
+type FighterNode implements Node {
+  age: Int
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  avgControlTime: Int
+  avgFightTime: Int
+  avgRev: Decimal
+  bestfightoddsUrl: String!
+  betFollow(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): BetFollowNodeConnection!
+  betSet(after: String, before: String, first: Int, last: Int, offset: Int, ticket: ID): BetNodeConnection!
+  birthDate: Date
+  camps(after: String, before: String, first: Int, last: Int, offset: Int): CampNodeConnection
+  currentCamp: CampNode
+  decLosses: Int!
+  decWins: Int!
+  dfsProjections(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, type: String, user: ID): UserProjectionNodeConnection!
+  dfsTags(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): UserFighterTagsNodeConnection!
+  dkAvgFpMin: Decimal
+  dkAvgWinPoints: Decimal
+  dqLosses: Int!
+  dqWins: Int!
+  draws: Int!
+  facebook: String!
+  facebookUrl: String!
+  fdAvgFpMin: Decimal
+  fighter1(after: String, before: String, event: ID, event_Date_Gt: Date, event_Date_Gte: Date, event_Date_Lt: Date, event_Date_Lte: Date, fighter1_LastName: String, fighter1_LastName_Icontains: String, fighter1_LastName_Istartswith: String, fighter2_LastName: String, fighter2_LastName_Icontains: String, fighter2_LastName_Istartswith: String, fightType: String, first: Int, isCancelled: Boolean, last: Int, offset: Int, order: Int, order_Gt: Int, order_Gte: Int, order_Lt: Int, order_Lte: Int): FightNodeConnection!
+  fighter2(after: String, before: String, event: ID, event_Date_Gt: Date, event_Date_Gte: Date, event_Date_Lt: Date, event_Date_Lte: Date, fighter1_LastName: String, fighter1_LastName_Icontains: String, fighter1_LastName_Istartswith: String, fighter2_LastName: String, fighter2_LastName_Icontains: String, fighter2_LastName_Istartswith: String, fightType: String, first: Int, isCancelled: Boolean, last: Int, offset: Int, order: Int, order_Gt: Int, order_Gte: Int, order_Lt: Int, order_Lte: Int): FightNodeConnection!
+  fightHistory(after: String, before: String, first: Int, last: Int): FightHistoryConnection
+  fightingOutOf: String!
+  fightingStyle: String!
+  fightmetricUrl: String!
+  fightpredictionSet(after: String, before: String, fight: ID, fight_Event: ID, first: Int, last: Int, offset: Int, published: Boolean, user: ID): NewsPredictionNodeConnection!
+  fightWinner(after: String, before: String, event: ID, event_Date_Gt: Date, event_Date_Gte: Date, event_Date_Lt: Date, event_Date_Lte: Date, fighter1_LastName: String, fighter1_LastName_Icontains: String, fighter1_LastName_Istartswith: String, fighter2_LastName: String, fighter2_LastName_Icontains: String, fighter2_LastName_Istartswith: String, fightType: String, first: Int, isCancelled: Boolean, last: Int, offset: Int, order: Int, order_Gt: Int, order_Gte: Int, order_Lt: Int, order_Lte: Int): FightNodeConnection!
+  firstName: String!
+  gender: FighterGender
+  grapplingStyle(after: String, before: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, offset: Int): FightingStyleNodeConnection!
+  height: Decimal
+  id: ID!
+  instagram: String!
+  isActive: Boolean!
+  kdAvg: Decimal
+  koLoss: Boolean
+  koLosses: Int!
+  koWins: Int!
+  lastName: String!
+  lastPopulated: DateTime
+  legReach: Decimal
+  lowIq: Boolean
+  myBreakdown(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyBreakdownNodeConnection!
+  myEmailNotification(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection!
+  myFighterAttributes(after: String, before: String, choice_Level: Int, choice_Level_Gte: Int, choice_Level_Lte: Int, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterAttributesNodeConnection!
+  myFighterStyle(after: String, before: String, category_Name_Icontains: String, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterStyleNodeConnection!
+  myNotes(after: String, before: String, first: Int, last: Int, offset: Int): NoteNodeConnection
+  myOdds(after: String, before: String, first: Int, last: Int, offset: Int): MyOddsNodeConnection
+  nationality: String!
+  nickName: String!
+  noContests: Int!
+  offerFighter1(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection!
+  offerFighter2(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection!
+  oppAvgControlTime: Decimal
+  oppAvgRev: Decimal
+  oppKdAvg: Decimal
+  optimalOutcomes(after: String, before: String, first: Int, last: Int, offset: Int): OptimalOutcomeNodeConnection!
+  otherNames: String!
+  outcomeFighter(after: String, before: String, fighter: ID, first: Int, last: Int, offer: ID, offset: Int): OutcomeNodeConnection!
+  pk: Int
+  prizePicksSelections(after: String, before: String, first: Int, last: Int, offset: Int): PrizePicksSelectionNodeConnection!
+  profileImageLg: String!
+  profileImageSm: String!
+  ranks(after: String, before: String, fightingStyle_Name: String, fightingStyle_Name_Icontains: String, fightingStyle_Name_Istartswith: String, first: Int, last: Int, offset: Int): FightingStyleRankNodeConnection!
+  reach: Decimal
+  retirementTalk: Boolean
+  roundStats(after: String, before: String, first: Int, last: Int, offset: Int): FightStatNodeConnection
+  sapm: Decimal
+  selections(after: String, before: String, dfsSite: ID, event: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): SelectionNodeConnection!
+  sherdogId: Int
+  sherdogUrl: String!
+  slpm: Decimal
+  slug: String!
+  stance: String!
+  stracc: Decimal
+  strAcc: Decimal
+  strDef: Decimal
+  strikingStyle(after: String, before: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, offset: Int): FightingStyleNodeConnection!
+  strlpm: Decimal
+  subAvg: Decimal
+  subLosses: Int!
+  subWins: Int!
+  tapologyId: Int
+  tapologyUrl: String!
+  tdAcc: Decimal
+  tdAvg: Decimal
+  tdDef: Decimal
+  temp: Boolean!
+  totalFightTime: Int
+  twitter: String!
+  ufcDebut: Boolean
+  ufcUrl: String!
+  weight: Decimal
+  weightClassChange: Boolean
+  wikipediaUrl: String!
+}
+
+type FighterNodeConnection {
+  edges: [FighterNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FighterNodeEdge {
+  cursor: String!
+  node: FighterNode
+}
+
+type FighterProjectionNode implements Node {
+  id: ID!
+  winDec: Float
+  winItd: Float
+  winR1: Float
+  winR2: Float
+  winR3: Float
+  winR4: Float
+  winR5: Float
+  winRdec: Float
+}
+
+type FighterStyleNode implements Node {
+  category: FighterAttributeCategoryNode!
+  id: ID!
+  myfighterstyleSet(after: String, before: String, category_Name_Icontains: String, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterStyleNodeConnection!
+  name: String!
+  order: Int
+}
+
+type FighterStyleNodeConnection {
+  edges: [FighterStyleNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FighterStyleNodeEdge {
+  cursor: String!
+  node: FighterStyleNode
+}
+
+type FightHistoryConnection {
+  edges: [FightHistoryEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightHistoryEdge {
+  cursor: String!
+  node: FightHistoryNode
+}
+
+type FightHistoryNode implements Node {
+  date: Date
+  duration: String
+  eventName: String
+  eventPk: Int
+  eventSlug: String
+  fight: FightNode
+  fighterOdds: Int
+  fightHistoryPk: Int
+  id: ID!
+  methodOfVictory1: String
+  methodOfVictory2: String
+  opponent: FighterNode
+  opponentOdds: Int
+  promotionLogo: String
+  result: String
+  round: Int
+  stats(after: String, before: String, first: Int, last: Int, offset: Int): FightStatNodeConnection
+  videoUrl: String
+  weightClass: String
+}
+
+type FightingStyleNode implements Node {
+  fightingstylerankSet(after: String, before: String, fightingStyle_Name: String, fightingStyle_Name_Icontains: String, fightingStyle_Name_Istartswith: String, first: Int, last: Int, offset: Int): FightingStyleRankNodeConnection!
+  grapplingStyle(after: String, before: String, first: Int, firstName: String, firstName_Icontains: String, firstName_Istartswith: String, last: Int, lastName: String, lastName_Icontains: String, lastName_Istartswith: String, offset: Int): FighterNodeConnection!
+  id: ID!
+  name: String!
+  otherNames: String!
+  strikingStyle(after: String, before: String, first: Int, firstName: String, firstName_Icontains: String, firstName_Istartswith: String, last: Int, lastName: String, lastName_Icontains: String, lastName_Istartswith: String, offset: Int): FighterNodeConnection!
+  type: FightingStyleType!
+}
+
+type FightingStyleNodeConnection {
+  edges: [FightingStyleNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightingStyleNodeEdge {
+  cursor: String!
+  node: FightingStyleNode
+}
+
+type FightingStyleRankNode implements Node {
+  fighterSet(after: String, before: String, first: Int, firstName: String, firstName_Icontains: String, firstName_Istartswith: String, last: Int, lastName: String, lastName_Icontains: String, lastName_Istartswith: String, offset: Int): FighterNodeConnection!
+  fightingStyle: FightingStyleNode!
+  id: ID!
+  rank: String!
+}
+
+type FightingStyleRankNodeConnection {
+  edges: [FightingStyleRankNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightingStyleRankNodeEdge {
+  cursor: String!
+  node: FightingStyleRankNode
+}
+
+enum FightingStyleType {
+  ST
+  GR
+}
+
+type FightNode implements Node {
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  bestStraightOutcome1: OutcomeNode
+  bestStraightOutcome2: OutcomeNode
+  betFollow(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): BetFollowNodeConnection!
+  channel: String!
+  dateAdded: DateTime!
+  dfsProjections(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, type: String, user: ID): UserProjectionNodeConnection!
+  dfsTags(after: String, before: String, first: Int, last: Int, offset: Int): UserFighterTagsNodeConnection
+  duration: String!
+  event: EventNode
+  fighter1: FighterNode!
+  fighter1DecOdds: Int
+  fighter1DkPoints: Decimal
+  fighter1DkSalary: Int
+  fighter1FdPoints: Decimal
+  fighter1FdSalary: Int
+  fighter1ItdOdds: Int
+  fighter1KoOdds: Int
+  fighter1Odds: Int
+  fighter1R1Odds: Int
+  fighter1R2Odds: Int
+  fighter1R3Odds: Int
+  fighter1R4Odds: Int
+  fighter1R5Odds: Int
+  fighter1SubOdds: Int
+  fighter2: FighterNode!
+  fighter2DecOdds: Int
+  fighter2DkPoints: Decimal
+  fighter2DkSalary: Int
+  fighter2FdPoints: Decimal
+  fighter2FdSalary: Int
+  fighter2ItdOdds: Int
+  fighter2KoOdds: Int
+  fighter2Odds: Int
+  fighter2R1Odds: Int
+  fighter2R2Odds: Int
+  fighter2R3Odds: Int
+  fighter2R4Odds: Int
+  fighter2R5Odds: Int
+  fighter2SubOdds: Int
+  fighterWinner: FighterNode
+  fightItdOdds: Int
+  fightpredictionSet(after: String, before: String, fight: ID, fight_Event: ID, first: Int, last: Int, offset: Int, published: Boolean, user: ID): NewsPredictionNodeConnection!
+  fightType: String
+  id: ID!
+  isCancelled: Boolean!
+  isChampionship: Boolean!
+  methodOfVictory1: String!
+  methodOfVictory2: String!
+  myBreakdown(after: String, before: String, first: Int, last: Int, offset: Int): MyBreakdownNodeConnection
+  myEmailNotification(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection!
+  myNotes(after: String, before: String, first: Int, last: Int, offset: Int): NoteNodeConnection
+  myOdds(after: String, before: String, first: Int, last: Int, offset: Int): MyOddsNodeConnection
+  offerCount: Int
+  offers(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection!
+  optimalOutcomes(after: String, before: String, first: Int, last: Int, offset: Int): OptimalOutcomeNodeConnection!
+  order: Int!
+  pk: Int
+  prizePicksSelections(after: String, before: String, first: Int, last: Int, offset: Int): PrizePicksSelectionNodeConnection!
+  propCount: Int
+  round: Int
+  selections(after: String, before: String, dfsSite: ID, event: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): SelectionNodeConnection!
+  slug: String!
+  sport: FightSport!
+  stats(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): FightStatNodeConnection!
+  statsUrl: String!
+  straightOutcome1(sportsbook: ID!): OutcomeNode
+  straightOutcome2(sportsbook: ID!): OutcomeNode
+  userProjections(after: String, before: String, first: Int, last: Int): UserProjectionConnection
+  videoUrl: String!
+  watchlistSet(after: String, before: String, fight: ID, first: Int, last: Int, offset: Int, user: ID): WatchlistNodeConnection!
+  weightClass: WeightClassNode
+}
+
+type FightNodeConnection {
+  edges: [FightNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightNodeEdge {
+  cursor: String!
+  node: FightNode
+}
+
+type FightOfferTableConnection {
+  edges: [FightOfferTableEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightOfferTableEdge {
+  cursor: String!
+  node: FightOfferTableNode
+}
+
+type FightOfferTableNode implements Node {
+  bestOdds1: Int
+  bestOdds2: Int
+  fight: FightNode
+  fighter1: FighterNode
+  fighter2: FighterNode
+  id: ID!
+  isCancelled: Boolean
+  propCount: Int
+  slug: String
+  straightOffers(after: String, before: String, first: Int, last: Int): OfferTableOfferNodeConnection
+}
+
+type FightOutcomeNode {
+  avgOdds: Int
+  description: String
+  fighterPk: Int
+  isNot: Boolean
+  notDescription: String
+  offerTypeId: String
+}
+
+type FightOutcomeNodeConnection {
+  edges: [FightOutcomeNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightOutcomeNodeEdge {
+  cursor: String!
+  node: FightOutcomeNode
+}
+
+type FightProjectionNode implements Node {
+  fighter1Projection: FighterProjectionNode
+  fighter2Projection: FighterProjectionNode
+  id: ID!
+}
+
+type FightPropOfferTableNode implements Node {
+  fight: FightNode
+  id: ID!
+  propOffers(after: String, before: String, first: Int, last: Int): PropOfferNodeConnection
+}
+
+enum FightSport {
+  MMA
+  KICK
+  GRAP
+  BOX
+}
+
+type FightStatNode implements Node {
+  controlTime: Int!
+  fight: FightNode!
+  fighter: FighterNode!
+  id: ID!
+  knockdowns: Int!
+  reversals: Int!
+  round: Int!
+  sigStrikes: Int!
+  sigStrikesAttempted: Int!
+  strikes: Int!
+  strikesAttempted: Int!
+  subAttempt: Int!
+  takedowns: Int!
+  takedownsAttempted: Int!
+}
+
+type FightStatNodeConnection {
+  edges: [FightStatNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type FightStatNodeEdge {
+  cursor: String!
+  node: FightStatNode
+}
+
+scalar GenericScalar
+
+type GroupNode implements Node {
+  id: ID!
+  name: String!
+  userSet: [UserAuthorNode!]!
+}
+
+type GroupNodeConnection {
+  edges: [GroupNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type GroupNodeEdge {
+  cursor: String!
+  node: GroupNode
+}
+
+type HandicapperNode implements Node {
+  description: String!
+  id: ID!
+  logo: String!
+  name: String!
+  order: Int
+  profit: Decimal
+  roi: Decimal
+  slug: String!
+  twitter: String!
+  website: String!
+  youtube: String!
+}
+
+type HandicapperNodeConnection {
+  edges: [HandicapperNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type HandicapperNodeEdge {
+  cursor: String!
+  node: HandicapperNode
+}
+
+type LineupConnection {
+  edges: [LineupEdge]!
+  pageInfo: PageInfo!
+}
+
+type LineupEdge {
+  cursor: String!
+  node: LineupNode
+}
+
+type LineupNode implements Node {
+  id: ID!
+  players(after: String, before: String, first: Int, last: Int): LineupPlayerNodeConnection
+  totalPoints: Float
+  totalSalary: Int
+}
+
+type LineupPlayerNode implements Node {
+  id: ID!
+  projectedPts: Float
+  selection: SelectionNode
+}
+
+type LineupPlayerNodeConnection {
+  edges: [LineupPlayerNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type LineupPlayerNodeEdge {
+  cursor: String!
+  node: LineupPlayerNode
+}
+
+type Mutation {
+  addBankroll(input: AddBankrollInput!): AddBankrollPayload
+  addEmailNotification(input: AddEmailNotificationInput!): AddEmailNotificationPayload
+  archiveAccount(password: String!): ArchiveAccount
+  deleteAccount(password: String!): DeleteAccount
+  deleteTicket(input: DeleteTicketInput!): DeleteTicketPayload
+  editBet(input: EditBetInput!): EditBetPayload
+  editEmailNotification(input: EditEmailNotificationInput!): EditEmailNotificationPayload
+  editTicket(input: EditTicketInput!): EditTicketPayload
+  passwordChange(newPassword1: String!, newPassword2: String!, oldPassword: String!): PasswordChange
+  passwordReset(newPassword1: String!, newPassword2: String!, token: String!): PasswordReset
+  refreshToken(token: String!): Refresh
+  register(email: String!, password1: String!, password2: String!, username: String!): Register
+  removeBankroll(input: RemoveBankrollInput!): RemoveBankrollPayload
+  removeEmailNotification(input: RemoveEmailNotificationInput!): RemoveEmailNotificationPayload
+  removeMyBreakdown(input: RemoveMyBreakdownInput!): RemoveMyBreakdownPayload
+  removeMyOdds(input: RemoveMyOddsInput!): RemoveMyOddsPayload
+  removeUserLineup(input: RemoveUserLineupInput!): RemoveUserLineupPayload
+  removeUserLineups(input: RemoveUserLineupsInput!): RemoveUserLineupsPayload
+  resendActivationEmail(email: String!): ResendActivationEmail
+  revokeToken(refreshToken: String!): Revoke
+  sendPasswordResetEmail(email: String!): SendPasswordResetEmail
+  setMyBreakdown(input: SetMyBreakdownInput!): SetMyBreakdownPayload
+  setMyFighterAttribute(input: SetMyFighterAttributeInput!): SetMyFighterAttributePayload
+  setMyFighterStyle(input: SetMyFighterStyleInput!): SetMyFighterStylePayload
+  setMyOdds(input: SetMyOddsInput!): SetMyOddsPayload
+  setNote(input: SetNoteInput!): SetNotePayload
+  setUserFighterTags(input: SetUserFighterTagsInput!): SetUserFighterTagsPayload
+  setUserLineup(input: SetUserLineupInput!): SetUserLineupPayload
+  setUserLineups(input: SetUserLineupsInput!): SetUserLineupsPayload
+  setUserProjection(input: SetUserProjectionInput!): SetUserProjectionPayload
+  setUserSelection(input: SetUserSelectionInput!): SetUserSelectionPayload
+  submitTicket(input: SubmitTicketInput!): SubmitTicketPayload
+  toggleBetFollow(input: ToggleBetFollowInput!): ToggleBetFollowPayload
+  toggleUserOptimalOutcome(input: ToggleUserOptimalOutcomeInput!): ToggleUserOptimalOutcomePayload
+  toggleWatchlist(input: ToggleWatchlistInput!): ToggleWatchlistPayload
+  tokenAuth(password: String!, username: String!): CustomObtainJSONWebToken
+  updateAccount(firstName: String, lastName: String): UpdateAccount
+  updateBankroll(input: UpdateBankrollInput!): UpdateBankrollPayload
+  updateWatchlist(input: UpdateWatchlistInput!): UpdateWatchlistPayload
+  verifyAccount(token: String!): VerifyAccount
+  verifyToken(token: String!): Verify
+}
+
+type MyBetFollowNode implements Node {
+  bestOdds: Int
+  betFollow: BetFollowNode
+  betName: String
+  id: ID!
+  myOdds: Int
+  outcomes(after: String, before: String, first: Int, last: Int): MyBetFollowOutcomeNodeConnection
+}
+
+type MyBetFollowNodeConnection {
+  edges: [MyBetFollowNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type MyBetFollowNodeEdge {
+  cursor: String!
+  node: MyBetFollowNode
+}
+
+type MyBetFollowOutcomeNodeConnection {
+  edges: [MyBetFollowOutcomeNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type MyBetFollowOutcomeNodeEdge {
+  cursor: String!
+  node: OutcomeNode
+}
+
+type MyBreakdownNode implements Node {
+  dec: Decimal
+  fight: FightNode!
+  fighter: FighterNode!
+  id: ID!
+  ko: Decimal
+  r1: Decimal
+  r2: Decimal
+  r3: Decimal
+  r4: Decimal
+  r5: Decimal
+  sub: Decimal
+  user: UserAuthorNode!
+  win: Decimal
+}
+
+type MyBreakdownNodeConnection {
+  edges: [MyBreakdownNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type MyBreakdownNodeEdge {
+  cursor: String!
+  node: MyBreakdownNode
+}
+
+type MyFighterAttributesNode implements Node {
+  attribute: FighterAttributeNode!
+  choice: FighterAttributeOptionNode!
+  fighter: FighterNode!
+  id: ID!
+  user: UserAuthorNode!
+}
+
+type MyFighterAttributesNodeConnection {
+  edges: [MyFighterAttributesNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type MyFighterAttributesNodeEdge {
+  cursor: String!
+  node: MyFighterAttributesNode
+}
+
+type MyFighterStyleNode implements Node {
+  category: FighterAttributeCategoryNode!
+  fighter: FighterNode!
+  id: ID!
+  style: FighterStyleNode!
+  user: UserAuthorNode!
+}
+
+type MyFighterStyleNodeConnection {
+  edges: [MyFighterStyleNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type MyFighterStyleNodeEdge {
+  cursor: String!
+  node: MyFighterStyleNode
+}
+
+type MyOddsNode implements Node {
+  fight: FightNode!
+  fighter: FighterNode
+  id: ID!
+  isNot: Boolean!
+  odds: Int
+  offerType: OfferTypeNode!
+  user: UserAuthorNode!
+}
+
+type MyOddsNodeConnection {
+  edges: [MyOddsNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type MyOddsNodeEdge {
+  cursor: String!
+  node: MyOddsNode
+}
+
+type NewsNode implements Node {
+  articleType: ArticleArticleType
+  author: UserAuthorNode!
+  content: String!
+  contentMarkdown: String!
+  dateCreated: DateTime
+  datePublished: DateTime
+  dateUpdated: DateTime
+  event: EventNode
+  facebookPosted: Boolean!
+  featured: Boolean!
+  fight: FightNode
+  fighter: FighterNode
+  id: ID!
+  image: String!
+  offer: OfferNode
+  previewContent: String!
+  promotion: PromotionNode
+  published: Boolean!
+  scorumPosted: Boolean!
+  slug: String!
+  sportsbook: SportsbookNode
+  steemitPosted: Boolean!
+  title: String!
+  tweetText: String!
+  twitterPosted: Boolean!
+}
+
+type NewsNodeConnection {
+  edges: [NewsNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type NewsNodeEdge {
+  cursor: String!
+  node: NewsNode
+}
+
+type NewsPredictionNode implements Node {
+  fight: FightNode!
+  fighterWinner: FighterNode!
+  id: ID!
+  methodOfVictory: String!
+  published: Boolean!
+  round: Int
+  user: UserAuthorNode!
+  writeUp: String!
+}
+
+type NewsPredictionNodeConnection {
+  edges: [NewsPredictionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type NewsPredictionNodeEdge {
+  cursor: String!
+  node: NewsPredictionNode
+}
+
+interface Node {
+  id: ID!
+}
+
+type NoteNode implements Node {
+  camp: CampNode
+  dateAdded: DateTime!
+  dateUpdated: DateTime!
+  fight: FightNode
+  fighter: FighterNode
+  id: ID!
+  note: String!
+  type: NoteType!
+  user: UserAuthorNode!
+}
+
+type NoteNodeConnection {
+  edges: [NoteNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type NoteNodeEdge {
+  cursor: String!
+  node: NoteNode
+}
+
+enum NoteType {
+  PRE
+  POS
+  FI
+  CA
+  R_1
+  R_2
+  R_3
+  R_4
+  R_5
+}
+
+type OddsNode implements Node {
+  id: ID!
+  odds: Int
+  outcome: OutcomeNode!
+  timestamp: DateTime!
+}
+
+type OddsNodeConnection {
+  edges: [OddsNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OddsNodeEdge {
+  cursor: String!
+  node: OddsNode
+}
+
+type OfferNode implements Node {
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  createdAt: DateTime!
+  event: EventNode
+  eventDate: Date
+  eventName: String
+  fight: FightNode
+  fighter1: FighterNode
+  fighter1Name: String
+  fighter2: FighterNode
+  fighter2Name: String
+  id: ID!
+  offerType: OfferTypeNode
+  outcomes(after: String, before: String, first: Int, last: Int, offset: Int): OutcomeNodeConnection
+  sbId: String!
+  sportsbook: SportsbookNode!
+  timestamp: DateTime!
+}
+
+type OfferNodeConnection {
+  edges: [OfferNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OfferNodeEdge {
+  cursor: String!
+  node: OfferNode
+}
+
+type OfferTableOfferNode implements Node {
+  id: ID!
+  outcome1: OutcomeNode
+  outcome2: OutcomeNode
+  sportsbook: SportsbookNode
+}
+
+type OfferTableOfferNodeConnection {
+  edges: [OfferTableOfferNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OfferTableOfferNodeEdge {
+  cursor: String!
+  node: OfferTableOfferNode
+}
+
+enum OfferTypeCategory {
+  A_0
+  A_1
+  A_2
+  A_3
+  A_4
+  A_5
+  A_6
+  A_7
+  A_8
+}
+
+type OfferTypeNode implements Node {
+  betfollowSet(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): BetFollowNodeConnection!
+  category: OfferTypeCategory!
+  description: String!
+  emailnotificationSet(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection!
+  id: ID!
+  myoddsSet(after: String, before: String, fight: ID, first: Int, last: Int, offerType_OfferTypeId: String, offset: Int, user: ID): MyOddsNodeConnection!
+  notDescription: String!
+  offerSet(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection!
+  offerTypeId: String!
+  prizepicksselectionSet(after: String, before: String, first: Int, last: Int, offset: Int): PrizePicksSelectionNodeConnection!
+  subCategory: OfferTypeSubCategory!
+  value: Decimal
+}
+
+type OfferTypeNodeConnection {
+  edges: [OfferTypeNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OfferTypeNodeEdge {
+  cursor: String!
+  node: OfferTypeNode
+}
+
+enum OfferTypeSubCategory {
+  A_0
+  A_1
+  A_2
+  A_3
+  A_4
+  A_5
+  A_6
+  A_7
+  A_8
+  A_9
+  A_10
+  A_11
+  A_12
+  A_13
+  A_14
+  A_15
+  A_16
+  A_17
+  A_19
+  A_20
+  A_21
+  A_22
+  A_23
+  A_24
+  A_25
+  A_26
+  A_27
+  A_28
+  A_29
+  A_30
+}
+
+type OptimalLineupNode implements Node {
+  dfsSite: DfsSiteNode!
+  event: EventNode!
+  id: ID!
+  selections(after: String, before: String, first: Int, last: Int, offset: Int): OptimalSelectionNodeConnection!
+}
+
+type OptimalLineupNodeConnection {
+  edges: [OptimalLineupNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OptimalLineupNodeEdge {
+  cursor: String!
+  node: OptimalLineupNode
+}
+
+type OptimalOutcomeNode implements Node {
+  eventPk: Int
+  fight: FightNode!
+  fighter: FighterNode!
+  id: ID!
+  outcome: OptimalOutcomeOutcome!
+  user: UserAuthorNode!
+}
+
+type OptimalOutcomeNodeConnection {
+  edges: [OptimalOutcomeNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OptimalOutcomeNodeEdge {
+  cursor: String!
+  node: OptimalOutcomeNode
+}
+
+enum OptimalOutcomeOutcome {
+  DEC
+  WIN
+  R1
+  R3
+  R5
+  R2
+  R4
+}
+
+type OptimalSelectionNode implements Node {
+  id: ID!
+  optimalLineup: OptimalLineupNode!
+  points: Decimal!
+  selection: SelectionNode!
+}
+
+type OptimalSelectionNodeConnection {
+  edges: [OptimalSelectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OptimalSelectionNodeEdge {
+  cursor: String!
+  node: OptimalSelectionNode
+}
+
+type OptimizerBuildNode implements Node {
+  event: EventNode
+  id: ID!
+  name: String!
+  user: UserAuthorNode!
+  userlineupSet(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): UserLineupNodeConnection!
+}
+
+type OptimizerBuildNodeConnection {
+  edges: [OptimizerBuildNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OptimizerBuildNodeEdge {
+  cursor: String!
+  node: OptimizerBuildNode
+}
+
+type OutcomeNode implements Node {
+  betSet(after: String, before: String, first: Int, last: Int, offset: Int, ticket: ID): BetNodeConnection!
+  fighter: FighterNode
+  id: ID!
+  isNot: Boolean!
+  name: String!
+  odds: Int
+  oddsBest: Int
+  oddsOpen: Int
+  oddsOutcome(after: String, before: String, first: Int, last: Int, offset: Int, outcome: ID): OddsNodeConnection!
+  oddsPrev: Int
+  oddsWorst: Int
+  offer: OfferNode!
+}
+
+type OutcomeNodeConnection {
+  edges: [OutcomeNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type OutcomeNodeEdge {
+  cursor: String!
+  node: OutcomeNode
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type PasswordChange {
+  errors: ExpectedErrorType
+  success: Boolean
+  token: String
+}
+
+type PasswordReset {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+enum PaymentMethodCategory {
+  CC
+  DC
+  EW
+  CR
+  WT
+  MT
+  CH
+  PE
+  SB
+}
+
+type PaymentMethodNode implements Node {
+  category: PaymentMethodCategory
+  icon: String!
+  id: ID!
+  logo: String!
+  name: String!
+  sportsbookpaymentmethodSet(after: String, before: String, first: Int, last: Int, offset: Int, sportsbook: ID, type: String): SportsbookPaymentMethodNodeConnection!
+  url: String!
+}
+
+type PrizePicksSelectionNode implements Node {
+  fight: FightNode
+  fighter: FighterNode
+  fighterName: String!
+  id: ID!
+  myOdds: Int
+  offerType: OfferTypeNode
+  overOdds: Int
+  ppId: String!
+  startTime: DateTime!
+  statType: PrizePicksSelectionStatType!
+  underOdds: Int
+  value: Decimal!
+}
+
+type PrizePicksSelectionNodeConnection {
+  edges: [PrizePicksSelectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type PrizePicksSelectionNodeEdge {
+  cursor: String!
+  node: PrizePicksSelectionNode
+}
+
+enum PrizePicksSelectionStatType {
+  TIME
+  FANTASY_SCORE
+  SIG_STRIKES
+  TAKEDOWNS
+}
+
+type PromotionNode implements Node {
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  events(after: String, before: String, date_Gt: Date, date_Gte: Date, date_Lt: Date, date_Lte: Date, first: Int, isCancelled: Boolean, last: Int, name: String, name_Icontains: String, name_Istartswith: String, offset: Int, orderBy: String, promotion: ID, promotion_ShortName: String, startTime_Gt: DateTime, startTime_Gte: DateTime, startTime_Lt: DateTime, startTime_Lte: DateTime, upcoming: Boolean): EventNodeConnection
+  facebook: String!
+  fullName: String!
+  id: ID!
+  instagram: String!
+  isActive: Boolean!
+  logo: String!
+  sherdogUrl: String!
+  shortName: String!
+  slug: String!
+  tapologyUrl: String!
+  twitter: String!
+  ufctvUrl: String!
+  upcomingEventCount: Int
+  upcomingFightCount: Int
+  website: String!
+  wikipediaUrl: String!
+}
+
+type PromotionNodeConnection {
+  edges: [PromotionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type PromotionNodeEdge {
+  cursor: String!
+  node: PromotionNode
+}
+
+type PropOfferNode {
+  bestOdds1: Int
+  bestOdds2: Int
+  offers(after: String, before: String, first: Int, last: Int): OfferTableOfferNodeConnection
+  offerType: OfferTypeNode
+  propName1: String
+  propName2: String
+}
+
+type PropOfferNodeConnection {
+  edges: [PropOfferNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type PropOfferNodeEdge {
+  cursor: String!
+  node: PropOfferNode
+}
+
+type Queries {
+  _debug: DjangoDebug
+  allArticles(after: String, before: String, eventPk: Float, feed: ID, fighterSlug: String, fightSlug: String, first: Int, last: Int, offset: Int, pageType: String, promotionSlug: String): ArticleNodeConnection
+  allAuthors(after: String, before: String, feed: ID, first: Int, last: Int, offset: Int): AuthorNodeConnection
+  allBankrolls(after: String, before: String, first: Int, isDeleted: Boolean, last: Int, offset: Int, user: ID): BankrollNodeConnection
+  allBanners(after: String, before: String, first: Int, isMobile: Boolean, last: Int, offset: Int, random: Boolean, size: String, sportsbook: ID): BannerNodeConnection
+  allBetFollows(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): BetFollowNodeConnection
+  allBets(after: String, before: String, first: Int, last: Int, offset: Int, ticket: ID): BetNodeConnection
+  allCamps(after: String, before: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, offset: Int): CampNodeConnection
+  allDfsContests(after: String, before: String, event: ID, eventPk: Float, first: Int, last: Int, offset: Int): DfsContestNodeConnection
+  allDfsSites(after: String, before: String, first: Int, last: Int, name: String, offset: Int): DfsSiteNodeConnection
+  allEmailNotifications(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection
+  allEvents(after: String, before: String, date_Gt: Date, date_Gte: Date, date_Lt: Date, date_Lte: Date, first: Int, isCancelled: Boolean, last: Int, name: String, name_Icontains: String, name_Istartswith: String, offset: Int, orderBy: String, promotion: ID, promotion_ShortName: String, startTime_Gt: DateTime, startTime_Gte: DateTime, startTime_Lt: DateTime, startTime_Lte: DateTime, upcoming: Boolean): EventNodeConnection
+  allFeeds(after: String, before: String, first: Int, last: Int, offset: Int, type: String): FeedNodeConnection
+  allFighterAttributeCategories(after: String, before: String, first: Int, last: Int, offset: Int): FighterAttributeCategoryNodeConnection
+  allFighterAttributes(after: String, before: String, category: ID, first: Int, last: Int, offset: Int): FighterAttributeNodeConnection
+  allFighters(after: String, before: String, first: Int, firstName: String, firstName_Icontains: String, firstName_Istartswith: String, last: Int, lastName: String, lastName_Icontains: String, lastName_Istartswith: String, offset: Int): FighterNodeConnection
+  allFighterStyles(after: String, before: String, first: Int, last: Int, offset: Int): FighterStyleNodeConnection
+  allFightingStyleRanks(after: String, before: String, fightingStyle_Name: String, fightingStyle_Name_Icontains: String, fightingStyle_Name_Istartswith: String, first: Int, last: Int, offset: Int): FightingStyleRankNodeConnection
+  allFightingStyles(after: String, before: String, first: Int, last: Int, name: String, name_Icontains: String, name_Istartswith: String, offset: Int): FightingStyleNodeConnection
+  allFights(after: String, before: String, event: ID, event_Date_Gt: Date, event_Date_Gte: Date, event_Date_Lt: Date, event_Date_Lte: Date, fighter1_LastName: String, fighter1_LastName_Icontains: String, fighter1_LastName_Istartswith: String, fighter2_LastName: String, fighter2_LastName_Icontains: String, fighter2_LastName_Istartswith: String, fightType: String, first: Int, isCancelled: Boolean, last: Int, offset: Int, order: Int, order_Gt: Int, order_Gte: Int, order_Lt: Int, order_Lte: Int): FightNodeConnection
+  allGroups(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): GroupNodeConnection
+  allHandicappers(after: String, before: String, first: Int, last: Int, name: String, offset: Int): HandicapperNodeConnection
+  allMyBreakdowns(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyBreakdownNodeConnection
+  allMyFighterAttributes(after: String, before: String, choice_Level: Int, choice_Level_Gte: Int, choice_Level_Lte: Int, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterAttributesNodeConnection
+  allMyFighterStyles(after: String, before: String, category_Name_Icontains: String, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterStyleNodeConnection
+  allMyOdds(after: String, before: String, fight: ID, first: Int, last: Int, offerType_OfferTypeId: String, offset: Int, user: ID): MyOddsNodeConnection
+  allNews(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection
+  allNewsPredictions(after: String, before: String, fight: ID, fight_Event: ID, first: Int, last: Int, offset: Int, published: Boolean, user: ID): NewsPredictionNodeConnection
+  allNotes(after: String, before: String, camp: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): NoteNodeConnection
+  allOdds(after: String, before: String, first: Int, last: Int, offset: Int, orderBy: String, outcome: ID): OddsNodeConnection
+  allOffers(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection
+  allOfferTypes(after: String, before: String, category: String, first: Int, last: Int, offerTypeId: String, offset: Int): OfferTypeNodeConnection
+  allOutcomes(after: String, before: String, fighter: ID, first: Int, last: Int, offer: ID, offset: Int): OutcomeNodeConnection
+  allPrizePicks(after: String, before: String, eventPk: Float, fight: ID, first: Int, last: Int, offset: Int): PrizePicksSelectionNodeConnection
+  allPromotions(after: String, before: String, first: Int, isActive: Boolean, last: Int, offset: Int, shortName: String, shortName_Icontains: String, shortName_Istartswith: String): PromotionNodeConnection
+  allSelections(after: String, before: String, dfsSite: ID, eventPk: Float, first: Int, last: Int, offset: Int): SelectionNodeConnection
+  allSlateSummary(after: String, before: String, first: Int, last: Int): SlateSummaryConnection
+  allSportsbookFeatures(after: String, before: String, category_Icontains: String, first: Int, last: Int, offset: Int): SportsbookFeatureNodeConnection
+  allSportsbooks(after: String, before: String, first: Int, hasOdds: Boolean, isAffiliate: Boolean, isDisabled: Boolean, last: Int, offset: Int, shortName: String, shortName_Icontains: String, shortName_Istartswith: String): SportsbookNodeConnection
+  allTickets(after: String, bankroll: ID, bankroll_Slug: String, before: String, deleted: Boolean, first: Int, last: Int, offset: Int, user: ID): TicketNodeConnection
+  allUpcomingEventOfferTables(after: String, before: String, first: Int, last: Int): EventOfferTableNodeConnection
+  allUserBuilds(after: String, before: String, event: ID, eventPk: Float, first: Int, last: Int, offset: Int): OptimizerBuildNodeConnection
+  allUserLineups(after: String, before: String, dfsSite: ID, eventPk: Float, first: Int, last: Int, offset: Int): UserLineupNodeConnection
+  allUserSelections(after: String, before: String, dfsSite: ID, eventPk: Float, first: Int, last: Int, offset: Int): UserSelectionNodeConnection
+  allWatchlists(after: String, before: String, fight: ID, first: Int, last: Int, offset: Int, user: ID): WatchlistNodeConnection
+  article(id: ID!): ArticleNode
+  author(id: ID!): AuthorNode
+  bankroll(id: ID!): BankrollNode
+  bankrollBySlug(slug: String): BankrollNode
+  banner(id: ID!): BannerNode
+  bet(id: ID!): BetNode
+  betFollow(id: ID!): BetFollowNode
+  camp(id: ID!): CampNode
+  dfsSite(id: ID!): DfsSiteNode
+  dummy: String
+  emailNotification(id: ID!): EmailNotificationNode
+  event(id: ID!): EventNode
+  eventByPk(pk: Int): EventNode
+  eventOfferTable(allFights: Boolean, isCancelled: Boolean, nextEvent: Boolean, pk: Int): EventOfferTableNode
+  exitPromo: ExitPromoNode
+  feed(id: ID!): FeedNode
+  fight(id: ID!): FightNode
+  fightBySlug(slug: String): FightNode
+  fighter(id: ID!): FighterNode
+  fighterAttribute(id: ID!): FighterAttributeNode
+  fighterAttributeCategory(id: ID!): FighterAttributeCategoryNode
+  fighterBySlug(slug: String): FighterNode
+  fighterStyle(id: ID!): FighterStyleNode
+  fightingStyle(id: ID!): FightingStyleNode
+  fightingStyleRank(id: ID!): FightingStyleRankNode
+  fightOfferTable(slug: String): FightOfferTableNode
+  fightOutcomesTable(after: String, before: String, first: Int, last: Int, slug: String): FightOutcomeNodeConnection
+  fightProjection(fightId: ID!): FightProjectionNode
+  fightPropOfferTable(slug: String): FightPropOfferTableNode
+  group(id: ID!): GroupNode
+  handicapper(id: ID!): HandicapperNode
+  lineups(after: String, before: String, dfsSiteShortName: String!, eventPk: Int!, exposureStrategy: String, first: Int, last: Int, maxDeviation: Float, maxExposure: Int, maxRepeatingPlayers: Int, minDeviation: Float, minSalaryCap: Int, optimizationStrategy: String, preventFightStack: Boolean!, progressiveIncrease: Float, totalLineups: Int!, useMaxExposure: Boolean): LineupConnection
+  lineupsOld(after: String, before: String, dfsSiteShortName: String!, eventPk: Int!, first: Int, last: Int, maxRepeatingPlayers: Int, minSalaryCap: Int, preventFightStack: Boolean!, projectionType: String!, randomness: Boolean!, totalLineups: Int!, useMaxExposure: Boolean!): LineupConnection
+  me: UserNode
+  myBetFollows(after: String, before: String, eventEndTime: DateTime, eventStartTime: DateTime!, first: Int, last: Int): MyBetFollowNodeConnection
+  myBreakdown(id: ID!): MyBreakdownNode
+  myFighterAttribute(id: ID!): MyFighterAttributesNode
+  myFighterStyle(id: ID!): MyFighterStyleNode
+  myOdds(id: ID!): MyOddsNode
+  news(id: ID!): NewsNode
+  newsBySlug(slug: String): NewsNode
+  newsPrediction(id: ID!): NewsPredictionNode
+  note(id: ID!): NoteNode
+  odd(id: ID!): OddsNode
+  offer(id: ID!): OfferNode
+  offerType(id: ID!): OfferTypeNode
+  outcome(id: ID!): OutcomeNode
+  promotion(id: ID!): PromotionNode
+  promotionBySlug(slug: String): PromotionNode
+  selection(id: ID!): SelectionNode
+  sportsbook(id: ID!): SportsbookNode
+  sportsbookBySlug(slug: String): SportsbookNode
+  suggestedStake(bankrollId: ID!, outcomeId: ID!): Float
+  ticket(id: ID!): TicketNode
+  user(id: ID!): UserNode
+  userBuild(id: ID!): OptimizerBuildNode
+  users(after: String, before: String, email: String, first: Int, isActive: Boolean, last: Int, offset: Int, status_Archived: Boolean, status_SecondaryEmail: String, status_Verified: Boolean, username: String, username_Icontains: String, username_Istartswith: String): UserNodeConnection
+  userSelection(id: ID!): UserSelectionNode
+  watchlist(id: ID!): WatchlistNode
+}
+
+type Refresh {
+  payload: GenericScalar
+  token: String
+}
+
+type Register {
+  errors: ExpectedErrorType
+  success: Boolean
+  token: String
+}
+
+input RemoveBankrollInput {
+  bankrollId: String!
+  clientMutationId: String
+}
+
+type RemoveBankrollPayload {
+  bankroll: BankrollNode
+  clientMutationId: String
+}
+
+input RemoveEmailNotificationInput {
+  clientMutationId: String
+  emailNotificationId: ID
+}
+
+type RemoveEmailNotificationPayload {
+  clientMutationId: String
+  deletedEmailNotificationId: ID
+  emailNotification: EmailNotificationNode
+}
+
+input RemoveMyBreakdownInput {
+  clientMutationId: String
+  myBreakdownId: ID!
+}
+
+type RemoveMyBreakdownPayload {
+  clientMutationId: String
+  myBreakdown: MyBreakdownNode
+}
+
+input RemoveMyOddsInput {
+  clientMutationId: String
+  myOddsId: String!
+}
+
+type RemoveMyOddsPayload {
+  clientMutationId: String
+  myOdds: MyOddsNode
+}
+
+input RemoveUserLineupInput {
+  clientMutationId: String
+  userLineupId: ID!
+}
+
+type RemoveUserLineupPayload {
+  clientMutationId: String
+  deletedUserLineupId: ID
+  userLineup: UserLineupNode
+}
+
+input RemoveUserLineupsInput {
+  clientMutationId: String
+  userLineupIds: [ID]!
+}
+
+type RemoveUserLineupsPayload {
+  clientMutationId: String
+  deletedUserLineupIds: [ID]
+}
+
+type ResendActivationEmail {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+type Revoke {
+  revoked: Int
+}
+
+type SelectionNode implements Node {
+  avgPpg: Decimal!
+  contestOwnership(after: String, before: String, first: Int, last: Int, offset: Int): ContestOwnershipNodeConnection
+  dfsId: String!
+  dfsSite: DfsSiteNode!
+  event: EventNode
+  eventPk: Int
+  fight: FightNode
+  fighter: FighterNode
+  id: ID!
+  itdOdds: Int
+  multiplier: Decimal
+  odds: Int
+  oppItdOdds: Int
+  optimalSelection(after: String, before: String, first: Int, last: Int, offset: Int): OptimalSelectionNodeConnection
+  salary: Int
+  sourceProjections(after: String, before: String, first: Int, last: Int, offset: Int): SourceProjectionNodeConnection
+  userlineupselectionSet(after: String, before: String, first: Int, last: Int, lineup: ID, offset: Int): UserLineupSelectionNodeConnection!
+  userSelections(after: String, before: String, first: Int, last: Int, offset: Int): UserSelectionNodeConnection
+}
+
+type SelectionNodeConnection {
+  edges: [SelectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type SelectionNodeEdge {
+  cursor: String!
+  node: SelectionNode
+}
+
+type SendPasswordResetEmail {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+input SetMyBreakdownInput {
+  clientMutationId: String
+  dec: Int
+  fighterId: ID!
+  fightId: ID!
+  ko: Int
+  myBreakdownId: ID
+  r1: Int
+  r2: Int
+  r3: Int
+  r4: Int
+  r5: Int
+  sub: Int
+  win: Int
+}
+
+type SetMyBreakdownPayload {
+  clientMutationId: String
+  myBreakdown: MyBreakdownNode
+}
+
+input SetMyFighterAttributeInput {
+  clientMutationId: String
+  fighterAttributeId: String!
+  fighterAttributeOptionId: String!
+  fighterId: String!
+  myFighterAttributeId: String
+}
+
+type SetMyFighterAttributePayload {
+  clientMutationId: String
+  myFighterAttribute: MyFighterAttributesNode
+}
+
+input SetMyFighterStyleInput {
+  categoryId: String!
+  clientMutationId: String
+  fighterId: String!
+  fighterStyleId: String!
+  myFighterStyleId: String
+}
+
+type SetMyFighterStylePayload {
+  clientMutationId: String
+  myFighterStyle: MyFighterStyleNode
+}
+
+input SetMyOddsInput {
+  clientMutationId: String
+  fighterId: ID
+  fightId: ID!
+  isNot: Boolean
+  myOddsId: ID
+  odds: Int
+  offerTypeId: String!
+}
+
+type SetMyOddsPayload {
+  clientMutationId: String
+  myOdds: MyOddsNode
+}
+
+input SetNoteInput {
+  campId: String
+  clientMutationId: String
+  fighterId: String
+  fightId: String
+  note: String!
+  noteId: String
+  type: String!
+}
+
+type SetNotePayload {
+  clientMutationId: String
+  note: NoteNode
+}
+
+input SetUserFighterTagsInput {
+  clientMutationId: String
+  contrarian: Boolean
+  earlyFinish: Boolean
+  fighterId: String!
+  fightId: String!
+  grapplingUpside: Boolean
+  highPace: Boolean
+  koUpside: Boolean
+  subUpside: Boolean
+  tdDefUpside: Boolean
+  userFighterTagsId: String
+}
+
+type SetUserFighterTagsPayload {
+  clientMutationId: String
+  userFighterTags: UserFighterTagsNode
+}
+
+input SetUserLineupInput {
+  clientMutationId: String
+  dfsSiteId: ID!
+  eventId: ID!
+  gameType: String!
+  projectionType: String!
+  selections: [UserLineupSelectionInput]!
+  tag: String!
+  userLineupId: String
+}
+
+type SetUserLineupPayload {
+  clientMutationId: String
+  userLineup: UserLineupNode
+}
+
+input SetUserLineupsInput {
+  clientMutationId: String
+  lineups: [UserLineupInput]!
+}
+
+type SetUserLineupsPayload {
+  clientMutationId: String
+  userLineups(after: String, before: String, first: Int, last: Int): LineupConnection
+}
+
+input SetUserProjectionInput {
+  clientMutationId: String
+  controlTime: Int
+  fighterId: String!
+  fightId: String!
+  knockdowns: Int
+  reversals: Int
+  sigStrikes: Int
+  strikes: Int
+  submissionAttempts: Int
+  takedownDefense: Int
+  takedowns: Int
+  type: String!
+  userProjectionId: String
+  winDec: Float
+  winMin1: Float
+  winR1: Float
+  winR2: Float
+  winR3: Float
+  winR4: Float
+  winR5: Float
+}
+
+type SetUserProjectionPayload {
+  clientMutationId: String
+  userProjection: UserProjectionNode
+}
+
+input SetUserSelectionInput {
+  clientMutationId: String
+  lock: Boolean
+  maxDeviation: Int
+  maxExposure: Int
+  minDeviation: Int
+  minExposure: Int
+  projectedOwnership: Int
+  projectedPoints: Float
+  remove: Boolean
+  selectionId: String!
+  userSelectionId: String
+}
+
+type SetUserSelectionPayload {
+  clientMutationId: String
+  userSelection: UserSelectionNode
+}
+
+type SlateSummaryConnection {
+  edges: [SlateSummaryEdge]!
+  pageInfo: PageInfo!
+}
+
+type SlateSummaryEdge {
+  cursor: String!
+  node: SlateSummaryNode
+}
+
+type SlateSummaryNode implements Node {
+  avgFighterWinningScore: Int
+  avgItdOdds: Int
+  avgOdds: Int
+  biggestFave: Int
+  biggestUnderdog: Int
+  eventName: String
+  eventPk: Int
+  expectedItd: Int
+  highestSalary: Int
+  id: ID!
+  itdCount: Int
+  lowestSalary: Int
+  medianOdds: Int
+  optimalAvgOdds: Int
+  optimalDupes: Int
+  optimalFavorites: Int
+  optimalHighestSalary: Int
+  optimalLowestSalary: Int
+  optimalSalary: Int
+  optimalScore: Int
+  optimalUnderdogs: Int
+  optimalWinners: Int
+  totalFights: Int
+}
+
+type SourceProjectionNode implements Node {
+  avgPoints: Decimal
+  id: ID!
+  ownership: Int!
+  selection: SelectionNode!
+  source: DfsSourceNode!
+  winPoints: Decimal
+}
+
+type SourceProjectionNodeConnection {
+  edges: [SourceProjectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type SourceProjectionNodeEdge {
+  cursor: String!
+  node: SourceProjectionNode
+}
+
+type SportsbookFeatureNode implements Node {
+  category: String!
+  id: ID!
+  name: String!
+  sportsbookSet(after: String, before: String, first: Int, hasOdds: Boolean, isAffiliate: Boolean, isDisabled: Boolean, last: Int, offset: Int, shortName: String, shortName_Icontains: String, shortName_Istartswith: String): SportsbookNodeConnection!
+}
+
+type SportsbookFeatureNodeConnection {
+  edges: [SportsbookFeatureNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type SportsbookFeatureNodeEdge {
+  cursor: String!
+  node: SportsbookFeatureNode
+}
+
+type SportsbookHighlightNode implements Node {
+  id: ID!
+  name: String!
+  order: Int!
+  sportsbookSet(after: String, before: String, first: Int, hasOdds: Boolean, isAffiliate: Boolean, isDisabled: Boolean, last: Int, offset: Int, shortName: String, shortName_Icontains: String, shortName_Istartswith: String): SportsbookNodeConnection!
+}
+
+type SportsbookHighlightNodeConnection {
+  edges: [SportsbookHighlightNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type SportsbookHighlightNodeEdge {
+  cursor: String!
+  node: SportsbookHighlightNode
+}
+
+type SportsbookNode implements Node {
+  acceptedCryptoCurrencies(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): CryptoCurrencyNodeConnection!
+  acceptedCurrencies(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): FiatCurrencyNodeConnection!
+  affiliateUrl: String!
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  bannerSet(after: String, before: String, first: Int, isMobile: Boolean, last: Int, offset: Int, size: String, sportsbook: ID): BannerNodeConnection!
+  bonuses(after: String, before: String, current: Boolean, first: Int, last: Int, offset: Int, sportsbook: ID, type: ID): BonusNodeConnection!
+  emailnotificationSet(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection!
+  exitpromoSet(after: String, before: String, first: Int, last: Int, offset: Int): ExitPromoNodeConnection!
+  features(after: String, before: String, category_Icontains: String, first: Int, last: Int, offset: Int): SportsbookFeatureNodeConnection!
+  fullName: String!
+  hasOdds: Boolean!
+  highlights(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): SportsbookHighlightNodeConnection!
+  icon: String!
+  id: ID!
+  isAffiliate: Boolean!
+  isDisabled: Boolean!
+  lastRun: DateTime
+  licence: String!
+  location: String!
+  logoDark: String!
+  logoLight: String!
+  mobileLink: String!
+  mobileScreenshot: String!
+  offerSet(after: String, before: String, event: ID, fight: ID, fighter1: ID, fighter2: ID, first: Int, last: Int, offerType_Category: String, offset: Int, sportsbook: ID): OfferNodeConnection!
+  overview: String!
+  protoId: SportsbookProtoId!
+  restrictedCountries: SportsbookRestrictedCountries
+  shortName: String!
+  slug: String!
+  sportsbookpaymentmethodSet(after: String, before: String, first: Int, last: Int, offset: Int, sportsbook: ID, type: String): SportsbookPaymentMethodNodeConnection!
+  uiScreenshot: String!
+  websiteUrl: String!
+  yearEstablished: Int!
+}
+
+type SportsbookNodeConnection {
+  edges: [SportsbookNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type SportsbookNodeEdge {
+  cursor: String!
+  node: SportsbookNode
+}
+
+type SportsbookPaymentMethodNode implements Node {
+  fee: String!
+  id: ID!
+  max: String!
+  min: String!
+  paymentMethod: PaymentMethodNode!
+  sportsbook: SportsbookNode!
+  type: SportsbookPaymentMethodType!
+}
+
+type SportsbookPaymentMethodNodeConnection {
+  edges: [SportsbookPaymentMethodNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type SportsbookPaymentMethodNodeEdge {
+  cursor: String!
+  node: SportsbookPaymentMethodNode
+}
+
+enum SportsbookPaymentMethodType {
+  D
+  W
+}
+
+enum SportsbookProtoId {
+  A_1
+  A_2
+  A_3
+  A_4
+  A_5
+  A_6
+  A_7
+  A_8
+  A_9
+  A_10
+  A_11
+  A_12
+  A_13
+  A_14
+  A_15
+  A_16
+  A_25
+  A_26
+  A_27
+  A_17
+  A_28
+  A_29
+  A_30
+  A_31
+  A_32
+  A_34
+  A_35
+  A_36
+  A_37
+  A_38
+  A_39
+  A_40
+}
+
+enum SportsbookRestrictedCountries {
+  AF
+  AX
+  AL
+  DZ
+  AS
+  AD
+  AO
+  AI
+  AQ
+  AG
+  AR
+  AM
+  AW
+  AU
+  AT
+  AZ
+  BS
+  BH
+  BD
+  BB
+  BY
+  BE
+  BZ
+  BJ
+  BM
+  BT
+  BO
+  BQ
+  BA
+  BW
+  BV
+  BR
+  IO
+  BN
+  BG
+  BF
+  BI
+  CV
+  KH
+  CM
+  CA
+  KY
+  CF
+  TD
+  CL
+  CN
+  CX
+  CC
+  CO
+  KM
+  CG
+  CD
+  CK
+  CR
+  CI
+  HR
+  CU
+  CW
+  CY
+  CZ
+  DK
+  DJ
+  DM
+  DO
+  EC
+  EG
+  SV
+  GQ
+  ER
+  EE
+  SZ
+  ET
+  FK
+  FO
+  FJ
+  FI
+  FR
+  GF
+  PF
+  TF
+  GA
+  GM
+  GE
+  DE
+  GH
+  GI
+  GR
+  GL
+  GD
+  GP
+  GU
+  GT
+  GG
+  GN
+  GW
+  GY
+  HT
+  HM
+  VA
+  HN
+  HK
+  HU
+  IS
+  IN
+  ID
+  IR
+  IQ
+  IE
+  IM
+  IL
+  IT
+  JM
+  JP
+  JE
+  JO
+  KZ
+  KE
+  KI
+  KW
+  KG
+  LA
+  LV
+  LB
+  LS
+  LR
+  LY
+  LI
+  LT
+  LU
+  MO
+  MG
+  MW
+  MY
+  MV
+  ML
+  MT
+  MH
+  MQ
+  MR
+  MU
+  YT
+  MX
+  FM
+  MD
+  MC
+  MN
+  ME
+  MS
+  MA
+  MZ
+  MM
+  NA
+  NR
+  NP
+  NL
+  NC
+  NZ
+  NI
+  NE
+  NG
+  NU
+  NF
+  KP
+  MK
+  MP
+  NO
+  OM
+  PK
+  PW
+  PS
+  PA
+  PG
+  PY
+  PE
+  PH
+  PN
+  PL
+  PT
+  PR
+  QA
+  RE
+  RO
+  RU
+  RW
+  BL
+  SH
+  KN
+  LC
+  MF
+  PM
+  VC
+  WS
+  SM
+  ST
+  SA
+  SN
+  RS
+  SC
+  SL
+  SG
+  SX
+  SK
+  SI
+  SB
+  SO
+  ZA
+  GS
+  KR
+  SS
+  ES
+  LK
+  SD
+  SR
+  SJ
+  SE
+  CH
+  SY
+  TW
+  TJ
+  TZ
+  TH
+  TL
+  TG
+  TK
+  TO
+  TT
+  TN
+  TR
+  TM
+  TC
+  TV
+  UG
+  UA
+  AE
+  GB
+  UM
+  US
+  UY
+  UZ
+  VU
+  VE
+  VN
+  VG
+  VI
+  WF
+  EH
+  YE
+  ZM
+  ZW
+}
+
+input SubmitBetInput {
+  confidence: String
+  fighterId: String
+  odds: Int!
+  outcomeId: String
+  prefightNote: String
+  value: String
+  warnings: Boolean
+}
+
+input SubmitTicketInput {
+  bankrollId: String!
+  bets: [SubmitBetInput]!
+  betType: String!
+  clientMutationId: String
+  odds: Int!
+  stake: Float!
+  units: Float!
+}
+
+type SubmitTicketPayload {
+  clientMutationId: String
+  ticket: TicketNode
+}
+
+enum TicketBetType {
+  SI
+  PA
+  RR
+}
+
+type TicketNode implements Node {
+  bankroll: BankrollNode!
+  bets(after: String, before: String, first: Int, last: Int, offset: Int): BetNodeConnection
+  betType: TicketBetType!
+  dateSubmitted: Date!
+  deleted: Boolean!
+  id: ID!
+  odds: Int!
+  result: TicketResult!
+  stake: Decimal!
+  timeDeleted: DateTime
+  units: Decimal!
+  user: UserAuthorNode!
+}
+
+type TicketNodeConnection {
+  edges: [TicketNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type TicketNodeEdge {
+  cursor: String!
+  node: TicketNode
+}
+
+enum TicketResult {
+  PE
+  WI
+  LO
+  PU
+  CA
+}
+
+input ToggleBetFollowInput {
+  betFollowId: ID
+  clientMutationId: String
+  fighterId: ID
+  fightId: ID
+  isNot: Boolean
+  offerTypeId: ID
+}
+
+type ToggleBetFollowPayload {
+  betFollow: BetFollowNode
+  clientMutationId: String
+  deletedBetFollowId: ID
+}
+
+input ToggleUserOptimalOutcomeInput {
+  clientMutationId: String
+  fighterId: ID!
+  fightId: ID!
+  outcome: String!
+}
+
+type ToggleUserOptimalOutcomePayload {
+  clientMutationId: String
+  optimalOutcome: OptimalOutcomeNode
+}
+
+input ToggleWatchlistInput {
+  clientMutationId: String
+  fightId: String!
+}
+
+type ToggleWatchlistPayload {
+  clientMutationId: String
+  watchlist: WatchlistNode
+}
+
+type UpdateAccount {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+input UpdateBankrollInput {
+  bankrollId: String!
+  clientMutationId: String
+  isPublic: Boolean!
+  name: String!
+  startingAmount: Float
+  unitSize: Float
+}
+
+type UpdateBankrollPayload {
+  bankroll: BankrollNode
+  clientMutationId: String
+}
+
+input UpdateWatchlistInput {
+  clientMutationId: String
+  watched: Boolean!
+  watchlistId: String!
+}
+
+type UpdateWatchlistPayload {
+  clientMutationId: String
+  watchlist: WatchlistNode
+}
+
+type UserAuthorNode {
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  bankrollSet(after: String, before: String, first: Int, isDeleted: Boolean, last: Int, offset: Int, user: ID): BankrollNodeConnection!
+  betFollow(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): BetFollowNodeConnection!
+  dateJoined: DateTime!
+  dfsSelections(after: String, before: String, first: Int, last: Int, offset: Int, selection: ID, user: ID): UserSelectionNodeConnection!
+  email: String!
+  fightpredictionSet(after: String, before: String, fight: ID, fight_Event: ID, first: Int, last: Int, offset: Int, published: Boolean, user: ID): NewsPredictionNodeConnection!
+  firstName: String!
+  groups(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): GroupNodeConnection!
+  id: ID!
+  isActive: Boolean!
+  isStaff: Boolean!
+  isSuperuser: Boolean!
+  lastLogin: DateTime
+  lastName: String!
+  myBreakdown(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyBreakdownNodeConnection!
+  myEmailNotification(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection!
+  myfighterattributesSet(after: String, before: String, choice_Level: Int, choice_Level_Gte: Int, choice_Level_Lte: Int, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterAttributesNodeConnection!
+  myfighterstyleSet(after: String, before: String, category_Name_Icontains: String, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterStyleNodeConnection!
+  myNotes(after: String, before: String, camp: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): NoteNodeConnection!
+  myOdds(after: String, before: String, fight: ID, first: Int, last: Int, offerType_OfferTypeId: String, offset: Int, user: ID): MyOddsNodeConnection!
+  optimalOutcomes(after: String, before: String, first: Int, last: Int, offset: Int): OptimalOutcomeNodeConnection!
+  optimizerBuilds(after: String, before: String, event: ID, first: Int, last: Int, offset: Int): OptimizerBuildNodeConnection!
+  password: String!
+  ticketSet(after: String, bankroll: ID, bankroll_Slug: String, before: String, deleted: Boolean, first: Int, last: Int, offset: Int, user: ID): TicketNodeConnection!
+  userLineups(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): UserLineupNodeConnection!
+  username: String!
+  userProjections(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, type: String, user: ID): UserProjectionNodeConnection!
+  userTags(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): UserFighterTagsNodeConnection!
+  watchlistSet(after: String, before: String, fight: ID, first: Int, last: Int, offset: Int, user: ID): WatchlistNodeConnection!
+}
+
+type UserFighterTagsNode implements Node {
+  contrarian: Boolean!
+  earlyFinish: Boolean!
+  fight: FightNode!
+  fighter: FighterNode!
+  grapplingUpside: Boolean!
+  highPace: Boolean!
+  id: ID!
+  koUpside: Boolean!
+  subUpside: Boolean!
+  tdDefUpside: Boolean!
+  user: UserAuthorNode!
+}
+
+type UserFighterTagsNodeConnection {
+  edges: [UserFighterTagsNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserFighterTagsNodeEdge {
+  cursor: String!
+  node: UserFighterTagsNode
+}
+
+enum UserLineupGameType {
+  GPP
+  CASH
+}
+
+input UserLineupInput {
+  dfsSiteId: ID!
+  eventId: ID!
+  gameType: String!
+  projectionType: String!
+  selections: [UserLineupSelectionInput]!
+  userLineupId: String
+}
+
+type UserLineupNode implements Node {
+  build: OptimizerBuildNode
+  contest: DfsContestNode
+  dfsId: String
+  dfsSite: DfsSiteNode!
+  dupeCount: Int
+  event: EventNode!
+  gameType: UserLineupGameType!
+  id: ID!
+  projectionType: UserLineupProjectionType!
+  selections(after: String, before: String, first: Int, last: Int, offset: Int): UserLineupSelectionNodeConnection
+  tag: UserLineupTag!
+  user: UserAuthorNode!
+}
+
+type UserLineupNodeConnection {
+  edges: [UserLineupNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserLineupNodeEdge {
+  cursor: String!
+  node: UserLineupNode
+}
+
+enum UserLineupProjectionType {
+  AVG
+  HIGH
+  ODDS
+  OPEN_ODDS
+  MY_ODDS
+  MY_ITD_ODDS
+  ITD_ODDS
+}
+
+input UserLineupSelectionInput {
+  selectionId: ID!
+  userLineupSelectionId: Int
+}
+
+type UserLineupSelectionNode implements Node {
+  id: ID!
+  lineup: UserLineupNode!
+  selection: SelectionNode!
+}
+
+type UserLineupSelectionNodeConnection {
+  edges: [UserLineupSelectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserLineupSelectionNodeEdge {
+  cursor: String!
+  node: UserLineupSelectionNode
+}
+
+enum UserLineupTag {
+  UNKNOWN
+  BEST_ODDS
+  BEST_ODDS_PARLAY
+  MY_BEST_ODDS
+  MY_BEST_ODDS_PARLAY
+  BEST_ITD_ODDS
+  BEST_ITD_ODDS_PARLAY
+  MY_BEST_ODDS_7
+  MY_BEST_ODDS_8
+  ALL_FAVES
+  ALL_FAVES_MY_ODDS
+  AVG_POINTS
+  HIGH_POINTS
+  MY_POINTS
+}
+
+type UserNode implements Node {
+  archived: Boolean
+  articleSet(after: String, articleType: String, before: String, first: Int, last: Int, offset: Int, published: Boolean): NewsNodeConnection!
+  bankrollSet(after: String, before: String, first: Int, isDeleted: Boolean, last: Int, offset: Int, user: ID): BankrollNodeConnection!
+  betFollow(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int): BetFollowNodeConnection!
+  dateJoined: DateTime!
+  dfsSelections(after: String, before: String, first: Int, last: Int, offset: Int, selection: ID, user: ID): UserSelectionNodeConnection!
+  email: String!
+  fightpredictionSet(after: String, before: String, fight: ID, fight_Event: ID, first: Int, last: Int, offset: Int, published: Boolean, user: ID): NewsPredictionNodeConnection!
+  firstName: String!
+  groups(after: String, before: String, first: Int, last: Int, name_Icontains: String, offset: Int): GroupNodeConnection!
+  id: ID!
+  isActive: Boolean!
+  isStaff: Boolean!
+  lastLogin: DateTime
+  lastName: String!
+  myBreakdown(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyBreakdownNodeConnection!
+  myEmailNotification(after: String, before: String, fight_Event_Promotion: ID, first: Int, last: Int, notified: Boolean, offerType_OfferTypeId: String, offset: Int, sportsbook: ID, user: ID): EmailNotificationNodeConnection!
+  myfighterattributesSet(after: String, before: String, choice_Level: Int, choice_Level_Gte: Int, choice_Level_Lte: Int, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterAttributesNodeConnection!
+  myfighterstyleSet(after: String, before: String, category_Name_Icontains: String, fighter: ID, first: Int, last: Int, offset: Int, user: ID): MyFighterStyleNodeConnection!
+  myNotes(after: String, before: String, camp: ID, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): NoteNodeConnection!
+  myOdds(after: String, before: String, fight: ID, first: Int, last: Int, offerType_OfferTypeId: String, offset: Int, user: ID): MyOddsNodeConnection!
+  optimalOutcomes(after: String, before: String, first: Int, last: Int, offset: Int): OptimalOutcomeNodeConnection!
+  optimizerBuilds(after: String, before: String, event: ID, first: Int, last: Int, offset: Int): OptimizerBuildNodeConnection!
+  pk: Int
+  secondaryEmail: String
+  ticketSet(after: String, bankroll: ID, bankroll_Slug: String, before: String, deleted: Boolean, first: Int, last: Int, offset: Int, user: ID): TicketNodeConnection!
+  userLineups(after: String, before: String, first: Int, last: Int, offset: Int, user: ID): UserLineupNodeConnection!
+  username: String!
+  userProjections(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, type: String, user: ID): UserProjectionNodeConnection!
+  userTags(after: String, before: String, fight: ID, fighter: ID, first: Int, last: Int, offset: Int, user: ID): UserFighterTagsNodeConnection!
+  verified: Boolean
+  watchlistSet(after: String, before: String, fight: ID, first: Int, last: Int, offset: Int, user: ID): WatchlistNodeConnection!
+}
+
+type UserNodeConnection {
+  edges: [UserNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserNodeEdge {
+  cursor: String!
+  node: UserNode
+}
+
+type UserProjectionConnection {
+  edges: [UserProjectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserProjectionEdge {
+  cursor: String!
+  node: UserProjectionNode
+}
+
+type UserProjectionNode implements Node {
+  controlTime: Int
+  fight: FightNode!
+  fighter: FighterNode!
+  id: ID!
+  knockdowns: Int
+  reversals: Int
+  sigStrikes: Int
+  strikes: Int
+  submissionAttempts: Int
+  takedownDefense: Int
+  takedowns: Int
+  type: UserProjectionType!
+  user: UserAuthorNode!
+  winDec: Decimal
+  winMin1: Decimal
+  winR1: Decimal
+  winR2: Decimal
+  winR3: Decimal
+  winR4: Decimal
+  winR5: Decimal
+}
+
+type UserProjectionNodeConnection {
+  edges: [UserProjectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserProjectionNodeEdge {
+  cursor: String!
+  node: UserProjectionNode
+}
+
+enum UserProjectionType {
+  AVG
+  HIGH
+}
+
+type UserSelectionNode implements Node {
+  eventPk: Int
+  id: ID!
+  lock: Boolean!
+  maxDeviation: Decimal
+  maxExposure: Decimal
+  minDeviation: Decimal
+  minExposure: Decimal
+  projectedOwnership: Decimal
+  projectedPoints: Decimal
+  remove: Boolean!
+  selection: SelectionNode!
+  user: UserAuthorNode!
+}
+
+type UserSelectionNodeConnection {
+  edges: [UserSelectionNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserSelectionNodeEdge {
+  cursor: String!
+  node: UserSelectionNode
+}
+
+type Verify {
+  payload: GenericScalar
+}
+
+type VerifyAccount {
+  errors: ExpectedErrorType
+  success: Boolean
+}
+
+type WatchlistNode implements Node {
+  dateAdded: Date!
+  fight: FightNode!
+  id: ID!
+  user: UserAuthorNode!
+  watched: Boolean!
+}
+
+type WatchlistNodeConnection {
+  edges: [WatchlistNodeEdge]!
+  pageInfo: PageInfo!
+}
+
+type WatchlistNodeEdge {
+  cursor: String!
+  node: WatchlistNode
+}
+
+type WeightClassNode implements Node {
+  fightSet(after: String, before: String, event: ID, event_Date_Gt: Date, event_Date_Gte: Date, event_Date_Lt: Date, event_Date_Lte: Date, fighter1_LastName: String, fighter1_LastName_Icontains: String, fighter1_LastName_Istartswith: String, fighter2_LastName: String, fighter2_LastName_Icontains: String, fighter2_LastName_Istartswith: String, fightType: String, first: Int, isCancelled: Boolean, last: Int, offset: Int, order: Int, order_Gt: Int, order_Gte: Int, order_Lt: Int, order_Lte: Int): FightNodeConnection!
+  id: ID!
+  weight: Int
+  weightClass: String!
+}

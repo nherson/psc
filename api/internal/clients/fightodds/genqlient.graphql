@@ -1,0 +1,89 @@
+query EventsQuery(
+  $promotionSlug: String!
+  $dateLt: Date!
+  $dateGte: Date!
+  $after: String!
+  $first: Int!
+  $orderBy: String!
+) {
+  promotion: promotionBySlug(slug: $promotionSlug) {
+    events(
+      first: $first
+      after: $after
+      date_Gte: $dateGte
+      date_Lt: $dateLt
+      orderBy: $orderBy
+    ) {
+      edges {
+        node {
+          id
+          pk
+        }
+      }
+    }
+  }
+}
+
+query FighterQuery($id: ID!) {
+  fighter(id: $id) {
+    firstName
+    lastName
+    id
+    tapologyId
+    ufcUrl
+    ufcDebut
+  }
+}
+
+query OddsQuery($eventPk: Int!) {
+  eventOfferTable(pk: $eventPk) {
+    fightOffers {
+      edges {
+        node {
+          id
+          fighter1 {
+            firstName
+            lastName
+            id
+            tapologyId
+            ufcUrl
+            ufcDebut
+          }
+          fighter2 {
+            firstName
+            lastName
+            id
+            tapologyId
+            ufcUrl
+            ufcDebut
+          }
+          bestOdds1
+          bestOdds2
+          slug
+          propCount
+          isCancelled
+          straightOffers {
+            edges {
+              node {
+                sportsbook {
+                  id
+                  shortName
+                  slug
+                }
+                outcome1 {
+                  id
+                  odds
+                }
+                outcome2 {
+                  id
+                  odds
+                }
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
