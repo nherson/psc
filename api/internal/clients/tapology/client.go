@@ -99,7 +99,7 @@ func (c *Client) parseFightCardBout(i int, e *colly.HTMLElement) (Fight, error) 
 	return Fight{
 		Fighter1:   fighters[0],
 		Fighter2:   fighters[1],
-		BoutNumber: i,
+		BoutNumber: i + 1, // 1-index for consistency with UFC canonical data
 	}, nil
 }
 

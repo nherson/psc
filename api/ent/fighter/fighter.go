@@ -34,10 +34,14 @@ const (
 	FieldTapologyID = "tapology_id"
 	// EdgeFights holds the string denoting the fights edge name in mutations.
 	EdgeFights = "fights"
+	// EdgeUpcomingFights holds the string denoting the upcoming_fights edge name in mutations.
+	EdgeUpcomingFights = "upcoming_fights"
 	// EdgeFighterAliases holds the string denoting the fighter_aliases edge name in mutations.
 	EdgeFighterAliases = "fighter_aliases"
 	// EdgeFighterResults holds the string denoting the fighter_results edge name in mutations.
 	EdgeFighterResults = "fighter_results"
+	// EdgeUpcomingFighterOdds holds the string denoting the upcoming_fighter_odds edge name in mutations.
+	EdgeUpcomingFighterOdds = "upcoming_fighter_odds"
 	// Table holds the table name of the fighter in the database.
 	Table = "fighters"
 	// FightsTable is the table that holds the fights relation/edge. The primary key declared below.
@@ -45,6 +49,11 @@ const (
 	// FightsInverseTable is the table name for the Fight entity.
 	// It exists in this package in order to avoid circular dependency with the "fight" package.
 	FightsInverseTable = "fights"
+	// UpcomingFightsTable is the table that holds the upcoming_fights relation/edge. The primary key declared below.
+	UpcomingFightsTable = "upcoming_fighter_odds"
+	// UpcomingFightsInverseTable is the table name for the UpcomingFight entity.
+	// It exists in this package in order to avoid circular dependency with the "upcomingfight" package.
+	UpcomingFightsInverseTable = "upcoming_fights"
 	// FighterAliasesTable is the table that holds the fighter_aliases relation/edge.
 	FighterAliasesTable = "fighter_alias"
 	// FighterAliasesInverseTable is the table name for the FighterAlias entity.
@@ -59,6 +68,13 @@ const (
 	FighterResultsInverseTable = "fighter_results"
 	// FighterResultsColumn is the table column denoting the fighter_results relation/edge.
 	FighterResultsColumn = "fighter_id"
+	// UpcomingFighterOddsTable is the table that holds the upcoming_fighter_odds relation/edge.
+	UpcomingFighterOddsTable = "upcoming_fighter_odds"
+	// UpcomingFighterOddsInverseTable is the table name for the UpcomingFighterOdds entity.
+	// It exists in this package in order to avoid circular dependency with the "upcomingfighterodds" package.
+	UpcomingFighterOddsInverseTable = "upcoming_fighter_odds"
+	// UpcomingFighterOddsColumn is the table column denoting the upcoming_fighter_odds relation/edge.
+	UpcomingFighterOddsColumn = "fighter_id"
 )
 
 // Columns holds all SQL columns for fighter fields.
@@ -79,6 +95,9 @@ var (
 	// FightsPrimaryKey and FightsColumn2 are the table columns denoting the
 	// primary key for the fights relation (M2M).
 	FightsPrimaryKey = []string{"fight_id", "fighter_id"}
+	// UpcomingFightsPrimaryKey and UpcomingFightsColumn2 are the table columns denoting the
+	// primary key for the upcoming_fights relation (M2M).
+	UpcomingFightsPrimaryKey = []string{"upcoming_fight_id", "fighter_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -169,6 +188,20 @@ func ByFights(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	}
 }
 
+// ByUpcomingFightsCount orders the results by upcoming_fights count.
+func ByUpcomingFightsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUpcomingFightsStep(), opts...)
+	}
+}
+
+// ByUpcomingFights orders the results by upcoming_fights terms.
+func ByUpcomingFights(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUpcomingFightsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByFighterAliasesCount orders the results by fighter_aliases count.
 func ByFighterAliasesCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -196,11 +229,32 @@ func ByFighterResults(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newFighterResultsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByUpcomingFighterOddsCount orders the results by upcoming_fighter_odds count.
+func ByUpcomingFighterOddsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUpcomingFighterOddsStep(), opts...)
+	}
+}
+
+// ByUpcomingFighterOdds orders the results by upcoming_fighter_odds terms.
+func ByUpcomingFighterOdds(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUpcomingFighterOddsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newFightsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FightsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, FightsTable, FightsPrimaryKey...),
+	)
+}
+func newUpcomingFightsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UpcomingFightsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, UpcomingFightsTable, UpcomingFightsPrimaryKey...),
 	)
 }
 func newFighterAliasesStep() *sqlgraph.Step {
@@ -215,5 +269,12 @@ func newFighterResultsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FighterResultsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, FighterResultsTable, FighterResultsColumn),
+	)
+}
+func newUpcomingFighterOddsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UpcomingFighterOddsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, UpcomingFighterOddsTable, UpcomingFighterOddsColumn),
 	)
 }

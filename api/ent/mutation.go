@@ -19,6 +19,7 @@ import (
 	"github.com/nherson/psc/api/ent/predicate"
 	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 const (
@@ -30,13 +31,14 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeEvent          = "Event"
-	TypeFight          = "Fight"
-	TypeFighter        = "Fighter"
-	TypeFighterAlias   = "FighterAlias"
-	TypeFighterResults = "FighterResults"
-	TypeUpcomingEvent  = "UpcomingEvent"
-	TypeUpcomingFight  = "UpcomingFight"
+	TypeEvent               = "Event"
+	TypeFight               = "Fight"
+	TypeFighter             = "Fighter"
+	TypeFighterAlias        = "FighterAlias"
+	TypeFighterResults      = "FighterResults"
+	TypeUpcomingEvent       = "UpcomingEvent"
+	TypeUpcomingFight       = "UpcomingFight"
+	TypeUpcomingFighterOdds = "UpcomingFighterOdds"
 )
 
 // EventMutation represents an operation that mutates the Event nodes in the graph.
@@ -1740,32 +1742,38 @@ func (m *FightMutation) ResetEdge(name string) error {
 // FighterMutation represents an operation that mutates the Fighter nodes in the graph.
 type FighterMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *int
-	created_at             *time.Time
-	updated_at             *time.Time
-	ufc_fighter_id         *string
-	mma_id                 *int
-	addmma_id              *int
-	first_name             *string
-	last_name              *string
-	nick_name              *string
-	fightinsider_id        *string
-	tapology_id            *string
-	clearedFields          map[string]struct{}
-	fights                 map[int]struct{}
-	removedfights          map[int]struct{}
-	clearedfights          bool
-	fighter_aliases        map[int]struct{}
-	removedfighter_aliases map[int]struct{}
-	clearedfighter_aliases bool
-	fighter_results        map[int]struct{}
-	removedfighter_results map[int]struct{}
-	clearedfighter_results bool
-	done                   bool
-	oldValue               func(context.Context) (*Fighter, error)
-	predicates             []predicate.Fighter
+	op                           Op
+	typ                          string
+	id                           *int
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	ufc_fighter_id               *string
+	mma_id                       *int
+	addmma_id                    *int
+	first_name                   *string
+	last_name                    *string
+	nick_name                    *string
+	fightinsider_id              *string
+	tapology_id                  *string
+	clearedFields                map[string]struct{}
+	fights                       map[int]struct{}
+	removedfights                map[int]struct{}
+	clearedfights                bool
+	upcoming_fights              map[int]struct{}
+	removedupcoming_fights       map[int]struct{}
+	clearedupcoming_fights       bool
+	fighter_aliases              map[int]struct{}
+	removedfighter_aliases       map[int]struct{}
+	clearedfighter_aliases       bool
+	fighter_results              map[int]struct{}
+	removedfighter_results       map[int]struct{}
+	clearedfighter_results       bool
+	upcoming_fighter_odds        map[int]struct{}
+	removedupcoming_fighter_odds map[int]struct{}
+	clearedupcoming_fighter_odds bool
+	done                         bool
+	oldValue                     func(context.Context) (*Fighter, error)
+	predicates                   []predicate.Fighter
 }
 
 var _ ent.Mutation = (*FighterMutation)(nil)
@@ -2290,6 +2298,60 @@ func (m *FighterMutation) ResetFights() {
 	m.removedfights = nil
 }
 
+// AddUpcomingFightIDs adds the "upcoming_fights" edge to the UpcomingFight entity by ids.
+func (m *FighterMutation) AddUpcomingFightIDs(ids ...int) {
+	if m.upcoming_fights == nil {
+		m.upcoming_fights = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.upcoming_fights[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUpcomingFights clears the "upcoming_fights" edge to the UpcomingFight entity.
+func (m *FighterMutation) ClearUpcomingFights() {
+	m.clearedupcoming_fights = true
+}
+
+// UpcomingFightsCleared reports if the "upcoming_fights" edge to the UpcomingFight entity was cleared.
+func (m *FighterMutation) UpcomingFightsCleared() bool {
+	return m.clearedupcoming_fights
+}
+
+// RemoveUpcomingFightIDs removes the "upcoming_fights" edge to the UpcomingFight entity by IDs.
+func (m *FighterMutation) RemoveUpcomingFightIDs(ids ...int) {
+	if m.removedupcoming_fights == nil {
+		m.removedupcoming_fights = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.upcoming_fights, ids[i])
+		m.removedupcoming_fights[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUpcomingFights returns the removed IDs of the "upcoming_fights" edge to the UpcomingFight entity.
+func (m *FighterMutation) RemovedUpcomingFightsIDs() (ids []int) {
+	for id := range m.removedupcoming_fights {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UpcomingFightsIDs returns the "upcoming_fights" edge IDs in the mutation.
+func (m *FighterMutation) UpcomingFightsIDs() (ids []int) {
+	for id := range m.upcoming_fights {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUpcomingFights resets all changes to the "upcoming_fights" edge.
+func (m *FighterMutation) ResetUpcomingFights() {
+	m.upcoming_fights = nil
+	m.clearedupcoming_fights = false
+	m.removedupcoming_fights = nil
+}
+
 // AddFighterAliasIDs adds the "fighter_aliases" edge to the FighterAlias entity by ids.
 func (m *FighterMutation) AddFighterAliasIDs(ids ...int) {
 	if m.fighter_aliases == nil {
@@ -2396,6 +2458,60 @@ func (m *FighterMutation) ResetFighterResults() {
 	m.fighter_results = nil
 	m.clearedfighter_results = false
 	m.removedfighter_results = nil
+}
+
+// AddUpcomingFighterOddIDs adds the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by ids.
+func (m *FighterMutation) AddUpcomingFighterOddIDs(ids ...int) {
+	if m.upcoming_fighter_odds == nil {
+		m.upcoming_fighter_odds = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.upcoming_fighter_odds[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUpcomingFighterOdds clears the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity.
+func (m *FighterMutation) ClearUpcomingFighterOdds() {
+	m.clearedupcoming_fighter_odds = true
+}
+
+// UpcomingFighterOddsCleared reports if the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity was cleared.
+func (m *FighterMutation) UpcomingFighterOddsCleared() bool {
+	return m.clearedupcoming_fighter_odds
+}
+
+// RemoveUpcomingFighterOddIDs removes the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by IDs.
+func (m *FighterMutation) RemoveUpcomingFighterOddIDs(ids ...int) {
+	if m.removedupcoming_fighter_odds == nil {
+		m.removedupcoming_fighter_odds = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.upcoming_fighter_odds, ids[i])
+		m.removedupcoming_fighter_odds[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUpcomingFighterOdds returns the removed IDs of the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity.
+func (m *FighterMutation) RemovedUpcomingFighterOddsIDs() (ids []int) {
+	for id := range m.removedupcoming_fighter_odds {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UpcomingFighterOddsIDs returns the "upcoming_fighter_odds" edge IDs in the mutation.
+func (m *FighterMutation) UpcomingFighterOddsIDs() (ids []int) {
+	for id := range m.upcoming_fighter_odds {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUpcomingFighterOdds resets all changes to the "upcoming_fighter_odds" edge.
+func (m *FighterMutation) ResetUpcomingFighterOdds() {
+	m.upcoming_fighter_odds = nil
+	m.clearedupcoming_fighter_odds = false
+	m.removedupcoming_fighter_odds = nil
 }
 
 // Where appends a list predicates to the FighterMutation builder.
@@ -2697,15 +2813,21 @@ func (m *FighterMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FighterMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.fights != nil {
 		edges = append(edges, fighter.EdgeFights)
+	}
+	if m.upcoming_fights != nil {
+		edges = append(edges, fighter.EdgeUpcomingFights)
 	}
 	if m.fighter_aliases != nil {
 		edges = append(edges, fighter.EdgeFighterAliases)
 	}
 	if m.fighter_results != nil {
 		edges = append(edges, fighter.EdgeFighterResults)
+	}
+	if m.upcoming_fighter_odds != nil {
+		edges = append(edges, fighter.EdgeUpcomingFighterOdds)
 	}
 	return edges
 }
@@ -2717,6 +2839,12 @@ func (m *FighterMutation) AddedIDs(name string) []ent.Value {
 	case fighter.EdgeFights:
 		ids := make([]ent.Value, 0, len(m.fights))
 		for id := range m.fights {
+			ids = append(ids, id)
+		}
+		return ids
+	case fighter.EdgeUpcomingFights:
+		ids := make([]ent.Value, 0, len(m.upcoming_fights))
+		for id := range m.upcoming_fights {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2732,21 +2860,33 @@ func (m *FighterMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case fighter.EdgeUpcomingFighterOdds:
+		ids := make([]ent.Value, 0, len(m.upcoming_fighter_odds))
+		for id := range m.upcoming_fighter_odds {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FighterMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.removedfights != nil {
 		edges = append(edges, fighter.EdgeFights)
+	}
+	if m.removedupcoming_fights != nil {
+		edges = append(edges, fighter.EdgeUpcomingFights)
 	}
 	if m.removedfighter_aliases != nil {
 		edges = append(edges, fighter.EdgeFighterAliases)
 	}
 	if m.removedfighter_results != nil {
 		edges = append(edges, fighter.EdgeFighterResults)
+	}
+	if m.removedupcoming_fighter_odds != nil {
+		edges = append(edges, fighter.EdgeUpcomingFighterOdds)
 	}
 	return edges
 }
@@ -2758,6 +2898,12 @@ func (m *FighterMutation) RemovedIDs(name string) []ent.Value {
 	case fighter.EdgeFights:
 		ids := make([]ent.Value, 0, len(m.removedfights))
 		for id := range m.removedfights {
+			ids = append(ids, id)
+		}
+		return ids
+	case fighter.EdgeUpcomingFights:
+		ids := make([]ent.Value, 0, len(m.removedupcoming_fights))
+		for id := range m.removedupcoming_fights {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2773,21 +2919,33 @@ func (m *FighterMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case fighter.EdgeUpcomingFighterOdds:
+		ids := make([]ent.Value, 0, len(m.removedupcoming_fighter_odds))
+		for id := range m.removedupcoming_fighter_odds {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FighterMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.clearedfights {
 		edges = append(edges, fighter.EdgeFights)
+	}
+	if m.clearedupcoming_fights {
+		edges = append(edges, fighter.EdgeUpcomingFights)
 	}
 	if m.clearedfighter_aliases {
 		edges = append(edges, fighter.EdgeFighterAliases)
 	}
 	if m.clearedfighter_results {
 		edges = append(edges, fighter.EdgeFighterResults)
+	}
+	if m.clearedupcoming_fighter_odds {
+		edges = append(edges, fighter.EdgeUpcomingFighterOdds)
 	}
 	return edges
 }
@@ -2798,10 +2956,14 @@ func (m *FighterMutation) EdgeCleared(name string) bool {
 	switch name {
 	case fighter.EdgeFights:
 		return m.clearedfights
+	case fighter.EdgeUpcomingFights:
+		return m.clearedupcoming_fights
 	case fighter.EdgeFighterAliases:
 		return m.clearedfighter_aliases
 	case fighter.EdgeFighterResults:
 		return m.clearedfighter_results
+	case fighter.EdgeUpcomingFighterOdds:
+		return m.clearedupcoming_fighter_odds
 	}
 	return false
 }
@@ -2821,11 +2983,17 @@ func (m *FighterMutation) ResetEdge(name string) error {
 	case fighter.EdgeFights:
 		m.ResetFights()
 		return nil
+	case fighter.EdgeUpcomingFights:
+		m.ResetUpcomingFights()
+		return nil
 	case fighter.EdgeFighterAliases:
 		m.ResetFighterAliases()
 		return nil
 	case fighter.EdgeFighterResults:
 		m.ResetFighterResults()
+		return nil
+	case fighter.EdgeUpcomingFighterOdds:
+		m.ResetUpcomingFighterOdds()
 		return nil
 	}
 	return fmt.Errorf("unknown Fighter edge %s", name)
@@ -4564,15 +4732,21 @@ func (m *FighterResultsMutation) ResetEdge(name string) error {
 // UpcomingEventMutation represents an operation that mutates the UpcomingEvent nodes in the graph.
 type UpcomingEventMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*UpcomingEvent, error)
-	predicates    []predicate.UpcomingEvent
+	op                     Op
+	typ                    string
+	id                     *int
+	created_at             *time.Time
+	updated_at             *time.Time
+	tapology_id            *string
+	name                   *string
+	date                   *time.Time
+	clearedFields          map[string]struct{}
+	upcoming_fights        map[int]struct{}
+	removedupcoming_fights map[int]struct{}
+	clearedupcoming_fights bool
+	done                   bool
+	oldValue               func(context.Context) (*UpcomingEvent, error)
+	predicates             []predicate.UpcomingEvent
 }
 
 var _ ent.Mutation = (*UpcomingEventMutation)(nil)
@@ -4745,6 +4919,168 @@ func (m *UpcomingEventMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetTapologyID sets the "tapology_id" field.
+func (m *UpcomingEventMutation) SetTapologyID(s string) {
+	m.tapology_id = &s
+}
+
+// TapologyID returns the value of the "tapology_id" field in the mutation.
+func (m *UpcomingEventMutation) TapologyID() (r string, exists bool) {
+	v := m.tapology_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTapologyID returns the old "tapology_id" field's value of the UpcomingEvent entity.
+// If the UpcomingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingEventMutation) OldTapologyID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTapologyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTapologyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTapologyID: %w", err)
+	}
+	return oldValue.TapologyID, nil
+}
+
+// ResetTapologyID resets all changes to the "tapology_id" field.
+func (m *UpcomingEventMutation) ResetTapologyID() {
+	m.tapology_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *UpcomingEventMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *UpcomingEventMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the UpcomingEvent entity.
+// If the UpcomingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingEventMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *UpcomingEventMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDate sets the "date" field.
+func (m *UpcomingEventMutation) SetDate(t time.Time) {
+	m.date = &t
+}
+
+// Date returns the value of the "date" field in the mutation.
+func (m *UpcomingEventMutation) Date() (r time.Time, exists bool) {
+	v := m.date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDate returns the old "date" field's value of the UpcomingEvent entity.
+// If the UpcomingEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingEventMutation) OldDate(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDate: %w", err)
+	}
+	return oldValue.Date, nil
+}
+
+// ResetDate resets all changes to the "date" field.
+func (m *UpcomingEventMutation) ResetDate() {
+	m.date = nil
+}
+
+// AddUpcomingFightIDs adds the "upcoming_fights" edge to the UpcomingFight entity by ids.
+func (m *UpcomingEventMutation) AddUpcomingFightIDs(ids ...int) {
+	if m.upcoming_fights == nil {
+		m.upcoming_fights = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.upcoming_fights[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUpcomingFights clears the "upcoming_fights" edge to the UpcomingFight entity.
+func (m *UpcomingEventMutation) ClearUpcomingFights() {
+	m.clearedupcoming_fights = true
+}
+
+// UpcomingFightsCleared reports if the "upcoming_fights" edge to the UpcomingFight entity was cleared.
+func (m *UpcomingEventMutation) UpcomingFightsCleared() bool {
+	return m.clearedupcoming_fights
+}
+
+// RemoveUpcomingFightIDs removes the "upcoming_fights" edge to the UpcomingFight entity by IDs.
+func (m *UpcomingEventMutation) RemoveUpcomingFightIDs(ids ...int) {
+	if m.removedupcoming_fights == nil {
+		m.removedupcoming_fights = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.upcoming_fights, ids[i])
+		m.removedupcoming_fights[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUpcomingFights returns the removed IDs of the "upcoming_fights" edge to the UpcomingFight entity.
+func (m *UpcomingEventMutation) RemovedUpcomingFightsIDs() (ids []int) {
+	for id := range m.removedupcoming_fights {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UpcomingFightsIDs returns the "upcoming_fights" edge IDs in the mutation.
+func (m *UpcomingEventMutation) UpcomingFightsIDs() (ids []int) {
+	for id := range m.upcoming_fights {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUpcomingFights resets all changes to the "upcoming_fights" edge.
+func (m *UpcomingEventMutation) ResetUpcomingFights() {
+	m.upcoming_fights = nil
+	m.clearedupcoming_fights = false
+	m.removedupcoming_fights = nil
+}
+
 // Where appends a list predicates to the UpcomingEventMutation builder.
 func (m *UpcomingEventMutation) Where(ps ...predicate.UpcomingEvent) {
 	m.predicates = append(m.predicates, ps...)
@@ -4779,12 +5115,21 @@ func (m *UpcomingEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UpcomingEventMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, upcomingevent.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, upcomingevent.FieldUpdatedAt)
+	}
+	if m.tapology_id != nil {
+		fields = append(fields, upcomingevent.FieldTapologyID)
+	}
+	if m.name != nil {
+		fields = append(fields, upcomingevent.FieldName)
+	}
+	if m.date != nil {
+		fields = append(fields, upcomingevent.FieldDate)
 	}
 	return fields
 }
@@ -4798,6 +5143,12 @@ func (m *UpcomingEventMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case upcomingevent.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case upcomingevent.FieldTapologyID:
+		return m.TapologyID()
+	case upcomingevent.FieldName:
+		return m.Name()
+	case upcomingevent.FieldDate:
+		return m.Date()
 	}
 	return nil, false
 }
@@ -4811,6 +5162,12 @@ func (m *UpcomingEventMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCreatedAt(ctx)
 	case upcomingevent.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case upcomingevent.FieldTapologyID:
+		return m.OldTapologyID(ctx)
+	case upcomingevent.FieldName:
+		return m.OldName(ctx)
+	case upcomingevent.FieldDate:
+		return m.OldDate(ctx)
 	}
 	return nil, fmt.Errorf("unknown UpcomingEvent field %s", name)
 }
@@ -4833,6 +5190,27 @@ func (m *UpcomingEventMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case upcomingevent.FieldTapologyID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTapologyID(v)
+		return nil
+	case upcomingevent.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case upcomingevent.FieldDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDate(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UpcomingEvent field %s", name)
@@ -4889,70 +5267,125 @@ func (m *UpcomingEventMutation) ResetField(name string) error {
 	case upcomingevent.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case upcomingevent.FieldTapologyID:
+		m.ResetTapologyID()
+		return nil
+	case upcomingevent.FieldName:
+		m.ResetName()
+		return nil
+	case upcomingevent.FieldDate:
+		m.ResetDate()
+		return nil
 	}
 	return fmt.Errorf("unknown UpcomingEvent field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UpcomingEventMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.upcoming_fights != nil {
+		edges = append(edges, upcomingevent.EdgeUpcomingFights)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UpcomingEventMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case upcomingevent.EdgeUpcomingFights:
+		ids := make([]ent.Value, 0, len(m.upcoming_fights))
+		for id := range m.upcoming_fights {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UpcomingEventMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedupcoming_fights != nil {
+		edges = append(edges, upcomingevent.EdgeUpcomingFights)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UpcomingEventMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case upcomingevent.EdgeUpcomingFights:
+		ids := make([]ent.Value, 0, len(m.removedupcoming_fights))
+		for id := range m.removedupcoming_fights {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UpcomingEventMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedupcoming_fights {
+		edges = append(edges, upcomingevent.EdgeUpcomingFights)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UpcomingEventMutation) EdgeCleared(name string) bool {
+	switch name {
+	case upcomingevent.EdgeUpcomingFights:
+		return m.clearedupcoming_fights
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UpcomingEventMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown UpcomingEvent unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UpcomingEventMutation) ResetEdge(name string) error {
+	switch name {
+	case upcomingevent.EdgeUpcomingFights:
+		m.ResetUpcomingFights()
+		return nil
+	}
 	return fmt.Errorf("unknown UpcomingEvent edge %s", name)
 }
 
 // UpcomingFightMutation represents an operation that mutates the UpcomingFight nodes in the graph.
 type UpcomingFightMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*UpcomingFight, error)
-	predicates    []predicate.UpcomingFight
+	op                           Op
+	typ                          string
+	id                           *int
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	card_order                   *int
+	addcard_order                *int
+	clearedFields                map[string]struct{}
+	upcoming_event               *int
+	clearedupcoming_event        bool
+	fighters                     map[int]struct{}
+	removedfighters              map[int]struct{}
+	clearedfighters              bool
+	upcoming_fighter_odds        map[int]struct{}
+	removedupcoming_fighter_odds map[int]struct{}
+	clearedupcoming_fighter_odds bool
+	done                         bool
+	oldValue                     func(context.Context) (*UpcomingFight, error)
+	predicates                   []predicate.UpcomingFight
 }
 
 var _ ent.Mutation = (*UpcomingFightMutation)(nil)
@@ -5125,6 +5558,209 @@ func (m *UpcomingFightMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetCardOrder sets the "card_order" field.
+func (m *UpcomingFightMutation) SetCardOrder(i int) {
+	m.card_order = &i
+	m.addcard_order = nil
+}
+
+// CardOrder returns the value of the "card_order" field in the mutation.
+func (m *UpcomingFightMutation) CardOrder() (r int, exists bool) {
+	v := m.card_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCardOrder returns the old "card_order" field's value of the UpcomingFight entity.
+// If the UpcomingFight object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingFightMutation) OldCardOrder(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCardOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCardOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCardOrder: %w", err)
+	}
+	return oldValue.CardOrder, nil
+}
+
+// AddCardOrder adds i to the "card_order" field.
+func (m *UpcomingFightMutation) AddCardOrder(i int) {
+	if m.addcard_order != nil {
+		*m.addcard_order += i
+	} else {
+		m.addcard_order = &i
+	}
+}
+
+// AddedCardOrder returns the value that was added to the "card_order" field in this mutation.
+func (m *UpcomingFightMutation) AddedCardOrder() (r int, exists bool) {
+	v := m.addcard_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCardOrder resets all changes to the "card_order" field.
+func (m *UpcomingFightMutation) ResetCardOrder() {
+	m.card_order = nil
+	m.addcard_order = nil
+}
+
+// SetUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by id.
+func (m *UpcomingFightMutation) SetUpcomingEventID(id int) {
+	m.upcoming_event = &id
+}
+
+// ClearUpcomingEvent clears the "upcoming_event" edge to the UpcomingEvent entity.
+func (m *UpcomingFightMutation) ClearUpcomingEvent() {
+	m.clearedupcoming_event = true
+}
+
+// UpcomingEventCleared reports if the "upcoming_event" edge to the UpcomingEvent entity was cleared.
+func (m *UpcomingFightMutation) UpcomingEventCleared() bool {
+	return m.clearedupcoming_event
+}
+
+// UpcomingEventID returns the "upcoming_event" edge ID in the mutation.
+func (m *UpcomingFightMutation) UpcomingEventID() (id int, exists bool) {
+	if m.upcoming_event != nil {
+		return *m.upcoming_event, true
+	}
+	return
+}
+
+// UpcomingEventIDs returns the "upcoming_event" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UpcomingEventID instead. It exists only for internal usage by the builders.
+func (m *UpcomingFightMutation) UpcomingEventIDs() (ids []int) {
+	if id := m.upcoming_event; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUpcomingEvent resets all changes to the "upcoming_event" edge.
+func (m *UpcomingFightMutation) ResetUpcomingEvent() {
+	m.upcoming_event = nil
+	m.clearedupcoming_event = false
+}
+
+// AddFighterIDs adds the "fighters" edge to the Fighter entity by ids.
+func (m *UpcomingFightMutation) AddFighterIDs(ids ...int) {
+	if m.fighters == nil {
+		m.fighters = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.fighters[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFighters clears the "fighters" edge to the Fighter entity.
+func (m *UpcomingFightMutation) ClearFighters() {
+	m.clearedfighters = true
+}
+
+// FightersCleared reports if the "fighters" edge to the Fighter entity was cleared.
+func (m *UpcomingFightMutation) FightersCleared() bool {
+	return m.clearedfighters
+}
+
+// RemoveFighterIDs removes the "fighters" edge to the Fighter entity by IDs.
+func (m *UpcomingFightMutation) RemoveFighterIDs(ids ...int) {
+	if m.removedfighters == nil {
+		m.removedfighters = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.fighters, ids[i])
+		m.removedfighters[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFighters returns the removed IDs of the "fighters" edge to the Fighter entity.
+func (m *UpcomingFightMutation) RemovedFightersIDs() (ids []int) {
+	for id := range m.removedfighters {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FightersIDs returns the "fighters" edge IDs in the mutation.
+func (m *UpcomingFightMutation) FightersIDs() (ids []int) {
+	for id := range m.fighters {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFighters resets all changes to the "fighters" edge.
+func (m *UpcomingFightMutation) ResetFighters() {
+	m.fighters = nil
+	m.clearedfighters = false
+	m.removedfighters = nil
+}
+
+// AddUpcomingFighterOddIDs adds the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by ids.
+func (m *UpcomingFightMutation) AddUpcomingFighterOddIDs(ids ...int) {
+	if m.upcoming_fighter_odds == nil {
+		m.upcoming_fighter_odds = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.upcoming_fighter_odds[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUpcomingFighterOdds clears the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity.
+func (m *UpcomingFightMutation) ClearUpcomingFighterOdds() {
+	m.clearedupcoming_fighter_odds = true
+}
+
+// UpcomingFighterOddsCleared reports if the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity was cleared.
+func (m *UpcomingFightMutation) UpcomingFighterOddsCleared() bool {
+	return m.clearedupcoming_fighter_odds
+}
+
+// RemoveUpcomingFighterOddIDs removes the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by IDs.
+func (m *UpcomingFightMutation) RemoveUpcomingFighterOddIDs(ids ...int) {
+	if m.removedupcoming_fighter_odds == nil {
+		m.removedupcoming_fighter_odds = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.upcoming_fighter_odds, ids[i])
+		m.removedupcoming_fighter_odds[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUpcomingFighterOdds returns the removed IDs of the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity.
+func (m *UpcomingFightMutation) RemovedUpcomingFighterOddsIDs() (ids []int) {
+	for id := range m.removedupcoming_fighter_odds {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UpcomingFighterOddsIDs returns the "upcoming_fighter_odds" edge IDs in the mutation.
+func (m *UpcomingFightMutation) UpcomingFighterOddsIDs() (ids []int) {
+	for id := range m.upcoming_fighter_odds {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUpcomingFighterOdds resets all changes to the "upcoming_fighter_odds" edge.
+func (m *UpcomingFightMutation) ResetUpcomingFighterOdds() {
+	m.upcoming_fighter_odds = nil
+	m.clearedupcoming_fighter_odds = false
+	m.removedupcoming_fighter_odds = nil
+}
+
 // Where appends a list predicates to the UpcomingFightMutation builder.
 func (m *UpcomingFightMutation) Where(ps ...predicate.UpcomingFight) {
 	m.predicates = append(m.predicates, ps...)
@@ -5159,12 +5795,15 @@ func (m *UpcomingFightMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UpcomingFightMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.created_at != nil {
 		fields = append(fields, upcomingfight.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, upcomingfight.FieldUpdatedAt)
+	}
+	if m.card_order != nil {
+		fields = append(fields, upcomingfight.FieldCardOrder)
 	}
 	return fields
 }
@@ -5178,6 +5817,8 @@ func (m *UpcomingFightMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case upcomingfight.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case upcomingfight.FieldCardOrder:
+		return m.CardOrder()
 	}
 	return nil, false
 }
@@ -5191,6 +5832,8 @@ func (m *UpcomingFightMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCreatedAt(ctx)
 	case upcomingfight.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case upcomingfight.FieldCardOrder:
+		return m.OldCardOrder(ctx)
 	}
 	return nil, fmt.Errorf("unknown UpcomingFight field %s", name)
 }
@@ -5214,6 +5857,13 @@ func (m *UpcomingFightMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
+	case upcomingfight.FieldCardOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCardOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown UpcomingFight field %s", name)
 }
@@ -5221,13 +5871,21 @@ func (m *UpcomingFightMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UpcomingFightMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcard_order != nil {
+		fields = append(fields, upcomingfight.FieldCardOrder)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UpcomingFightMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case upcomingfight.FieldCardOrder:
+		return m.AddedCardOrder()
+	}
 	return nil, false
 }
 
@@ -5236,6 +5894,13 @@ func (m *UpcomingFightMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UpcomingFightMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case upcomingfight.FieldCardOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCardOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown UpcomingFight numeric field %s", name)
 }
@@ -5269,54 +5934,782 @@ func (m *UpcomingFightMutation) ResetField(name string) error {
 	case upcomingfight.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case upcomingfight.FieldCardOrder:
+		m.ResetCardOrder()
+		return nil
 	}
 	return fmt.Errorf("unknown UpcomingFight field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UpcomingFightMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 3)
+	if m.upcoming_event != nil {
+		edges = append(edges, upcomingfight.EdgeUpcomingEvent)
+	}
+	if m.fighters != nil {
+		edges = append(edges, upcomingfight.EdgeFighters)
+	}
+	if m.upcoming_fighter_odds != nil {
+		edges = append(edges, upcomingfight.EdgeUpcomingFighterOdds)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UpcomingFightMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case upcomingfight.EdgeUpcomingEvent:
+		if id := m.upcoming_event; id != nil {
+			return []ent.Value{*id}
+		}
+	case upcomingfight.EdgeFighters:
+		ids := make([]ent.Value, 0, len(m.fighters))
+		for id := range m.fighters {
+			ids = append(ids, id)
+		}
+		return ids
+	case upcomingfight.EdgeUpcomingFighterOdds:
+		ids := make([]ent.Value, 0, len(m.upcoming_fighter_odds))
+		for id := range m.upcoming_fighter_odds {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UpcomingFightMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 3)
+	if m.removedfighters != nil {
+		edges = append(edges, upcomingfight.EdgeFighters)
+	}
+	if m.removedupcoming_fighter_odds != nil {
+		edges = append(edges, upcomingfight.EdgeUpcomingFighterOdds)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UpcomingFightMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case upcomingfight.EdgeFighters:
+		ids := make([]ent.Value, 0, len(m.removedfighters))
+		for id := range m.removedfighters {
+			ids = append(ids, id)
+		}
+		return ids
+	case upcomingfight.EdgeUpcomingFighterOdds:
+		ids := make([]ent.Value, 0, len(m.removedupcoming_fighter_odds))
+		for id := range m.removedupcoming_fighter_odds {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UpcomingFightMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 3)
+	if m.clearedupcoming_event {
+		edges = append(edges, upcomingfight.EdgeUpcomingEvent)
+	}
+	if m.clearedfighters {
+		edges = append(edges, upcomingfight.EdgeFighters)
+	}
+	if m.clearedupcoming_fighter_odds {
+		edges = append(edges, upcomingfight.EdgeUpcomingFighterOdds)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UpcomingFightMutation) EdgeCleared(name string) bool {
+	switch name {
+	case upcomingfight.EdgeUpcomingEvent:
+		return m.clearedupcoming_event
+	case upcomingfight.EdgeFighters:
+		return m.clearedfighters
+	case upcomingfight.EdgeUpcomingFighterOdds:
+		return m.clearedupcoming_fighter_odds
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UpcomingFightMutation) ClearEdge(name string) error {
+	switch name {
+	case upcomingfight.EdgeUpcomingEvent:
+		m.ClearUpcomingEvent()
+		return nil
+	}
 	return fmt.Errorf("unknown UpcomingFight unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UpcomingFightMutation) ResetEdge(name string) error {
+	switch name {
+	case upcomingfight.EdgeUpcomingEvent:
+		m.ResetUpcomingEvent()
+		return nil
+	case upcomingfight.EdgeFighters:
+		m.ResetFighters()
+		return nil
+	case upcomingfight.EdgeUpcomingFighterOdds:
+		m.ResetUpcomingFighterOdds()
+		return nil
+	}
 	return fmt.Errorf("unknown UpcomingFight edge %s", name)
+}
+
+// UpcomingFighterOddsMutation represents an operation that mutates the UpcomingFighterOdds nodes in the graph.
+type UpcomingFighterOddsMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *int
+	best_odds             *int
+	addbest_odds          *int
+	corner                *upcomingfighterodds.Corner
+	clearedFields         map[string]struct{}
+	fighter               *int
+	clearedfighter        bool
+	upcoming_fight        *int
+	clearedupcoming_fight bool
+	done                  bool
+	oldValue              func(context.Context) (*UpcomingFighterOdds, error)
+	predicates            []predicate.UpcomingFighterOdds
+}
+
+var _ ent.Mutation = (*UpcomingFighterOddsMutation)(nil)
+
+// upcomingfighteroddsOption allows management of the mutation configuration using functional options.
+type upcomingfighteroddsOption func(*UpcomingFighterOddsMutation)
+
+// newUpcomingFighterOddsMutation creates new mutation for the UpcomingFighterOdds entity.
+func newUpcomingFighterOddsMutation(c config, op Op, opts ...upcomingfighteroddsOption) *UpcomingFighterOddsMutation {
+	m := &UpcomingFighterOddsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUpcomingFighterOdds,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUpcomingFighterOddsID sets the ID field of the mutation.
+func withUpcomingFighterOddsID(id int) upcomingfighteroddsOption {
+	return func(m *UpcomingFighterOddsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *UpcomingFighterOdds
+		)
+		m.oldValue = func(ctx context.Context) (*UpcomingFighterOdds, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().UpcomingFighterOdds.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUpcomingFighterOdds sets the old UpcomingFighterOdds of the mutation.
+func withUpcomingFighterOdds(node *UpcomingFighterOdds) upcomingfighteroddsOption {
+	return func(m *UpcomingFighterOddsMutation) {
+		m.oldValue = func(context.Context) (*UpcomingFighterOdds, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UpcomingFighterOddsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UpcomingFighterOddsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UpcomingFighterOddsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UpcomingFighterOddsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().UpcomingFighterOdds.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFighterID sets the "fighter_id" field.
+func (m *UpcomingFighterOddsMutation) SetFighterID(i int) {
+	m.fighter = &i
+}
+
+// FighterID returns the value of the "fighter_id" field in the mutation.
+func (m *UpcomingFighterOddsMutation) FighterID() (r int, exists bool) {
+	v := m.fighter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFighterID returns the old "fighter_id" field's value of the UpcomingFighterOdds entity.
+// If the UpcomingFighterOdds object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingFighterOddsMutation) OldFighterID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFighterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFighterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFighterID: %w", err)
+	}
+	return oldValue.FighterID, nil
+}
+
+// ResetFighterID resets all changes to the "fighter_id" field.
+func (m *UpcomingFighterOddsMutation) ResetFighterID() {
+	m.fighter = nil
+}
+
+// SetUpcomingFightID sets the "upcoming_fight_id" field.
+func (m *UpcomingFighterOddsMutation) SetUpcomingFightID(i int) {
+	m.upcoming_fight = &i
+}
+
+// UpcomingFightID returns the value of the "upcoming_fight_id" field in the mutation.
+func (m *UpcomingFighterOddsMutation) UpcomingFightID() (r int, exists bool) {
+	v := m.upcoming_fight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpcomingFightID returns the old "upcoming_fight_id" field's value of the UpcomingFighterOdds entity.
+// If the UpcomingFighterOdds object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingFighterOddsMutation) OldUpcomingFightID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpcomingFightID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpcomingFightID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpcomingFightID: %w", err)
+	}
+	return oldValue.UpcomingFightID, nil
+}
+
+// ResetUpcomingFightID resets all changes to the "upcoming_fight_id" field.
+func (m *UpcomingFighterOddsMutation) ResetUpcomingFightID() {
+	m.upcoming_fight = nil
+}
+
+// SetBestOdds sets the "best_odds" field.
+func (m *UpcomingFighterOddsMutation) SetBestOdds(i int) {
+	m.best_odds = &i
+	m.addbest_odds = nil
+}
+
+// BestOdds returns the value of the "best_odds" field in the mutation.
+func (m *UpcomingFighterOddsMutation) BestOdds() (r int, exists bool) {
+	v := m.best_odds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBestOdds returns the old "best_odds" field's value of the UpcomingFighterOdds entity.
+// If the UpcomingFighterOdds object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingFighterOddsMutation) OldBestOdds(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBestOdds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBestOdds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBestOdds: %w", err)
+	}
+	return oldValue.BestOdds, nil
+}
+
+// AddBestOdds adds i to the "best_odds" field.
+func (m *UpcomingFighterOddsMutation) AddBestOdds(i int) {
+	if m.addbest_odds != nil {
+		*m.addbest_odds += i
+	} else {
+		m.addbest_odds = &i
+	}
+}
+
+// AddedBestOdds returns the value that was added to the "best_odds" field in this mutation.
+func (m *UpcomingFighterOddsMutation) AddedBestOdds() (r int, exists bool) {
+	v := m.addbest_odds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearBestOdds clears the value of the "best_odds" field.
+func (m *UpcomingFighterOddsMutation) ClearBestOdds() {
+	m.best_odds = nil
+	m.addbest_odds = nil
+	m.clearedFields[upcomingfighterodds.FieldBestOdds] = struct{}{}
+}
+
+// BestOddsCleared returns if the "best_odds" field was cleared in this mutation.
+func (m *UpcomingFighterOddsMutation) BestOddsCleared() bool {
+	_, ok := m.clearedFields[upcomingfighterodds.FieldBestOdds]
+	return ok
+}
+
+// ResetBestOdds resets all changes to the "best_odds" field.
+func (m *UpcomingFighterOddsMutation) ResetBestOdds() {
+	m.best_odds = nil
+	m.addbest_odds = nil
+	delete(m.clearedFields, upcomingfighterodds.FieldBestOdds)
+}
+
+// SetCorner sets the "corner" field.
+func (m *UpcomingFighterOddsMutation) SetCorner(u upcomingfighterodds.Corner) {
+	m.corner = &u
+}
+
+// Corner returns the value of the "corner" field in the mutation.
+func (m *UpcomingFighterOddsMutation) Corner() (r upcomingfighterodds.Corner, exists bool) {
+	v := m.corner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCorner returns the old "corner" field's value of the UpcomingFighterOdds entity.
+// If the UpcomingFighterOdds object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UpcomingFighterOddsMutation) OldCorner(ctx context.Context) (v upcomingfighterodds.Corner, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCorner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCorner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCorner: %w", err)
+	}
+	return oldValue.Corner, nil
+}
+
+// ResetCorner resets all changes to the "corner" field.
+func (m *UpcomingFighterOddsMutation) ResetCorner() {
+	m.corner = nil
+}
+
+// ClearFighter clears the "fighter" edge to the Fighter entity.
+func (m *UpcomingFighterOddsMutation) ClearFighter() {
+	m.clearedfighter = true
+}
+
+// FighterCleared reports if the "fighter" edge to the Fighter entity was cleared.
+func (m *UpcomingFighterOddsMutation) FighterCleared() bool {
+	return m.clearedfighter
+}
+
+// FighterIDs returns the "fighter" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FighterID instead. It exists only for internal usage by the builders.
+func (m *UpcomingFighterOddsMutation) FighterIDs() (ids []int) {
+	if id := m.fighter; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFighter resets all changes to the "fighter" edge.
+func (m *UpcomingFighterOddsMutation) ResetFighter() {
+	m.fighter = nil
+	m.clearedfighter = false
+}
+
+// ClearUpcomingFight clears the "upcoming_fight" edge to the UpcomingFight entity.
+func (m *UpcomingFighterOddsMutation) ClearUpcomingFight() {
+	m.clearedupcoming_fight = true
+}
+
+// UpcomingFightCleared reports if the "upcoming_fight" edge to the UpcomingFight entity was cleared.
+func (m *UpcomingFighterOddsMutation) UpcomingFightCleared() bool {
+	return m.clearedupcoming_fight
+}
+
+// UpcomingFightIDs returns the "upcoming_fight" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UpcomingFightID instead. It exists only for internal usage by the builders.
+func (m *UpcomingFighterOddsMutation) UpcomingFightIDs() (ids []int) {
+	if id := m.upcoming_fight; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUpcomingFight resets all changes to the "upcoming_fight" edge.
+func (m *UpcomingFighterOddsMutation) ResetUpcomingFight() {
+	m.upcoming_fight = nil
+	m.clearedupcoming_fight = false
+}
+
+// Where appends a list predicates to the UpcomingFighterOddsMutation builder.
+func (m *UpcomingFighterOddsMutation) Where(ps ...predicate.UpcomingFighterOdds) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UpcomingFighterOddsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UpcomingFighterOddsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.UpcomingFighterOdds, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *UpcomingFighterOddsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UpcomingFighterOddsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (UpcomingFighterOdds).
+func (m *UpcomingFighterOddsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *UpcomingFighterOddsMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.fighter != nil {
+		fields = append(fields, upcomingfighterodds.FieldFighterID)
+	}
+	if m.upcoming_fight != nil {
+		fields = append(fields, upcomingfighterodds.FieldUpcomingFightID)
+	}
+	if m.best_odds != nil {
+		fields = append(fields, upcomingfighterodds.FieldBestOdds)
+	}
+	if m.corner != nil {
+		fields = append(fields, upcomingfighterodds.FieldCorner)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *UpcomingFighterOddsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case upcomingfighterodds.FieldFighterID:
+		return m.FighterID()
+	case upcomingfighterodds.FieldUpcomingFightID:
+		return m.UpcomingFightID()
+	case upcomingfighterodds.FieldBestOdds:
+		return m.BestOdds()
+	case upcomingfighterodds.FieldCorner:
+		return m.Corner()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *UpcomingFighterOddsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case upcomingfighterodds.FieldFighterID:
+		return m.OldFighterID(ctx)
+	case upcomingfighterodds.FieldUpcomingFightID:
+		return m.OldUpcomingFightID(ctx)
+	case upcomingfighterodds.FieldBestOdds:
+		return m.OldBestOdds(ctx)
+	case upcomingfighterodds.FieldCorner:
+		return m.OldCorner(ctx)
+	}
+	return nil, fmt.Errorf("unknown UpcomingFighterOdds field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UpcomingFighterOddsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case upcomingfighterodds.FieldFighterID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFighterID(v)
+		return nil
+	case upcomingfighterodds.FieldUpcomingFightID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpcomingFightID(v)
+		return nil
+	case upcomingfighterodds.FieldBestOdds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBestOdds(v)
+		return nil
+	case upcomingfighterodds.FieldCorner:
+		v, ok := value.(upcomingfighterodds.Corner)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCorner(v)
+		return nil
+	}
+	return fmt.Errorf("unknown UpcomingFighterOdds field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *UpcomingFighterOddsMutation) AddedFields() []string {
+	var fields []string
+	if m.addbest_odds != nil {
+		fields = append(fields, upcomingfighterodds.FieldBestOdds)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *UpcomingFighterOddsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case upcomingfighterodds.FieldBestOdds:
+		return m.AddedBestOdds()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UpcomingFighterOddsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case upcomingfighterodds.FieldBestOdds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBestOdds(v)
+		return nil
+	}
+	return fmt.Errorf("unknown UpcomingFighterOdds numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *UpcomingFighterOddsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(upcomingfighterodds.FieldBestOdds) {
+		fields = append(fields, upcomingfighterodds.FieldBestOdds)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *UpcomingFighterOddsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *UpcomingFighterOddsMutation) ClearField(name string) error {
+	switch name {
+	case upcomingfighterodds.FieldBestOdds:
+		m.ClearBestOdds()
+		return nil
+	}
+	return fmt.Errorf("unknown UpcomingFighterOdds nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *UpcomingFighterOddsMutation) ResetField(name string) error {
+	switch name {
+	case upcomingfighterodds.FieldFighterID:
+		m.ResetFighterID()
+		return nil
+	case upcomingfighterodds.FieldUpcomingFightID:
+		m.ResetUpcomingFightID()
+		return nil
+	case upcomingfighterodds.FieldBestOdds:
+		m.ResetBestOdds()
+		return nil
+	case upcomingfighterodds.FieldCorner:
+		m.ResetCorner()
+		return nil
+	}
+	return fmt.Errorf("unknown UpcomingFighterOdds field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *UpcomingFighterOddsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.fighter != nil {
+		edges = append(edges, upcomingfighterodds.EdgeFighter)
+	}
+	if m.upcoming_fight != nil {
+		edges = append(edges, upcomingfighterodds.EdgeUpcomingFight)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *UpcomingFighterOddsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case upcomingfighterodds.EdgeFighter:
+		if id := m.fighter; id != nil {
+			return []ent.Value{*id}
+		}
+	case upcomingfighterodds.EdgeUpcomingFight:
+		if id := m.upcoming_fight; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *UpcomingFighterOddsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *UpcomingFighterOddsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *UpcomingFighterOddsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedfighter {
+		edges = append(edges, upcomingfighterodds.EdgeFighter)
+	}
+	if m.clearedupcoming_fight {
+		edges = append(edges, upcomingfighterodds.EdgeUpcomingFight)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *UpcomingFighterOddsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case upcomingfighterodds.EdgeFighter:
+		return m.clearedfighter
+	case upcomingfighterodds.EdgeUpcomingFight:
+		return m.clearedupcoming_fight
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *UpcomingFighterOddsMutation) ClearEdge(name string) error {
+	switch name {
+	case upcomingfighterodds.EdgeFighter:
+		m.ClearFighter()
+		return nil
+	case upcomingfighterodds.EdgeUpcomingFight:
+		m.ClearUpcomingFight()
+		return nil
+	}
+	return fmt.Errorf("unknown UpcomingFighterOdds unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *UpcomingFighterOddsMutation) ResetEdge(name string) error {
+	switch name {
+	case upcomingfighterodds.EdgeFighter:
+		m.ResetFighter()
+		return nil
+	case upcomingfighterodds.EdgeUpcomingFight:
+		m.ResetUpcomingFight()
+		return nil
+	}
+	return fmt.Errorf("unknown UpcomingFighterOdds edge %s", name)
 }

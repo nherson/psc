@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,15 +13,17 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/predicate"
 	"github.com/nherson/psc/api/ent/upcomingevent"
+	"github.com/nherson/psc/api/ent/upcomingfight"
 )
 
 // UpcomingEventQuery is the builder for querying UpcomingEvent entities.
 type UpcomingEventQuery struct {
 	config
-	ctx        *QueryContext
-	order      []upcomingevent.Order
-	inters     []Interceptor
-	predicates []predicate.UpcomingEvent
+	ctx                *QueryContext
+	order              []upcomingevent.Order
+	inters             []Interceptor
+	predicates         []predicate.UpcomingEvent
+	withUpcomingFights *UpcomingFightQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +58,28 @@ func (ueq *UpcomingEventQuery) Unique(unique bool) *UpcomingEventQuery {
 func (ueq *UpcomingEventQuery) Order(o ...upcomingevent.Order) *UpcomingEventQuery {
 	ueq.order = append(ueq.order, o...)
 	return ueq
+}
+
+// QueryUpcomingFights chains the current query on the "upcoming_fights" edge.
+func (ueq *UpcomingEventQuery) QueryUpcomingFights() *UpcomingFightQuery {
+	query := (&UpcomingFightClient{config: ueq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ueq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ueq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingevent.Table, upcomingevent.FieldID, selector),
+			sqlgraph.To(upcomingfight.Table, upcomingfight.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, upcomingevent.UpcomingFightsTable, upcomingevent.UpcomingFightsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ueq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first UpcomingEvent entity from the query.
@@ -244,15 +269,27 @@ func (ueq *UpcomingEventQuery) Clone() *UpcomingEventQuery {
 		return nil
 	}
 	return &UpcomingEventQuery{
-		config:     ueq.config,
-		ctx:        ueq.ctx.Clone(),
-		order:      append([]upcomingevent.Order{}, ueq.order...),
-		inters:     append([]Interceptor{}, ueq.inters...),
-		predicates: append([]predicate.UpcomingEvent{}, ueq.predicates...),
+		config:             ueq.config,
+		ctx:                ueq.ctx.Clone(),
+		order:              append([]upcomingevent.Order{}, ueq.order...),
+		inters:             append([]Interceptor{}, ueq.inters...),
+		predicates:         append([]predicate.UpcomingEvent{}, ueq.predicates...),
+		withUpcomingFights: ueq.withUpcomingFights.Clone(),
 		// clone intermediate query.
 		sql:  ueq.sql.Clone(),
 		path: ueq.path,
 	}
+}
+
+// WithUpcomingFights tells the query-builder to eager-load the nodes that are connected to
+// the "upcoming_fights" edge. The optional arguments are used to configure the query builder of the edge.
+func (ueq *UpcomingEventQuery) WithUpcomingFights(opts ...func(*UpcomingFightQuery)) *UpcomingEventQuery {
+	query := (&UpcomingFightClient{config: ueq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ueq.withUpcomingFights = query
+	return ueq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -331,8 +368,11 @@ func (ueq *UpcomingEventQuery) prepareQuery(ctx context.Context) error {
 
 func (ueq *UpcomingEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UpcomingEvent, error) {
 	var (
-		nodes = []*UpcomingEvent{}
-		_spec = ueq.querySpec()
+		nodes       = []*UpcomingEvent{}
+		_spec       = ueq.querySpec()
+		loadedTypes = [1]bool{
+			ueq.withUpcomingFights != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UpcomingEvent).scanValues(nil, columns)
@@ -340,6 +380,7 @@ func (ueq *UpcomingEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &UpcomingEvent{config: ueq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +392,46 @@ func (ueq *UpcomingEventQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := ueq.withUpcomingFights; query != nil {
+		if err := ueq.loadUpcomingFights(ctx, query, nodes,
+			func(n *UpcomingEvent) { n.Edges.UpcomingFights = []*UpcomingFight{} },
+			func(n *UpcomingEvent, e *UpcomingFight) { n.Edges.UpcomingFights = append(n.Edges.UpcomingFights, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (ueq *UpcomingEventQuery) loadUpcomingFights(ctx context.Context, query *UpcomingFightQuery, nodes []*UpcomingEvent, init func(*UpcomingEvent), assign func(*UpcomingEvent, *UpcomingFight)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*UpcomingEvent)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.UpcomingFight(func(s *sql.Selector) {
+		s.Where(sql.InValues(upcomingevent.UpcomingFightsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.upcoming_event_upcoming_fights
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "upcoming_event_upcoming_fights" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "upcoming_event_upcoming_fights" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (ueq *UpcomingEventQuery) sqlCount(ctx context.Context) (int, error) {

@@ -35,6 +35,7 @@ func (Fighter) Fields() []ent.Field {
 func (Fighter) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("fights", Fight.Type).Through("fighter_results", FighterResults.Type).Ref("fighters"),
+		edge.From("upcoming_fights", UpcomingFight.Type).Through("upcoming_fighter_odds", UpcomingFighterOdds.Type).Ref("fighters"),
 		edge.To("fighter_aliases", FighterAlias.Type),
 	}
 }

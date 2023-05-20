@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/nherson/psc/api/ent/predicate"
 )
 
@@ -62,6 +63,21 @@ func CreatedAt(v time.Time) predicate.UpcomingEvent {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.UpcomingEvent {
 	return predicate.UpcomingEvent(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// TapologyID applies equality check predicate on the "tapology_id" field. It's identical to TapologyIDEQ.
+func TapologyID(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEQ(FieldTapologyID, v))
+}
+
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEQ(FieldName, v))
+}
+
+// Date applies equality check predicate on the "date" field. It's identical to DateEQ.
+func Date(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEQ(FieldDate, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -142,6 +158,199 @@ func UpdatedAtLT(v time.Time) predicate.UpcomingEvent {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.UpcomingEvent {
 	return predicate.UpcomingEvent(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// TapologyIDEQ applies the EQ predicate on the "tapology_id" field.
+func TapologyIDEQ(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEQ(FieldTapologyID, v))
+}
+
+// TapologyIDNEQ applies the NEQ predicate on the "tapology_id" field.
+func TapologyIDNEQ(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldNEQ(FieldTapologyID, v))
+}
+
+// TapologyIDIn applies the In predicate on the "tapology_id" field.
+func TapologyIDIn(vs ...string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldIn(FieldTapologyID, vs...))
+}
+
+// TapologyIDNotIn applies the NotIn predicate on the "tapology_id" field.
+func TapologyIDNotIn(vs ...string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldNotIn(FieldTapologyID, vs...))
+}
+
+// TapologyIDGT applies the GT predicate on the "tapology_id" field.
+func TapologyIDGT(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldGT(FieldTapologyID, v))
+}
+
+// TapologyIDGTE applies the GTE predicate on the "tapology_id" field.
+func TapologyIDGTE(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldGTE(FieldTapologyID, v))
+}
+
+// TapologyIDLT applies the LT predicate on the "tapology_id" field.
+func TapologyIDLT(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldLT(FieldTapologyID, v))
+}
+
+// TapologyIDLTE applies the LTE predicate on the "tapology_id" field.
+func TapologyIDLTE(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldLTE(FieldTapologyID, v))
+}
+
+// TapologyIDContains applies the Contains predicate on the "tapology_id" field.
+func TapologyIDContains(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldContains(FieldTapologyID, v))
+}
+
+// TapologyIDHasPrefix applies the HasPrefix predicate on the "tapology_id" field.
+func TapologyIDHasPrefix(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldHasPrefix(FieldTapologyID, v))
+}
+
+// TapologyIDHasSuffix applies the HasSuffix predicate on the "tapology_id" field.
+func TapologyIDHasSuffix(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldHasSuffix(FieldTapologyID, v))
+}
+
+// TapologyIDEqualFold applies the EqualFold predicate on the "tapology_id" field.
+func TapologyIDEqualFold(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEqualFold(FieldTapologyID, v))
+}
+
+// TapologyIDContainsFold applies the ContainsFold predicate on the "tapology_id" field.
+func TapologyIDContainsFold(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldContainsFold(FieldTapologyID, v))
+}
+
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldContainsFold(FieldName, v))
+}
+
+// DateEQ applies the EQ predicate on the "date" field.
+func DateEQ(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldEQ(FieldDate, v))
+}
+
+// DateNEQ applies the NEQ predicate on the "date" field.
+func DateNEQ(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldNEQ(FieldDate, v))
+}
+
+// DateIn applies the In predicate on the "date" field.
+func DateIn(vs ...time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldIn(FieldDate, vs...))
+}
+
+// DateNotIn applies the NotIn predicate on the "date" field.
+func DateNotIn(vs ...time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldNotIn(FieldDate, vs...))
+}
+
+// DateGT applies the GT predicate on the "date" field.
+func DateGT(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldGT(FieldDate, v))
+}
+
+// DateGTE applies the GTE predicate on the "date" field.
+func DateGTE(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldGTE(FieldDate, v))
+}
+
+// DateLT applies the LT predicate on the "date" field.
+func DateLT(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldLT(FieldDate, v))
+}
+
+// DateLTE applies the LTE predicate on the "date" field.
+func DateLTE(v time.Time) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(sql.FieldLTE(FieldDate, v))
+}
+
+// HasUpcomingFights applies the HasEdge predicate on the "upcoming_fights" edge.
+func HasUpcomingFights() predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UpcomingFightsTable, UpcomingFightsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUpcomingFightsWith applies the HasEdge predicate on the "upcoming_fights" edge with a given conditions (other predicates).
+func HasUpcomingFightsWith(preds ...predicate.UpcomingFight) predicate.UpcomingEvent {
+	return predicate.UpcomingEvent(func(s *sql.Selector) {
+		step := newUpcomingFightsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

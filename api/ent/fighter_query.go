@@ -16,18 +16,22 @@ import (
 	"github.com/nherson/psc/api/ent/fighteralias"
 	"github.com/nherson/psc/api/ent/fighterresults"
 	"github.com/nherson/psc/api/ent/predicate"
+	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // FighterQuery is the builder for querying Fighter entities.
 type FighterQuery struct {
 	config
-	ctx                *QueryContext
-	order              []fighter.Order
-	inters             []Interceptor
-	predicates         []predicate.Fighter
-	withFights         *FightQuery
-	withFighterAliases *FighterAliasQuery
-	withFighterResults *FighterResultsQuery
+	ctx                     *QueryContext
+	order                   []fighter.Order
+	inters                  []Interceptor
+	predicates              []predicate.Fighter
+	withFights              *FightQuery
+	withUpcomingFights      *UpcomingFightQuery
+	withFighterAliases      *FighterAliasQuery
+	withFighterResults      *FighterResultsQuery
+	withUpcomingFighterOdds *UpcomingFighterOddsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,6 +90,28 @@ func (fq *FighterQuery) QueryFights() *FightQuery {
 	return query
 }
 
+// QueryUpcomingFights chains the current query on the "upcoming_fights" edge.
+func (fq *FighterQuery) QueryUpcomingFights() *UpcomingFightQuery {
+	query := (&UpcomingFightClient{config: fq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fighter.Table, fighter.FieldID, selector),
+			sqlgraph.To(upcomingfight.Table, upcomingfight.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, fighter.UpcomingFightsTable, fighter.UpcomingFightsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryFighterAliases chains the current query on the "fighter_aliases" edge.
 func (fq *FighterQuery) QueryFighterAliases() *FighterAliasQuery {
 	query := (&FighterAliasClient{config: fq.config}).Query()
@@ -123,6 +149,28 @@ func (fq *FighterQuery) QueryFighterResults() *FighterResultsQuery {
 			sqlgraph.From(fighter.Table, fighter.FieldID, selector),
 			sqlgraph.To(fighterresults.Table, fighterresults.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, fighter.FighterResultsTable, fighter.FighterResultsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUpcomingFighterOdds chains the current query on the "upcoming_fighter_odds" edge.
+func (fq *FighterQuery) QueryUpcomingFighterOdds() *UpcomingFighterOddsQuery {
+	query := (&UpcomingFighterOddsClient{config: fq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fighter.Table, fighter.FieldID, selector),
+			sqlgraph.To(upcomingfighterodds.Table, upcomingfighterodds.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, fighter.UpcomingFighterOddsTable, fighter.UpcomingFighterOddsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -317,14 +365,16 @@ func (fq *FighterQuery) Clone() *FighterQuery {
 		return nil
 	}
 	return &FighterQuery{
-		config:             fq.config,
-		ctx:                fq.ctx.Clone(),
-		order:              append([]fighter.Order{}, fq.order...),
-		inters:             append([]Interceptor{}, fq.inters...),
-		predicates:         append([]predicate.Fighter{}, fq.predicates...),
-		withFights:         fq.withFights.Clone(),
-		withFighterAliases: fq.withFighterAliases.Clone(),
-		withFighterResults: fq.withFighterResults.Clone(),
+		config:                  fq.config,
+		ctx:                     fq.ctx.Clone(),
+		order:                   append([]fighter.Order{}, fq.order...),
+		inters:                  append([]Interceptor{}, fq.inters...),
+		predicates:              append([]predicate.Fighter{}, fq.predicates...),
+		withFights:              fq.withFights.Clone(),
+		withUpcomingFights:      fq.withUpcomingFights.Clone(),
+		withFighterAliases:      fq.withFighterAliases.Clone(),
+		withFighterResults:      fq.withFighterResults.Clone(),
+		withUpcomingFighterOdds: fq.withUpcomingFighterOdds.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
 		path: fq.path,
@@ -339,6 +389,17 @@ func (fq *FighterQuery) WithFights(opts ...func(*FightQuery)) *FighterQuery {
 		opt(query)
 	}
 	fq.withFights = query
+	return fq
+}
+
+// WithUpcomingFights tells the query-builder to eager-load the nodes that are connected to
+// the "upcoming_fights" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FighterQuery) WithUpcomingFights(opts ...func(*UpcomingFightQuery)) *FighterQuery {
+	query := (&UpcomingFightClient{config: fq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withUpcomingFights = query
 	return fq
 }
 
@@ -361,6 +422,17 @@ func (fq *FighterQuery) WithFighterResults(opts ...func(*FighterResultsQuery)) *
 		opt(query)
 	}
 	fq.withFighterResults = query
+	return fq
+}
+
+// WithUpcomingFighterOdds tells the query-builder to eager-load the nodes that are connected to
+// the "upcoming_fighter_odds" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FighterQuery) WithUpcomingFighterOdds(opts ...func(*UpcomingFighterOddsQuery)) *FighterQuery {
+	query := (&UpcomingFighterOddsClient{config: fq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withUpcomingFighterOdds = query
 	return fq
 }
 
@@ -442,10 +514,12 @@ func (fq *FighterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Figh
 	var (
 		nodes       = []*Fighter{}
 		_spec       = fq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
 			fq.withFights != nil,
+			fq.withUpcomingFights != nil,
 			fq.withFighterAliases != nil,
 			fq.withFighterResults != nil,
+			fq.withUpcomingFighterOdds != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -473,6 +547,13 @@ func (fq *FighterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Figh
 			return nil, err
 		}
 	}
+	if query := fq.withUpcomingFights; query != nil {
+		if err := fq.loadUpcomingFights(ctx, query, nodes,
+			func(n *Fighter) { n.Edges.UpcomingFights = []*UpcomingFight{} },
+			func(n *Fighter, e *UpcomingFight) { n.Edges.UpcomingFights = append(n.Edges.UpcomingFights, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := fq.withFighterAliases; query != nil {
 		if err := fq.loadFighterAliases(ctx, query, nodes,
 			func(n *Fighter) { n.Edges.FighterAliases = []*FighterAlias{} },
@@ -484,6 +565,15 @@ func (fq *FighterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Figh
 		if err := fq.loadFighterResults(ctx, query, nodes,
 			func(n *Fighter) { n.Edges.FighterResults = []*FighterResults{} },
 			func(n *Fighter, e *FighterResults) { n.Edges.FighterResults = append(n.Edges.FighterResults, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := fq.withUpcomingFighterOdds; query != nil {
+		if err := fq.loadUpcomingFighterOdds(ctx, query, nodes,
+			func(n *Fighter) { n.Edges.UpcomingFighterOdds = []*UpcomingFighterOdds{} },
+			func(n *Fighter, e *UpcomingFighterOdds) {
+				n.Edges.UpcomingFighterOdds = append(n.Edges.UpcomingFighterOdds, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -551,6 +641,67 @@ func (fq *FighterQuery) loadFights(ctx context.Context, query *FightQuery, nodes
 	}
 	return nil
 }
+func (fq *FighterQuery) loadUpcomingFights(ctx context.Context, query *UpcomingFightQuery, nodes []*Fighter, init func(*Fighter), assign func(*Fighter, *UpcomingFight)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Fighter)
+	nids := make(map[int]map[*Fighter]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(fighter.UpcomingFightsTable)
+		s.Join(joinT).On(s.C(upcomingfight.FieldID), joinT.C(fighter.UpcomingFightsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(fighter.UpcomingFightsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(fighter.UpcomingFightsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Fighter]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*UpcomingFight](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "upcoming_fights" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 func (fq *FighterQuery) loadFighterAliases(ctx context.Context, query *FighterAliasQuery, nodes []*Fighter, init func(*Fighter), assign func(*Fighter, *FighterAlias)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Fighter)
@@ -594,6 +745,33 @@ func (fq *FighterQuery) loadFighterResults(ctx context.Context, query *FighterRe
 	}
 	query.Where(predicate.FighterResults(func(s *sql.Selector) {
 		s.Where(sql.InValues(fighter.FighterResultsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.FighterID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "fighter_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (fq *FighterQuery) loadUpcomingFighterOdds(ctx context.Context, query *UpcomingFighterOddsQuery, nodes []*Fighter, init func(*Fighter), assign func(*Fighter, *UpcomingFighterOdds)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Fighter)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.UpcomingFighterOdds(func(s *sql.Selector) {
+		s.Where(sql.InValues(fighter.UpcomingFighterOddsColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

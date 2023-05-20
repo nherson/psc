@@ -19,6 +19,7 @@ import (
 	"github.com/nherson/psc/api/ent/fighterresults"
 	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -79,13 +80,14 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			event.Table:          event.ValidColumn,
-			fight.Table:          fight.ValidColumn,
-			fighter.Table:        fighter.ValidColumn,
-			fighteralias.Table:   fighteralias.ValidColumn,
-			fighterresults.Table: fighterresults.ValidColumn,
-			upcomingevent.Table:  upcomingevent.ValidColumn,
-			upcomingfight.Table:  upcomingfight.ValidColumn,
+			event.Table:               event.ValidColumn,
+			fight.Table:               fight.ValidColumn,
+			fighter.Table:             fighter.ValidColumn,
+			fighteralias.Table:        fighteralias.ValidColumn,
+			fighterresults.Table:      fighterresults.ValidColumn,
+			upcomingevent.Table:       upcomingevent.ValidColumn,
+			upcomingfight.Table:       upcomingfight.ValidColumn,
+			upcomingfighterodds.Table: upcomingfighterodds.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

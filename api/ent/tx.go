@@ -26,6 +26,8 @@ type Tx struct {
 	UpcomingEvent *UpcomingEventClient
 	// UpcomingFight is the client for interacting with the UpcomingFight builders.
 	UpcomingFight *UpcomingFightClient
+	// UpcomingFighterOdds is the client for interacting with the UpcomingFighterOdds builders.
+	UpcomingFighterOdds *UpcomingFighterOddsClient
 
 	// lazily loaded.
 	client     *Client
@@ -164,6 +166,7 @@ func (tx *Tx) init() {
 	tx.FighterResults = NewFighterResultsClient(tx.config)
 	tx.UpcomingEvent = NewUpcomingEventClient(tx.config)
 	tx.UpcomingFight = NewUpcomingFightClient(tx.config)
+	tx.UpcomingFighterOdds = NewUpcomingFighterOddsClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

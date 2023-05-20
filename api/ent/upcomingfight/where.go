@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/nherson/psc/api/ent/predicate"
 )
 
@@ -62,6 +63,11 @@ func CreatedAt(v time.Time) predicate.UpcomingFight {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.UpcomingFight {
 	return predicate.UpcomingFight(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// CardOrder applies equality check predicate on the "card_order" field. It's identical to CardOrderEQ.
+func CardOrder(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldEQ(FieldCardOrder, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -142,6 +148,115 @@ func UpdatedAtLT(v time.Time) predicate.UpcomingFight {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.UpcomingFight {
 	return predicate.UpcomingFight(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// CardOrderEQ applies the EQ predicate on the "card_order" field.
+func CardOrderEQ(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldEQ(FieldCardOrder, v))
+}
+
+// CardOrderNEQ applies the NEQ predicate on the "card_order" field.
+func CardOrderNEQ(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldNEQ(FieldCardOrder, v))
+}
+
+// CardOrderIn applies the In predicate on the "card_order" field.
+func CardOrderIn(vs ...int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldIn(FieldCardOrder, vs...))
+}
+
+// CardOrderNotIn applies the NotIn predicate on the "card_order" field.
+func CardOrderNotIn(vs ...int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldNotIn(FieldCardOrder, vs...))
+}
+
+// CardOrderGT applies the GT predicate on the "card_order" field.
+func CardOrderGT(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldGT(FieldCardOrder, v))
+}
+
+// CardOrderGTE applies the GTE predicate on the "card_order" field.
+func CardOrderGTE(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldGTE(FieldCardOrder, v))
+}
+
+// CardOrderLT applies the LT predicate on the "card_order" field.
+func CardOrderLT(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldLT(FieldCardOrder, v))
+}
+
+// CardOrderLTE applies the LTE predicate on the "card_order" field.
+func CardOrderLTE(v int) predicate.UpcomingFight {
+	return predicate.UpcomingFight(sql.FieldLTE(FieldCardOrder, v))
+}
+
+// HasUpcomingEvent applies the HasEdge predicate on the "upcoming_event" edge.
+func HasUpcomingEvent() predicate.UpcomingFight {
+	return predicate.UpcomingFight(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UpcomingEventTable, UpcomingEventColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUpcomingEventWith applies the HasEdge predicate on the "upcoming_event" edge with a given conditions (other predicates).
+func HasUpcomingEventWith(preds ...predicate.UpcomingEvent) predicate.UpcomingFight {
+	return predicate.UpcomingFight(func(s *sql.Selector) {
+		step := newUpcomingEventStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFighters applies the HasEdge predicate on the "fighters" edge.
+func HasFighters() predicate.UpcomingFight {
+	return predicate.UpcomingFight(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, FightersTable, FightersPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFightersWith applies the HasEdge predicate on the "fighters" edge with a given conditions (other predicates).
+func HasFightersWith(preds ...predicate.Fighter) predicate.UpcomingFight {
+	return predicate.UpcomingFight(func(s *sql.Selector) {
+		step := newFightersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUpcomingFighterOdds applies the HasEdge predicate on the "upcoming_fighter_odds" edge.
+func HasUpcomingFighterOdds() predicate.UpcomingFight {
+	return predicate.UpcomingFight(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, UpcomingFighterOddsTable, UpcomingFighterOddsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUpcomingFighterOddsWith applies the HasEdge predicate on the "upcoming_fighter_odds" edge with a given conditions (other predicates).
+func HasUpcomingFighterOddsWith(preds ...predicate.UpcomingFighterOdds) predicate.UpcomingFight {
+	return predicate.UpcomingFight(func(s *sql.Selector) {
+		step := newUpcomingFighterOddsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

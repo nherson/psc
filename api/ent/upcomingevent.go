@@ -20,8 +20,35 @@ type UpcomingEvent struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// TapologyID holds the value of the "tapology_id" field.
+	TapologyID string `json:"tapology_id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Date holds the value of the "date" field.
+	Date time.Time `json:"date,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UpcomingEventQuery when eager-loading is set.
+	Edges        UpcomingEventEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// UpcomingEventEdges holds the relations/edges for other nodes in the graph.
+type UpcomingEventEdges struct {
+	// UpcomingFights holds the value of the upcoming_fights edge.
+	UpcomingFights []*UpcomingFight `json:"upcoming_fights,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// UpcomingFightsOrErr returns the UpcomingFights value or an error if the edge
+// was not loaded in eager-loading.
+func (e UpcomingEventEdges) UpcomingFightsOrErr() ([]*UpcomingFight, error) {
+	if e.loadedTypes[0] {
+		return e.UpcomingFights, nil
+	}
+	return nil, &NotLoadedError{edge: "upcoming_fights"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -31,7 +58,9 @@ func (*UpcomingEvent) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case upcomingevent.FieldID:
 			values[i] = new(sql.NullInt64)
-		case upcomingevent.FieldCreatedAt, upcomingevent.FieldUpdatedAt:
+		case upcomingevent.FieldTapologyID, upcomingevent.FieldName:
+			values[i] = new(sql.NullString)
+		case upcomingevent.FieldCreatedAt, upcomingevent.FieldUpdatedAt, upcomingevent.FieldDate:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -66,6 +95,24 @@ func (ue *UpcomingEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ue.UpdatedAt = value.Time
 			}
+		case upcomingevent.FieldTapologyID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tapology_id", values[i])
+			} else if value.Valid {
+				ue.TapologyID = value.String
+			}
+		case upcomingevent.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				ue.Name = value.String
+			}
+		case upcomingevent.FieldDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field date", values[i])
+			} else if value.Valid {
+				ue.Date = value.Time
+			}
 		default:
 			ue.selectValues.Set(columns[i], values[i])
 		}
@@ -77,6 +124,11 @@ func (ue *UpcomingEvent) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (ue *UpcomingEvent) Value(name string) (ent.Value, error) {
 	return ue.selectValues.Get(name)
+}
+
+// QueryUpcomingFights queries the "upcoming_fights" edge of the UpcomingEvent entity.
+func (ue *UpcomingEvent) QueryUpcomingFights() *UpcomingFightQuery {
+	return NewUpcomingEventClient(ue.config).QueryUpcomingFights(ue)
 }
 
 // Update returns a builder for updating this UpcomingEvent.
@@ -107,6 +159,15 @@ func (ue *UpcomingEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(ue.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("tapology_id=")
+	builder.WriteString(ue.TapologyID)
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(ue.Name)
+	builder.WriteString(", ")
+	builder.WriteString("date=")
+	builder.WriteString(ue.Date.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

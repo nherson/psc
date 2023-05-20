@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
 )
 
@@ -20,8 +21,58 @@ type UpcomingFight struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
-	selectValues sql.SelectValues
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CardOrder holds the value of the "card_order" field.
+	CardOrder int `json:"card_order,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UpcomingFightQuery when eager-loading is set.
+	Edges                          UpcomingFightEdges `json:"edges"`
+	upcoming_event_upcoming_fights *int
+	selectValues                   sql.SelectValues
+}
+
+// UpcomingFightEdges holds the relations/edges for other nodes in the graph.
+type UpcomingFightEdges struct {
+	// UpcomingEvent holds the value of the upcoming_event edge.
+	UpcomingEvent *UpcomingEvent `json:"upcoming_event,omitempty"`
+	// Fighters holds the value of the fighters edge.
+	Fighters []*Fighter `json:"fighters,omitempty"`
+	// UpcomingFighterOdds holds the value of the upcoming_fighter_odds edge.
+	UpcomingFighterOdds []*UpcomingFighterOdds `json:"upcoming_fighter_odds,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [3]bool
+}
+
+// UpcomingEventOrErr returns the UpcomingEvent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UpcomingFightEdges) UpcomingEventOrErr() (*UpcomingEvent, error) {
+	if e.loadedTypes[0] {
+		if e.UpcomingEvent == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: upcomingevent.Label}
+		}
+		return e.UpcomingEvent, nil
+	}
+	return nil, &NotLoadedError{edge: "upcoming_event"}
+}
+
+// FightersOrErr returns the Fighters value or an error if the edge
+// was not loaded in eager-loading.
+func (e UpcomingFightEdges) FightersOrErr() ([]*Fighter, error) {
+	if e.loadedTypes[1] {
+		return e.Fighters, nil
+	}
+	return nil, &NotLoadedError{edge: "fighters"}
+}
+
+// UpcomingFighterOddsOrErr returns the UpcomingFighterOdds value or an error if the edge
+// was not loaded in eager-loading.
+func (e UpcomingFightEdges) UpcomingFighterOddsOrErr() ([]*UpcomingFighterOdds, error) {
+	if e.loadedTypes[2] {
+		return e.UpcomingFighterOdds, nil
+	}
+	return nil, &NotLoadedError{edge: "upcoming_fighter_odds"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -29,10 +80,12 @@ func (*UpcomingFight) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case upcomingfight.FieldID:
+		case upcomingfight.FieldID, upcomingfight.FieldCardOrder:
 			values[i] = new(sql.NullInt64)
 		case upcomingfight.FieldCreatedAt, upcomingfight.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case upcomingfight.ForeignKeys[0]: // upcoming_event_upcoming_fights
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -66,6 +119,19 @@ func (uf *UpcomingFight) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				uf.UpdatedAt = value.Time
 			}
+		case upcomingfight.FieldCardOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field card_order", values[i])
+			} else if value.Valid {
+				uf.CardOrder = int(value.Int64)
+			}
+		case upcomingfight.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field upcoming_event_upcoming_fights", value)
+			} else if value.Valid {
+				uf.upcoming_event_upcoming_fights = new(int)
+				*uf.upcoming_event_upcoming_fights = int(value.Int64)
+			}
 		default:
 			uf.selectValues.Set(columns[i], values[i])
 		}
@@ -77,6 +143,21 @@ func (uf *UpcomingFight) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (uf *UpcomingFight) Value(name string) (ent.Value, error) {
 	return uf.selectValues.Get(name)
+}
+
+// QueryUpcomingEvent queries the "upcoming_event" edge of the UpcomingFight entity.
+func (uf *UpcomingFight) QueryUpcomingEvent() *UpcomingEventQuery {
+	return NewUpcomingFightClient(uf.config).QueryUpcomingEvent(uf)
+}
+
+// QueryFighters queries the "fighters" edge of the UpcomingFight entity.
+func (uf *UpcomingFight) QueryFighters() *FighterQuery {
+	return NewUpcomingFightClient(uf.config).QueryFighters(uf)
+}
+
+// QueryUpcomingFighterOdds queries the "upcoming_fighter_odds" edge of the UpcomingFight entity.
+func (uf *UpcomingFight) QueryUpcomingFighterOdds() *UpcomingFighterOddsQuery {
+	return NewUpcomingFightClient(uf.config).QueryUpcomingFighterOdds(uf)
 }
 
 // Update returns a builder for updating this UpcomingFight.
@@ -107,6 +188,9 @@ func (uf *UpcomingFight) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(uf.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("card_order=")
+	builder.WriteString(fmt.Sprintf("%v", uf.CardOrder))
 	builder.WriteByte(')')
 	return builder.String()
 }

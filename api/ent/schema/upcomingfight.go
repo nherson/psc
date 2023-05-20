@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/mixins"
 )
 
@@ -18,10 +20,17 @@ func (UpcomingFight) Mixin() []ent.Mixin {
 
 // Fields of the UpcomingFight.
 func (UpcomingFight) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.Int("card_order").Min(1),
+	}
 }
 
 // Edges of the UpcomingFight.
 func (UpcomingFight) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("upcoming_event", UpcomingEvent.Type).
+			Ref("upcoming_fights").
+			Unique(),
+		edge.To("fighters", Fighter.Type).Through("upcoming_fighter_odds", UpcomingFighterOdds.Type),
+	}
 }

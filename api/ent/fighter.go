@@ -45,13 +45,17 @@ type Fighter struct {
 type FighterEdges struct {
 	// Fights holds the value of the fights edge.
 	Fights []*Fight `json:"fights,omitempty"`
+	// UpcomingFights holds the value of the upcoming_fights edge.
+	UpcomingFights []*UpcomingFight `json:"upcoming_fights,omitempty"`
 	// FighterAliases holds the value of the fighter_aliases edge.
 	FighterAliases []*FighterAlias `json:"fighter_aliases,omitempty"`
 	// FighterResults holds the value of the fighter_results edge.
 	FighterResults []*FighterResults `json:"fighter_results,omitempty"`
+	// UpcomingFighterOdds holds the value of the upcoming_fighter_odds edge.
+	UpcomingFighterOdds []*UpcomingFighterOdds `json:"upcoming_fighter_odds,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // FightsOrErr returns the Fights value or an error if the edge
@@ -63,10 +67,19 @@ func (e FighterEdges) FightsOrErr() ([]*Fight, error) {
 	return nil, &NotLoadedError{edge: "fights"}
 }
 
+// UpcomingFightsOrErr returns the UpcomingFights value or an error if the edge
+// was not loaded in eager-loading.
+func (e FighterEdges) UpcomingFightsOrErr() ([]*UpcomingFight, error) {
+	if e.loadedTypes[1] {
+		return e.UpcomingFights, nil
+	}
+	return nil, &NotLoadedError{edge: "upcoming_fights"}
+}
+
 // FighterAliasesOrErr returns the FighterAliases value or an error if the edge
 // was not loaded in eager-loading.
 func (e FighterEdges) FighterAliasesOrErr() ([]*FighterAlias, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.FighterAliases, nil
 	}
 	return nil, &NotLoadedError{edge: "fighter_aliases"}
@@ -75,10 +88,19 @@ func (e FighterEdges) FighterAliasesOrErr() ([]*FighterAlias, error) {
 // FighterResultsOrErr returns the FighterResults value or an error if the edge
 // was not loaded in eager-loading.
 func (e FighterEdges) FighterResultsOrErr() ([]*FighterResults, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.FighterResults, nil
 	}
 	return nil, &NotLoadedError{edge: "fighter_results"}
+}
+
+// UpcomingFighterOddsOrErr returns the UpcomingFighterOdds value or an error if the edge
+// was not loaded in eager-loading.
+func (e FighterEdges) UpcomingFighterOddsOrErr() ([]*UpcomingFighterOdds, error) {
+	if e.loadedTypes[4] {
+		return e.UpcomingFighterOdds, nil
+	}
+	return nil, &NotLoadedError{edge: "upcoming_fighter_odds"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -185,6 +207,11 @@ func (f *Fighter) QueryFights() *FightQuery {
 	return NewFighterClient(f.config).QueryFights(f)
 }
 
+// QueryUpcomingFights queries the "upcoming_fights" edge of the Fighter entity.
+func (f *Fighter) QueryUpcomingFights() *UpcomingFightQuery {
+	return NewFighterClient(f.config).QueryUpcomingFights(f)
+}
+
 // QueryFighterAliases queries the "fighter_aliases" edge of the Fighter entity.
 func (f *Fighter) QueryFighterAliases() *FighterAliasQuery {
 	return NewFighterClient(f.config).QueryFighterAliases(f)
@@ -193,6 +220,11 @@ func (f *Fighter) QueryFighterAliases() *FighterAliasQuery {
 // QueryFighterResults queries the "fighter_results" edge of the Fighter entity.
 func (f *Fighter) QueryFighterResults() *FighterResultsQuery {
 	return NewFighterClient(f.config).QueryFighterResults(f)
+}
+
+// QueryUpcomingFighterOdds queries the "upcoming_fighter_odds" edge of the Fighter entity.
+func (f *Fighter) QueryUpcomingFighterOdds() *UpcomingFighterOddsQuery {
+	return NewFighterClient(f.config).QueryUpcomingFighterOdds(f)
 }
 
 // Update returns a builder for updating this Fighter.

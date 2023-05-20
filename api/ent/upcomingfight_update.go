@@ -11,8 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/predicate"
+	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // UpcomingFightUpdate is the builder for updating UpcomingFight entities.
@@ -34,9 +37,119 @@ func (ufu *UpcomingFightUpdate) SetUpdatedAt(t time.Time) *UpcomingFightUpdate {
 	return ufu
 }
 
+// SetCardOrder sets the "card_order" field.
+func (ufu *UpcomingFightUpdate) SetCardOrder(i int) *UpcomingFightUpdate {
+	ufu.mutation.ResetCardOrder()
+	ufu.mutation.SetCardOrder(i)
+	return ufu
+}
+
+// AddCardOrder adds i to the "card_order" field.
+func (ufu *UpcomingFightUpdate) AddCardOrder(i int) *UpcomingFightUpdate {
+	ufu.mutation.AddCardOrder(i)
+	return ufu
+}
+
+// SetUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by ID.
+func (ufu *UpcomingFightUpdate) SetUpcomingEventID(id int) *UpcomingFightUpdate {
+	ufu.mutation.SetUpcomingEventID(id)
+	return ufu
+}
+
+// SetNillableUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by ID if the given value is not nil.
+func (ufu *UpcomingFightUpdate) SetNillableUpcomingEventID(id *int) *UpcomingFightUpdate {
+	if id != nil {
+		ufu = ufu.SetUpcomingEventID(*id)
+	}
+	return ufu
+}
+
+// SetUpcomingEvent sets the "upcoming_event" edge to the UpcomingEvent entity.
+func (ufu *UpcomingFightUpdate) SetUpcomingEvent(u *UpcomingEvent) *UpcomingFightUpdate {
+	return ufu.SetUpcomingEventID(u.ID)
+}
+
+// AddFighterIDs adds the "fighters" edge to the Fighter entity by IDs.
+func (ufu *UpcomingFightUpdate) AddFighterIDs(ids ...int) *UpcomingFightUpdate {
+	ufu.mutation.AddFighterIDs(ids...)
+	return ufu
+}
+
+// AddFighters adds the "fighters" edges to the Fighter entity.
+func (ufu *UpcomingFightUpdate) AddFighters(f ...*Fighter) *UpcomingFightUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ufu.AddFighterIDs(ids...)
+}
+
+// AddUpcomingFighterOddIDs adds the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by IDs.
+func (ufu *UpcomingFightUpdate) AddUpcomingFighterOddIDs(ids ...int) *UpcomingFightUpdate {
+	ufu.mutation.AddUpcomingFighterOddIDs(ids...)
+	return ufu
+}
+
+// AddUpcomingFighterOdds adds the "upcoming_fighter_odds" edges to the UpcomingFighterOdds entity.
+func (ufu *UpcomingFightUpdate) AddUpcomingFighterOdds(u ...*UpcomingFighterOdds) *UpcomingFightUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ufu.AddUpcomingFighterOddIDs(ids...)
+}
+
 // Mutation returns the UpcomingFightMutation object of the builder.
 func (ufu *UpcomingFightUpdate) Mutation() *UpcomingFightMutation {
 	return ufu.mutation
+}
+
+// ClearUpcomingEvent clears the "upcoming_event" edge to the UpcomingEvent entity.
+func (ufu *UpcomingFightUpdate) ClearUpcomingEvent() *UpcomingFightUpdate {
+	ufu.mutation.ClearUpcomingEvent()
+	return ufu
+}
+
+// ClearFighters clears all "fighters" edges to the Fighter entity.
+func (ufu *UpcomingFightUpdate) ClearFighters() *UpcomingFightUpdate {
+	ufu.mutation.ClearFighters()
+	return ufu
+}
+
+// RemoveFighterIDs removes the "fighters" edge to Fighter entities by IDs.
+func (ufu *UpcomingFightUpdate) RemoveFighterIDs(ids ...int) *UpcomingFightUpdate {
+	ufu.mutation.RemoveFighterIDs(ids...)
+	return ufu
+}
+
+// RemoveFighters removes "fighters" edges to Fighter entities.
+func (ufu *UpcomingFightUpdate) RemoveFighters(f ...*Fighter) *UpcomingFightUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ufu.RemoveFighterIDs(ids...)
+}
+
+// ClearUpcomingFighterOdds clears all "upcoming_fighter_odds" edges to the UpcomingFighterOdds entity.
+func (ufu *UpcomingFightUpdate) ClearUpcomingFighterOdds() *UpcomingFightUpdate {
+	ufu.mutation.ClearUpcomingFighterOdds()
+	return ufu
+}
+
+// RemoveUpcomingFighterOddIDs removes the "upcoming_fighter_odds" edge to UpcomingFighterOdds entities by IDs.
+func (ufu *UpcomingFightUpdate) RemoveUpcomingFighterOddIDs(ids ...int) *UpcomingFightUpdate {
+	ufu.mutation.RemoveUpcomingFighterOddIDs(ids...)
+	return ufu
+}
+
+// RemoveUpcomingFighterOdds removes "upcoming_fighter_odds" edges to UpcomingFighterOdds entities.
+func (ufu *UpcomingFightUpdate) RemoveUpcomingFighterOdds(u ...*UpcomingFighterOdds) *UpcomingFightUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ufu.RemoveUpcomingFighterOddIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -75,7 +188,20 @@ func (ufu *UpcomingFightUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ufu *UpcomingFightUpdate) check() error {
+	if v, ok := ufu.mutation.CardOrder(); ok {
+		if err := upcomingfight.CardOrderValidator(v); err != nil {
+			return &ValidationError{Name: "card_order", err: fmt.Errorf(`ent: validator failed for field "UpcomingFight.card_order": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ufu *UpcomingFightUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := ufu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(upcomingfight.Table, upcomingfight.Columns, sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt))
 	if ps := ufu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -86,6 +212,143 @@ func (ufu *UpcomingFightUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	}
 	if value, ok := ufu.mutation.UpdatedAt(); ok {
 		_spec.SetField(upcomingfight.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := ufu.mutation.CardOrder(); ok {
+		_spec.SetField(upcomingfight.FieldCardOrder, field.TypeInt, value)
+	}
+	if value, ok := ufu.mutation.AddedCardOrder(); ok {
+		_spec.AddField(upcomingfight.FieldCardOrder, field.TypeInt, value)
+	}
+	if ufu.mutation.UpcomingEventCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingEventTable,
+			Columns: []string{upcomingfight.UpcomingEventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufu.mutation.UpcomingEventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingEventTable,
+			Columns: []string{upcomingfight.UpcomingEventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ufu.mutation.FightersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufu.config, mutation: newUpcomingFighterOddsMutation(ufu.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufu.mutation.RemovedFightersIDs(); len(nodes) > 0 && !ufu.mutation.FightersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufu.config, mutation: newUpcomingFighterOddsMutation(ufu.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufu.mutation.FightersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufu.config, mutation: newUpcomingFighterOddsMutation(ufu.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ufu.mutation.UpcomingFighterOddsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufu.mutation.RemovedUpcomingFighterOddsIDs(); len(nodes) > 0 && !ufu.mutation.UpcomingFighterOddsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufu.mutation.UpcomingFighterOddsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ufu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -113,9 +376,119 @@ func (ufuo *UpcomingFightUpdateOne) SetUpdatedAt(t time.Time) *UpcomingFightUpda
 	return ufuo
 }
 
+// SetCardOrder sets the "card_order" field.
+func (ufuo *UpcomingFightUpdateOne) SetCardOrder(i int) *UpcomingFightUpdateOne {
+	ufuo.mutation.ResetCardOrder()
+	ufuo.mutation.SetCardOrder(i)
+	return ufuo
+}
+
+// AddCardOrder adds i to the "card_order" field.
+func (ufuo *UpcomingFightUpdateOne) AddCardOrder(i int) *UpcomingFightUpdateOne {
+	ufuo.mutation.AddCardOrder(i)
+	return ufuo
+}
+
+// SetUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by ID.
+func (ufuo *UpcomingFightUpdateOne) SetUpcomingEventID(id int) *UpcomingFightUpdateOne {
+	ufuo.mutation.SetUpcomingEventID(id)
+	return ufuo
+}
+
+// SetNillableUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by ID if the given value is not nil.
+func (ufuo *UpcomingFightUpdateOne) SetNillableUpcomingEventID(id *int) *UpcomingFightUpdateOne {
+	if id != nil {
+		ufuo = ufuo.SetUpcomingEventID(*id)
+	}
+	return ufuo
+}
+
+// SetUpcomingEvent sets the "upcoming_event" edge to the UpcomingEvent entity.
+func (ufuo *UpcomingFightUpdateOne) SetUpcomingEvent(u *UpcomingEvent) *UpcomingFightUpdateOne {
+	return ufuo.SetUpcomingEventID(u.ID)
+}
+
+// AddFighterIDs adds the "fighters" edge to the Fighter entity by IDs.
+func (ufuo *UpcomingFightUpdateOne) AddFighterIDs(ids ...int) *UpcomingFightUpdateOne {
+	ufuo.mutation.AddFighterIDs(ids...)
+	return ufuo
+}
+
+// AddFighters adds the "fighters" edges to the Fighter entity.
+func (ufuo *UpcomingFightUpdateOne) AddFighters(f ...*Fighter) *UpcomingFightUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ufuo.AddFighterIDs(ids...)
+}
+
+// AddUpcomingFighterOddIDs adds the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by IDs.
+func (ufuo *UpcomingFightUpdateOne) AddUpcomingFighterOddIDs(ids ...int) *UpcomingFightUpdateOne {
+	ufuo.mutation.AddUpcomingFighterOddIDs(ids...)
+	return ufuo
+}
+
+// AddUpcomingFighterOdds adds the "upcoming_fighter_odds" edges to the UpcomingFighterOdds entity.
+func (ufuo *UpcomingFightUpdateOne) AddUpcomingFighterOdds(u ...*UpcomingFighterOdds) *UpcomingFightUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ufuo.AddUpcomingFighterOddIDs(ids...)
+}
+
 // Mutation returns the UpcomingFightMutation object of the builder.
 func (ufuo *UpcomingFightUpdateOne) Mutation() *UpcomingFightMutation {
 	return ufuo.mutation
+}
+
+// ClearUpcomingEvent clears the "upcoming_event" edge to the UpcomingEvent entity.
+func (ufuo *UpcomingFightUpdateOne) ClearUpcomingEvent() *UpcomingFightUpdateOne {
+	ufuo.mutation.ClearUpcomingEvent()
+	return ufuo
+}
+
+// ClearFighters clears all "fighters" edges to the Fighter entity.
+func (ufuo *UpcomingFightUpdateOne) ClearFighters() *UpcomingFightUpdateOne {
+	ufuo.mutation.ClearFighters()
+	return ufuo
+}
+
+// RemoveFighterIDs removes the "fighters" edge to Fighter entities by IDs.
+func (ufuo *UpcomingFightUpdateOne) RemoveFighterIDs(ids ...int) *UpcomingFightUpdateOne {
+	ufuo.mutation.RemoveFighterIDs(ids...)
+	return ufuo
+}
+
+// RemoveFighters removes "fighters" edges to Fighter entities.
+func (ufuo *UpcomingFightUpdateOne) RemoveFighters(f ...*Fighter) *UpcomingFightUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ufuo.RemoveFighterIDs(ids...)
+}
+
+// ClearUpcomingFighterOdds clears all "upcoming_fighter_odds" edges to the UpcomingFighterOdds entity.
+func (ufuo *UpcomingFightUpdateOne) ClearUpcomingFighterOdds() *UpcomingFightUpdateOne {
+	ufuo.mutation.ClearUpcomingFighterOdds()
+	return ufuo
+}
+
+// RemoveUpcomingFighterOddIDs removes the "upcoming_fighter_odds" edge to UpcomingFighterOdds entities by IDs.
+func (ufuo *UpcomingFightUpdateOne) RemoveUpcomingFighterOddIDs(ids ...int) *UpcomingFightUpdateOne {
+	ufuo.mutation.RemoveUpcomingFighterOddIDs(ids...)
+	return ufuo
+}
+
+// RemoveUpcomingFighterOdds removes "upcoming_fighter_odds" edges to UpcomingFighterOdds entities.
+func (ufuo *UpcomingFightUpdateOne) RemoveUpcomingFighterOdds(u ...*UpcomingFighterOdds) *UpcomingFightUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ufuo.RemoveUpcomingFighterOddIDs(ids...)
 }
 
 // Where appends a list predicates to the UpcomingFightUpdate builder.
@@ -167,7 +540,20 @@ func (ufuo *UpcomingFightUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ufuo *UpcomingFightUpdateOne) check() error {
+	if v, ok := ufuo.mutation.CardOrder(); ok {
+		if err := upcomingfight.CardOrderValidator(v); err != nil {
+			return &ValidationError{Name: "card_order", err: fmt.Errorf(`ent: validator failed for field "UpcomingFight.card_order": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ufuo *UpcomingFightUpdateOne) sqlSave(ctx context.Context) (_node *UpcomingFight, err error) {
+	if err := ufuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(upcomingfight.Table, upcomingfight.Columns, sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt))
 	id, ok := ufuo.mutation.ID()
 	if !ok {
@@ -195,6 +581,143 @@ func (ufuo *UpcomingFightUpdateOne) sqlSave(ctx context.Context) (_node *Upcomin
 	}
 	if value, ok := ufuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(upcomingfight.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := ufuo.mutation.CardOrder(); ok {
+		_spec.SetField(upcomingfight.FieldCardOrder, field.TypeInt, value)
+	}
+	if value, ok := ufuo.mutation.AddedCardOrder(); ok {
+		_spec.AddField(upcomingfight.FieldCardOrder, field.TypeInt, value)
+	}
+	if ufuo.mutation.UpcomingEventCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingEventTable,
+			Columns: []string{upcomingfight.UpcomingEventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufuo.mutation.UpcomingEventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingEventTable,
+			Columns: []string{upcomingfight.UpcomingEventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ufuo.mutation.FightersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufuo.config, mutation: newUpcomingFighterOddsMutation(ufuo.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufuo.mutation.RemovedFightersIDs(); len(nodes) > 0 && !ufuo.mutation.FightersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufuo.config, mutation: newUpcomingFighterOddsMutation(ufuo.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufuo.mutation.FightersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufuo.config, mutation: newUpcomingFighterOddsMutation(ufuo.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ufuo.mutation.UpcomingFighterOddsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufuo.mutation.RemovedUpcomingFighterOddsIDs(); len(nodes) > 0 && !ufuo.mutation.UpcomingFighterOddsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ufuo.mutation.UpcomingFighterOddsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &UpcomingFight{config: ufuo.config}
 	_spec.Assign = _node.assignValues

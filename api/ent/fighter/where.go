@@ -653,6 +653,29 @@ func HasFightsWith(preds ...predicate.Fight) predicate.Fighter {
 	})
 }
 
+// HasUpcomingFights applies the HasEdge predicate on the "upcoming_fights" edge.
+func HasUpcomingFights() predicate.Fighter {
+	return predicate.Fighter(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, UpcomingFightsTable, UpcomingFightsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUpcomingFightsWith applies the HasEdge predicate on the "upcoming_fights" edge with a given conditions (other predicates).
+func HasUpcomingFightsWith(preds ...predicate.UpcomingFight) predicate.Fighter {
+	return predicate.Fighter(func(s *sql.Selector) {
+		step := newUpcomingFightsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasFighterAliases applies the HasEdge predicate on the "fighter_aliases" edge.
 func HasFighterAliases() predicate.Fighter {
 	return predicate.Fighter(func(s *sql.Selector) {
@@ -691,6 +714,29 @@ func HasFighterResults() predicate.Fighter {
 func HasFighterResultsWith(preds ...predicate.FighterResults) predicate.Fighter {
 	return predicate.Fighter(func(s *sql.Selector) {
 		step := newFighterResultsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUpcomingFighterOdds applies the HasEdge predicate on the "upcoming_fighter_odds" edge.
+func HasUpcomingFighterOdds() predicate.Fighter {
+	return predicate.Fighter(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, UpcomingFighterOddsTable, UpcomingFighterOddsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUpcomingFighterOddsWith applies the HasEdge predicate on the "upcoming_fighter_odds" edge with a given conditions (other predicates).
+func HasUpcomingFighterOddsWith(preds ...predicate.UpcomingFighterOdds) predicate.Fighter {
+	return predicate.Fighter(func(s *sql.Selector) {
+		step := newUpcomingFighterOddsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

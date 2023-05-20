@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/upcomingevent"
+	"github.com/nherson/psc/api/ent/upcomingfight"
 )
 
 // UpcomingEventCreate is the builder for creating a UpcomingEvent entity.
@@ -48,6 +49,39 @@ func (uec *UpcomingEventCreate) SetNillableUpdatedAt(t *time.Time) *UpcomingEven
 		uec.SetUpdatedAt(*t)
 	}
 	return uec
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (uec *UpcomingEventCreate) SetTapologyID(s string) *UpcomingEventCreate {
+	uec.mutation.SetTapologyID(s)
+	return uec
+}
+
+// SetName sets the "name" field.
+func (uec *UpcomingEventCreate) SetName(s string) *UpcomingEventCreate {
+	uec.mutation.SetName(s)
+	return uec
+}
+
+// SetDate sets the "date" field.
+func (uec *UpcomingEventCreate) SetDate(t time.Time) *UpcomingEventCreate {
+	uec.mutation.SetDate(t)
+	return uec
+}
+
+// AddUpcomingFightIDs adds the "upcoming_fights" edge to the UpcomingFight entity by IDs.
+func (uec *UpcomingEventCreate) AddUpcomingFightIDs(ids ...int) *UpcomingEventCreate {
+	uec.mutation.AddUpcomingFightIDs(ids...)
+	return uec
+}
+
+// AddUpcomingFights adds the "upcoming_fights" edges to the UpcomingFight entity.
+func (uec *UpcomingEventCreate) AddUpcomingFights(u ...*UpcomingFight) *UpcomingEventCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uec.AddUpcomingFightIDs(ids...)
 }
 
 // Mutation returns the UpcomingEventMutation object of the builder.
@@ -103,6 +137,25 @@ func (uec *UpcomingEventCreate) check() error {
 	if _, ok := uec.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "UpcomingEvent.updated_at"`)}
 	}
+	if _, ok := uec.mutation.TapologyID(); !ok {
+		return &ValidationError{Name: "tapology_id", err: errors.New(`ent: missing required field "UpcomingEvent.tapology_id"`)}
+	}
+	if v, ok := uec.mutation.TapologyID(); ok {
+		if err := upcomingevent.TapologyIDValidator(v); err != nil {
+			return &ValidationError{Name: "tapology_id", err: fmt.Errorf(`ent: validator failed for field "UpcomingEvent.tapology_id": %w`, err)}
+		}
+	}
+	if _, ok := uec.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "UpcomingEvent.name"`)}
+	}
+	if v, ok := uec.mutation.Name(); ok {
+		if err := upcomingevent.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "UpcomingEvent.name": %w`, err)}
+		}
+	}
+	if _, ok := uec.mutation.Date(); !ok {
+		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "UpcomingEvent.date"`)}
+	}
 	return nil
 }
 
@@ -137,6 +190,34 @@ func (uec *UpcomingEventCreate) createSpec() (*UpcomingEvent, *sqlgraph.CreateSp
 	if value, ok := uec.mutation.UpdatedAt(); ok {
 		_spec.SetField(upcomingevent.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := uec.mutation.TapologyID(); ok {
+		_spec.SetField(upcomingevent.FieldTapologyID, field.TypeString, value)
+		_node.TapologyID = value
+	}
+	if value, ok := uec.mutation.Name(); ok {
+		_spec.SetField(upcomingevent.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if value, ok := uec.mutation.Date(); ok {
+		_spec.SetField(upcomingevent.FieldDate, field.TypeTime, value)
+		_node.Date = value
+	}
+	if nodes := uec.mutation.UpcomingFightsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -202,6 +283,42 @@ func (u *UpcomingEventUpsert) UpdateUpdatedAt() *UpcomingEventUpsert {
 	return u
 }
 
+// SetTapologyID sets the "tapology_id" field.
+func (u *UpcomingEventUpsert) SetTapologyID(v string) *UpcomingEventUpsert {
+	u.Set(upcomingevent.FieldTapologyID, v)
+	return u
+}
+
+// UpdateTapologyID sets the "tapology_id" field to the value that was provided on create.
+func (u *UpcomingEventUpsert) UpdateTapologyID() *UpcomingEventUpsert {
+	u.SetExcluded(upcomingevent.FieldTapologyID)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *UpcomingEventUpsert) SetName(v string) *UpcomingEventUpsert {
+	u.Set(upcomingevent.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *UpcomingEventUpsert) UpdateName() *UpcomingEventUpsert {
+	u.SetExcluded(upcomingevent.FieldName)
+	return u
+}
+
+// SetDate sets the "date" field.
+func (u *UpcomingEventUpsert) SetDate(v time.Time) *UpcomingEventUpsert {
+	u.Set(upcomingevent.FieldDate, v)
+	return u
+}
+
+// UpdateDate sets the "date" field to the value that was provided on create.
+func (u *UpcomingEventUpsert) UpdateDate() *UpcomingEventUpsert {
+	u.SetExcluded(upcomingevent.FieldDate)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -258,6 +375,48 @@ func (u *UpcomingEventUpsertOne) SetUpdatedAt(v time.Time) *UpcomingEventUpsertO
 func (u *UpcomingEventUpsertOne) UpdateUpdatedAt() *UpcomingEventUpsertOne {
 	return u.Update(func(s *UpcomingEventUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (u *UpcomingEventUpsertOne) SetTapologyID(v string) *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetTapologyID(v)
+	})
+}
+
+// UpdateTapologyID sets the "tapology_id" field to the value that was provided on create.
+func (u *UpcomingEventUpsertOne) UpdateTapologyID() *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateTapologyID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *UpcomingEventUpsertOne) SetName(v string) *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *UpcomingEventUpsertOne) UpdateName() *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetDate sets the "date" field.
+func (u *UpcomingEventUpsertOne) SetDate(v time.Time) *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetDate(v)
+	})
+}
+
+// UpdateDate sets the "date" field to the value that was provided on create.
+func (u *UpcomingEventUpsertOne) UpdateDate() *UpcomingEventUpsertOne {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateDate()
 	})
 }
 
@@ -479,6 +638,48 @@ func (u *UpcomingEventUpsertBulk) SetUpdatedAt(v time.Time) *UpcomingEventUpsert
 func (u *UpcomingEventUpsertBulk) UpdateUpdatedAt() *UpcomingEventUpsertBulk {
 	return u.Update(func(s *UpcomingEventUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetTapologyID sets the "tapology_id" field.
+func (u *UpcomingEventUpsertBulk) SetTapologyID(v string) *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetTapologyID(v)
+	})
+}
+
+// UpdateTapologyID sets the "tapology_id" field to the value that was provided on create.
+func (u *UpcomingEventUpsertBulk) UpdateTapologyID() *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateTapologyID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *UpcomingEventUpsertBulk) SetName(v string) *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *UpcomingEventUpsertBulk) UpdateName() *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetDate sets the "date" field.
+func (u *UpcomingEventUpsertBulk) SetDate(v time.Time) *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.SetDate(v)
+	})
+}
+
+// UpdateDate sets the "date" field to the value that was provided on create.
+func (u *UpcomingEventUpsertBulk) UpdateDate() *UpcomingEventUpsertBulk {
+	return u.Update(func(s *UpcomingEventUpsert) {
+		s.UpdateDate()
 	})
 }
 

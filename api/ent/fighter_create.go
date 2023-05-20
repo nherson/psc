@@ -15,6 +15,8 @@ import (
 	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/fighteralias"
 	"github.com/nherson/psc/api/ent/fighterresults"
+	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // FighterCreate is the builder for creating a Fighter entity.
@@ -126,6 +128,21 @@ func (fc *FighterCreate) AddFights(f ...*Fight) *FighterCreate {
 	return fc.AddFightIDs(ids...)
 }
 
+// AddUpcomingFightIDs adds the "upcoming_fights" edge to the UpcomingFight entity by IDs.
+func (fc *FighterCreate) AddUpcomingFightIDs(ids ...int) *FighterCreate {
+	fc.mutation.AddUpcomingFightIDs(ids...)
+	return fc
+}
+
+// AddUpcomingFights adds the "upcoming_fights" edges to the UpcomingFight entity.
+func (fc *FighterCreate) AddUpcomingFights(u ...*UpcomingFight) *FighterCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return fc.AddUpcomingFightIDs(ids...)
+}
+
 // AddFighterAliasIDs adds the "fighter_aliases" edge to the FighterAlias entity by IDs.
 func (fc *FighterCreate) AddFighterAliasIDs(ids ...int) *FighterCreate {
 	fc.mutation.AddFighterAliasIDs(ids...)
@@ -154,6 +171,21 @@ func (fc *FighterCreate) AddFighterResults(f ...*FighterResults) *FighterCreate 
 		ids[i] = f[i].ID
 	}
 	return fc.AddFighterResultIDs(ids...)
+}
+
+// AddUpcomingFighterOddIDs adds the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by IDs.
+func (fc *FighterCreate) AddUpcomingFighterOddIDs(ids ...int) *FighterCreate {
+	fc.mutation.AddUpcomingFighterOddIDs(ids...)
+	return fc
+}
+
+// AddUpcomingFighterOdds adds the "upcoming_fighter_odds" edges to the UpcomingFighterOdds entity.
+func (fc *FighterCreate) AddUpcomingFighterOdds(u ...*UpcomingFighterOdds) *FighterCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return fc.AddUpcomingFighterOddIDs(ids...)
 }
 
 // Mutation returns the FighterMutation object of the builder.
@@ -312,6 +344,26 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := fc.mutation.UpcomingFightsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   fighter.UpcomingFightsTable,
+			Columns: fighter.UpcomingFightsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UpcomingFighterOddsCreate{config: fc.config, mutation: newUpcomingFighterOddsMutation(fc.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := fc.mutation.FighterAliasesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -337,6 +389,22 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fighterresults.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fc.mutation.UpcomingFighterOddsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   fighter.UpcomingFighterOddsTable,
+			Columns: []string{fighter.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -21,6 +21,7 @@ import (
 	"github.com/nherson/psc/api/ent/fighterresults"
 	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // Client is the client that holds all ent builders.
@@ -42,6 +43,8 @@ type Client struct {
 	UpcomingEvent *UpcomingEventClient
 	// UpcomingFight is the client for interacting with the UpcomingFight builders.
 	UpcomingFight *UpcomingFightClient
+	// UpcomingFighterOdds is the client for interacting with the UpcomingFighterOdds builders.
+	UpcomingFighterOdds *UpcomingFighterOddsClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.FighterResults = NewFighterResultsClient(c.config)
 	c.UpcomingEvent = NewUpcomingEventClient(c.config)
 	c.UpcomingFight = NewUpcomingFightClient(c.config)
+	c.UpcomingFighterOdds = NewUpcomingFighterOddsClient(c.config)
 }
 
 type (
@@ -142,15 +146,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		Event:          NewEventClient(cfg),
-		Fight:          NewFightClient(cfg),
-		Fighter:        NewFighterClient(cfg),
-		FighterAlias:   NewFighterAliasClient(cfg),
-		FighterResults: NewFighterResultsClient(cfg),
-		UpcomingEvent:  NewUpcomingEventClient(cfg),
-		UpcomingFight:  NewUpcomingFightClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Event:               NewEventClient(cfg),
+		Fight:               NewFightClient(cfg),
+		Fighter:             NewFighterClient(cfg),
+		FighterAlias:        NewFighterAliasClient(cfg),
+		FighterResults:      NewFighterResultsClient(cfg),
+		UpcomingEvent:       NewUpcomingEventClient(cfg),
+		UpcomingFight:       NewUpcomingFightClient(cfg),
+		UpcomingFighterOdds: NewUpcomingFighterOddsClient(cfg),
 	}, nil
 }
 
@@ -168,15 +173,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:            ctx,
-		config:         cfg,
-		Event:          NewEventClient(cfg),
-		Fight:          NewFightClient(cfg),
-		Fighter:        NewFighterClient(cfg),
-		FighterAlias:   NewFighterAliasClient(cfg),
-		FighterResults: NewFighterResultsClient(cfg),
-		UpcomingEvent:  NewUpcomingEventClient(cfg),
-		UpcomingFight:  NewUpcomingFightClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Event:               NewEventClient(cfg),
+		Fight:               NewFightClient(cfg),
+		Fighter:             NewFighterClient(cfg),
+		FighterAlias:        NewFighterAliasClient(cfg),
+		FighterResults:      NewFighterResultsClient(cfg),
+		UpcomingEvent:       NewUpcomingEventClient(cfg),
+		UpcomingFight:       NewUpcomingFightClient(cfg),
+		UpcomingFighterOdds: NewUpcomingFighterOddsClient(cfg),
 	}, nil
 }
 
@@ -207,7 +213,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Event, c.Fight, c.Fighter, c.FighterAlias, c.FighterResults, c.UpcomingEvent,
-		c.UpcomingFight,
+		c.UpcomingFight, c.UpcomingFighterOdds,
 	} {
 		n.Use(hooks...)
 	}
@@ -218,7 +224,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Event, c.Fight, c.Fighter, c.FighterAlias, c.FighterResults, c.UpcomingEvent,
-		c.UpcomingFight,
+		c.UpcomingFight, c.UpcomingFighterOdds,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -241,6 +247,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UpcomingEvent.mutate(ctx, m)
 	case *UpcomingFightMutation:
 		return c.UpcomingFight.mutate(ctx, m)
+	case *UpcomingFighterOddsMutation:
+		return c.UpcomingFighterOdds.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -655,6 +663,22 @@ func (c *FighterClient) QueryFights(f *Fighter) *FightQuery {
 	return query
 }
 
+// QueryUpcomingFights queries the upcoming_fights edge of a Fighter.
+func (c *FighterClient) QueryUpcomingFights(f *Fighter) *UpcomingFightQuery {
+	query := (&UpcomingFightClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fighter.Table, fighter.FieldID, id),
+			sqlgraph.To(upcomingfight.Table, upcomingfight.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, fighter.UpcomingFightsTable, fighter.UpcomingFightsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryFighterAliases queries the fighter_aliases edge of a Fighter.
 func (c *FighterClient) QueryFighterAliases(f *Fighter) *FighterAliasQuery {
 	query := (&FighterAliasClient{config: c.config}).Query()
@@ -680,6 +704,22 @@ func (c *FighterClient) QueryFighterResults(f *Fighter) *FighterResultsQuery {
 			sqlgraph.From(fighter.Table, fighter.FieldID, id),
 			sqlgraph.To(fighterresults.Table, fighterresults.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, fighter.FighterResultsTable, fighter.FighterResultsColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpcomingFighterOdds queries the upcoming_fighter_odds edge of a Fighter.
+func (c *FighterClient) QueryUpcomingFighterOdds(f *Fighter) *UpcomingFighterOddsQuery {
+	query := (&UpcomingFighterOddsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fighter.Table, fighter.FieldID, id),
+			sqlgraph.To(upcomingfighterodds.Table, upcomingfighterodds.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, fighter.UpcomingFighterOddsTable, fighter.UpcomingFighterOddsColumn),
 		)
 		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
 		return fromV, nil
@@ -1089,6 +1129,22 @@ func (c *UpcomingEventClient) GetX(ctx context.Context, id int) *UpcomingEvent {
 	return obj
 }
 
+// QueryUpcomingFights queries the upcoming_fights edge of a UpcomingEvent.
+func (c *UpcomingEventClient) QueryUpcomingFights(ue *UpcomingEvent) *UpcomingFightQuery {
+	query := (&UpcomingFightClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ue.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingevent.Table, upcomingevent.FieldID, id),
+			sqlgraph.To(upcomingfight.Table, upcomingfight.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, upcomingevent.UpcomingFightsTable, upcomingevent.UpcomingFightsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ue.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UpcomingEventClient) Hooks() []Hook {
 	return c.hooks.UpcomingEvent
@@ -1207,6 +1263,54 @@ func (c *UpcomingFightClient) GetX(ctx context.Context, id int) *UpcomingFight {
 	return obj
 }
 
+// QueryUpcomingEvent queries the upcoming_event edge of a UpcomingFight.
+func (c *UpcomingFightClient) QueryUpcomingEvent(uf *UpcomingFight) *UpcomingEventQuery {
+	query := (&UpcomingEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := uf.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfight.Table, upcomingfight.FieldID, id),
+			sqlgraph.To(upcomingevent.Table, upcomingevent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, upcomingfight.UpcomingEventTable, upcomingfight.UpcomingEventColumn),
+		)
+		fromV = sqlgraph.Neighbors(uf.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFighters queries the fighters edge of a UpcomingFight.
+func (c *UpcomingFightClient) QueryFighters(uf *UpcomingFight) *FighterQuery {
+	query := (&FighterClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := uf.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfight.Table, upcomingfight.FieldID, id),
+			sqlgraph.To(fighter.Table, fighter.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, upcomingfight.FightersTable, upcomingfight.FightersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(uf.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpcomingFighterOdds queries the upcoming_fighter_odds edge of a UpcomingFight.
+func (c *UpcomingFightClient) QueryUpcomingFighterOdds(uf *UpcomingFight) *UpcomingFighterOddsQuery {
+	query := (&UpcomingFighterOddsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := uf.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfight.Table, upcomingfight.FieldID, id),
+			sqlgraph.To(upcomingfighterodds.Table, upcomingfighterodds.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, upcomingfight.UpcomingFighterOddsTable, upcomingfight.UpcomingFighterOddsColumn),
+		)
+		fromV = sqlgraph.Neighbors(uf.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UpcomingFightClient) Hooks() []Hook {
 	return c.hooks.UpcomingFight
@@ -1232,14 +1336,164 @@ func (c *UpcomingFightClient) mutate(ctx context.Context, m *UpcomingFightMutati
 	}
 }
 
+// UpcomingFighterOddsClient is a client for the UpcomingFighterOdds schema.
+type UpcomingFighterOddsClient struct {
+	config
+}
+
+// NewUpcomingFighterOddsClient returns a client for the UpcomingFighterOdds from the given config.
+func NewUpcomingFighterOddsClient(c config) *UpcomingFighterOddsClient {
+	return &UpcomingFighterOddsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `upcomingfighterodds.Hooks(f(g(h())))`.
+func (c *UpcomingFighterOddsClient) Use(hooks ...Hook) {
+	c.hooks.UpcomingFighterOdds = append(c.hooks.UpcomingFighterOdds, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `upcomingfighterodds.Intercept(f(g(h())))`.
+func (c *UpcomingFighterOddsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UpcomingFighterOdds = append(c.inters.UpcomingFighterOdds, interceptors...)
+}
+
+// Create returns a builder for creating a UpcomingFighterOdds entity.
+func (c *UpcomingFighterOddsClient) Create() *UpcomingFighterOddsCreate {
+	mutation := newUpcomingFighterOddsMutation(c.config, OpCreate)
+	return &UpcomingFighterOddsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UpcomingFighterOdds entities.
+func (c *UpcomingFighterOddsClient) CreateBulk(builders ...*UpcomingFighterOddsCreate) *UpcomingFighterOddsCreateBulk {
+	return &UpcomingFighterOddsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UpcomingFighterOdds.
+func (c *UpcomingFighterOddsClient) Update() *UpcomingFighterOddsUpdate {
+	mutation := newUpcomingFighterOddsMutation(c.config, OpUpdate)
+	return &UpcomingFighterOddsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UpcomingFighterOddsClient) UpdateOne(ufo *UpcomingFighterOdds) *UpcomingFighterOddsUpdateOne {
+	mutation := newUpcomingFighterOddsMutation(c.config, OpUpdateOne, withUpcomingFighterOdds(ufo))
+	return &UpcomingFighterOddsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UpcomingFighterOddsClient) UpdateOneID(id int) *UpcomingFighterOddsUpdateOne {
+	mutation := newUpcomingFighterOddsMutation(c.config, OpUpdateOne, withUpcomingFighterOddsID(id))
+	return &UpcomingFighterOddsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UpcomingFighterOdds.
+func (c *UpcomingFighterOddsClient) Delete() *UpcomingFighterOddsDelete {
+	mutation := newUpcomingFighterOddsMutation(c.config, OpDelete)
+	return &UpcomingFighterOddsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UpcomingFighterOddsClient) DeleteOne(ufo *UpcomingFighterOdds) *UpcomingFighterOddsDeleteOne {
+	return c.DeleteOneID(ufo.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UpcomingFighterOddsClient) DeleteOneID(id int) *UpcomingFighterOddsDeleteOne {
+	builder := c.Delete().Where(upcomingfighterodds.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UpcomingFighterOddsDeleteOne{builder}
+}
+
+// Query returns a query builder for UpcomingFighterOdds.
+func (c *UpcomingFighterOddsClient) Query() *UpcomingFighterOddsQuery {
+	return &UpcomingFighterOddsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUpcomingFighterOdds},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UpcomingFighterOdds entity by its id.
+func (c *UpcomingFighterOddsClient) Get(ctx context.Context, id int) (*UpcomingFighterOdds, error) {
+	return c.Query().Where(upcomingfighterodds.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UpcomingFighterOddsClient) GetX(ctx context.Context, id int) *UpcomingFighterOdds {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFighter queries the fighter edge of a UpcomingFighterOdds.
+func (c *UpcomingFighterOddsClient) QueryFighter(ufo *UpcomingFighterOdds) *FighterQuery {
+	query := (&FighterClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ufo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfighterodds.Table, upcomingfighterodds.FieldID, id),
+			sqlgraph.To(fighter.Table, fighter.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, upcomingfighterodds.FighterTable, upcomingfighterodds.FighterColumn),
+		)
+		fromV = sqlgraph.Neighbors(ufo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUpcomingFight queries the upcoming_fight edge of a UpcomingFighterOdds.
+func (c *UpcomingFighterOddsClient) QueryUpcomingFight(ufo *UpcomingFighterOdds) *UpcomingFightQuery {
+	query := (&UpcomingFightClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ufo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfighterodds.Table, upcomingfighterodds.FieldID, id),
+			sqlgraph.To(upcomingfight.Table, upcomingfight.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, upcomingfighterodds.UpcomingFightTable, upcomingfighterodds.UpcomingFightColumn),
+		)
+		fromV = sqlgraph.Neighbors(ufo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UpcomingFighterOddsClient) Hooks() []Hook {
+	return c.hooks.UpcomingFighterOdds
+}
+
+// Interceptors returns the client interceptors.
+func (c *UpcomingFighterOddsClient) Interceptors() []Interceptor {
+	return c.inters.UpcomingFighterOdds
+}
+
+func (c *UpcomingFighterOddsClient) mutate(ctx context.Context, m *UpcomingFighterOddsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UpcomingFighterOddsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UpcomingFighterOddsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UpcomingFighterOddsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UpcomingFighterOddsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UpcomingFighterOdds mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Event, Fight, Fighter, FighterAlias, FighterResults, UpcomingEvent,
-		UpcomingFight []ent.Hook
+		UpcomingFight, UpcomingFighterOdds []ent.Hook
 	}
 	inters struct {
 		Event, Fight, Fighter, FighterAlias, FighterResults, UpcomingEvent,
-		UpcomingFight []ent.Interceptor
+		UpcomingFight, UpcomingFighterOdds []ent.Interceptor
 	}
 )

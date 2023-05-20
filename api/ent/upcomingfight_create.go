@@ -11,7 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/nherson/psc/api/ent/fighter"
+	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // UpcomingFightCreate is the builder for creating a UpcomingFight entity.
@@ -48,6 +51,61 @@ func (ufc *UpcomingFightCreate) SetNillableUpdatedAt(t *time.Time) *UpcomingFigh
 		ufc.SetUpdatedAt(*t)
 	}
 	return ufc
+}
+
+// SetCardOrder sets the "card_order" field.
+func (ufc *UpcomingFightCreate) SetCardOrder(i int) *UpcomingFightCreate {
+	ufc.mutation.SetCardOrder(i)
+	return ufc
+}
+
+// SetUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by ID.
+func (ufc *UpcomingFightCreate) SetUpcomingEventID(id int) *UpcomingFightCreate {
+	ufc.mutation.SetUpcomingEventID(id)
+	return ufc
+}
+
+// SetNillableUpcomingEventID sets the "upcoming_event" edge to the UpcomingEvent entity by ID if the given value is not nil.
+func (ufc *UpcomingFightCreate) SetNillableUpcomingEventID(id *int) *UpcomingFightCreate {
+	if id != nil {
+		ufc = ufc.SetUpcomingEventID(*id)
+	}
+	return ufc
+}
+
+// SetUpcomingEvent sets the "upcoming_event" edge to the UpcomingEvent entity.
+func (ufc *UpcomingFightCreate) SetUpcomingEvent(u *UpcomingEvent) *UpcomingFightCreate {
+	return ufc.SetUpcomingEventID(u.ID)
+}
+
+// AddFighterIDs adds the "fighters" edge to the Fighter entity by IDs.
+func (ufc *UpcomingFightCreate) AddFighterIDs(ids ...int) *UpcomingFightCreate {
+	ufc.mutation.AddFighterIDs(ids...)
+	return ufc
+}
+
+// AddFighters adds the "fighters" edges to the Fighter entity.
+func (ufc *UpcomingFightCreate) AddFighters(f ...*Fighter) *UpcomingFightCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ufc.AddFighterIDs(ids...)
+}
+
+// AddUpcomingFighterOddIDs adds the "upcoming_fighter_odds" edge to the UpcomingFighterOdds entity by IDs.
+func (ufc *UpcomingFightCreate) AddUpcomingFighterOddIDs(ids ...int) *UpcomingFightCreate {
+	ufc.mutation.AddUpcomingFighterOddIDs(ids...)
+	return ufc
+}
+
+// AddUpcomingFighterOdds adds the "upcoming_fighter_odds" edges to the UpcomingFighterOdds entity.
+func (ufc *UpcomingFightCreate) AddUpcomingFighterOdds(u ...*UpcomingFighterOdds) *UpcomingFightCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ufc.AddUpcomingFighterOddIDs(ids...)
 }
 
 // Mutation returns the UpcomingFightMutation object of the builder.
@@ -103,6 +161,14 @@ func (ufc *UpcomingFightCreate) check() error {
 	if _, ok := ufc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "UpcomingFight.updated_at"`)}
 	}
+	if _, ok := ufc.mutation.CardOrder(); !ok {
+		return &ValidationError{Name: "card_order", err: errors.New(`ent: missing required field "UpcomingFight.card_order"`)}
+	}
+	if v, ok := ufc.mutation.CardOrder(); ok {
+		if err := upcomingfight.CardOrderValidator(v); err != nil {
+			return &ValidationError{Name: "card_order", err: fmt.Errorf(`ent: validator failed for field "UpcomingFight.card_order": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -137,6 +203,63 @@ func (ufc *UpcomingFightCreate) createSpec() (*UpcomingFight, *sqlgraph.CreateSp
 	if value, ok := ufc.mutation.UpdatedAt(); ok {
 		_spec.SetField(upcomingfight.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := ufc.mutation.CardOrder(); ok {
+		_spec.SetField(upcomingfight.FieldCardOrder, field.TypeInt, value)
+		_node.CardOrder = value
+	}
+	if nodes := ufc.mutation.UpcomingEventIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingEventTable,
+			Columns: []string{upcomingfight.UpcomingEventColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.upcoming_event_upcoming_fights = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ufc.mutation.FightersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   upcomingfight.FightersTable,
+			Columns: upcomingfight.FightersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fighter.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UpcomingFighterOddsCreate{config: ufc.config, mutation: newUpcomingFighterOddsMutation(ufc.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ufc.mutation.UpcomingFighterOddsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   upcomingfight.UpcomingFighterOddsTable,
+			Columns: []string{upcomingfight.UpcomingFighterOddsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfighterodds.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -202,6 +325,24 @@ func (u *UpcomingFightUpsert) UpdateUpdatedAt() *UpcomingFightUpsert {
 	return u
 }
 
+// SetCardOrder sets the "card_order" field.
+func (u *UpcomingFightUpsert) SetCardOrder(v int) *UpcomingFightUpsert {
+	u.Set(upcomingfight.FieldCardOrder, v)
+	return u
+}
+
+// UpdateCardOrder sets the "card_order" field to the value that was provided on create.
+func (u *UpcomingFightUpsert) UpdateCardOrder() *UpcomingFightUpsert {
+	u.SetExcluded(upcomingfight.FieldCardOrder)
+	return u
+}
+
+// AddCardOrder adds v to the "card_order" field.
+func (u *UpcomingFightUpsert) AddCardOrder(v int) *UpcomingFightUpsert {
+	u.Add(upcomingfight.FieldCardOrder, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -258,6 +399,27 @@ func (u *UpcomingFightUpsertOne) SetUpdatedAt(v time.Time) *UpcomingFightUpsertO
 func (u *UpcomingFightUpsertOne) UpdateUpdatedAt() *UpcomingFightUpsertOne {
 	return u.Update(func(s *UpcomingFightUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetCardOrder sets the "card_order" field.
+func (u *UpcomingFightUpsertOne) SetCardOrder(v int) *UpcomingFightUpsertOne {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.SetCardOrder(v)
+	})
+}
+
+// AddCardOrder adds v to the "card_order" field.
+func (u *UpcomingFightUpsertOne) AddCardOrder(v int) *UpcomingFightUpsertOne {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.AddCardOrder(v)
+	})
+}
+
+// UpdateCardOrder sets the "card_order" field to the value that was provided on create.
+func (u *UpcomingFightUpsertOne) UpdateCardOrder() *UpcomingFightUpsertOne {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.UpdateCardOrder()
 	})
 }
 
@@ -479,6 +641,27 @@ func (u *UpcomingFightUpsertBulk) SetUpdatedAt(v time.Time) *UpcomingFightUpsert
 func (u *UpcomingFightUpsertBulk) UpdateUpdatedAt() *UpcomingFightUpsertBulk {
 	return u.Update(func(s *UpcomingFightUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetCardOrder sets the "card_order" field.
+func (u *UpcomingFightUpsertBulk) SetCardOrder(v int) *UpcomingFightUpsertBulk {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.SetCardOrder(v)
+	})
+}
+
+// AddCardOrder adds v to the "card_order" field.
+func (u *UpcomingFightUpsertBulk) AddCardOrder(v int) *UpcomingFightUpsertBulk {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.AddCardOrder(v)
+	})
+}
+
+// UpdateCardOrder sets the "card_order" field to the value that was provided on create.
+func (u *UpcomingFightUpsertBulk) UpdateCardOrder() *UpcomingFightUpsertBulk {
+	return u.Update(func(s *UpcomingFightUpsert) {
+		s.UpdateCardOrder()
 	})
 }
 

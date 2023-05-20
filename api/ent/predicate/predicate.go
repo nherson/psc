@@ -26,3 +26,6 @@ type UpcomingEvent func(*sql.Selector)
 
 // UpcomingFight is the predicate function for upcomingfight builders.
 type UpcomingFight func(*sql.Selector)
+
+// UpcomingFighterOdds is the predicate function for upcomingfighterodds builders.
+type UpcomingFighterOdds func(*sql.Selector)

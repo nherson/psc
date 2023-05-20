@@ -149,6 +149,14 @@ func init() {
 	upcomingevent.DefaultUpdatedAt = upcomingeventDescUpdatedAt.Default.(func() time.Time)
 	// upcomingevent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	upcomingevent.UpdateDefaultUpdatedAt = upcomingeventDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// upcomingeventDescTapologyID is the schema descriptor for tapology_id field.
+	upcomingeventDescTapologyID := upcomingeventFields[0].Descriptor()
+	// upcomingevent.TapologyIDValidator is a validator for the "tapology_id" field. It is called by the builders before save.
+	upcomingevent.TapologyIDValidator = upcomingeventDescTapologyID.Validators[0].(func(string) error)
+	// upcomingeventDescName is the schema descriptor for name field.
+	upcomingeventDescName := upcomingeventFields[1].Descriptor()
+	// upcomingevent.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	upcomingevent.NameValidator = upcomingeventDescName.Validators[0].(func(string) error)
 	upcomingfightMixin := schema.UpcomingFight{}.Mixin()
 	upcomingfightMixinFields0 := upcomingfightMixin[0].Fields()
 	_ = upcomingfightMixinFields0
@@ -164,4 +172,10 @@ func init() {
 	upcomingfight.DefaultUpdatedAt = upcomingfightDescUpdatedAt.Default.(func() time.Time)
 	// upcomingfight.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	upcomingfight.UpdateDefaultUpdatedAt = upcomingfightDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// upcomingfightDescCardOrder is the schema descriptor for card_order field.
+	upcomingfightDescCardOrder := upcomingfightFields[0].Descriptor()
+	// upcomingfight.CardOrderValidator is a validator for the "card_order" field. It is called by the builders before save.
+	upcomingfight.CardOrderValidator = upcomingfightDescCardOrder.Validators[0].(func(int) error)
+	upcomingfighteroddsFields := schema.UpcomingFighterOdds{}.Fields()
+	_ = upcomingfighteroddsFields
 }

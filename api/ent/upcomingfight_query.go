@@ -4,23 +4,31 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/predicate"
+	"github.com/nherson/psc/api/ent/upcomingevent"
 	"github.com/nherson/psc/api/ent/upcomingfight"
+	"github.com/nherson/psc/api/ent/upcomingfighterodds"
 )
 
 // UpcomingFightQuery is the builder for querying UpcomingFight entities.
 type UpcomingFightQuery struct {
 	config
-	ctx        *QueryContext
-	order      []upcomingfight.Order
-	inters     []Interceptor
-	predicates []predicate.UpcomingFight
+	ctx                     *QueryContext
+	order                   []upcomingfight.Order
+	inters                  []Interceptor
+	predicates              []predicate.UpcomingFight
+	withUpcomingEvent       *UpcomingEventQuery
+	withFighters            *FighterQuery
+	withUpcomingFighterOdds *UpcomingFighterOddsQuery
+	withFKs                 bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +63,72 @@ func (ufq *UpcomingFightQuery) Unique(unique bool) *UpcomingFightQuery {
 func (ufq *UpcomingFightQuery) Order(o ...upcomingfight.Order) *UpcomingFightQuery {
 	ufq.order = append(ufq.order, o...)
 	return ufq
+}
+
+// QueryUpcomingEvent chains the current query on the "upcoming_event" edge.
+func (ufq *UpcomingFightQuery) QueryUpcomingEvent() *UpcomingEventQuery {
+	query := (&UpcomingEventClient{config: ufq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ufq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ufq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfight.Table, upcomingfight.FieldID, selector),
+			sqlgraph.To(upcomingevent.Table, upcomingevent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, upcomingfight.UpcomingEventTable, upcomingfight.UpcomingEventColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ufq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFighters chains the current query on the "fighters" edge.
+func (ufq *UpcomingFightQuery) QueryFighters() *FighterQuery {
+	query := (&FighterClient{config: ufq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ufq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ufq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfight.Table, upcomingfight.FieldID, selector),
+			sqlgraph.To(fighter.Table, fighter.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, upcomingfight.FightersTable, upcomingfight.FightersPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(ufq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUpcomingFighterOdds chains the current query on the "upcoming_fighter_odds" edge.
+func (ufq *UpcomingFightQuery) QueryUpcomingFighterOdds() *UpcomingFighterOddsQuery {
+	query := (&UpcomingFighterOddsClient{config: ufq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ufq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ufq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(upcomingfight.Table, upcomingfight.FieldID, selector),
+			sqlgraph.To(upcomingfighterodds.Table, upcomingfighterodds.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, upcomingfight.UpcomingFighterOddsTable, upcomingfight.UpcomingFighterOddsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ufq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first UpcomingFight entity from the query.
@@ -244,15 +318,51 @@ func (ufq *UpcomingFightQuery) Clone() *UpcomingFightQuery {
 		return nil
 	}
 	return &UpcomingFightQuery{
-		config:     ufq.config,
-		ctx:        ufq.ctx.Clone(),
-		order:      append([]upcomingfight.Order{}, ufq.order...),
-		inters:     append([]Interceptor{}, ufq.inters...),
-		predicates: append([]predicate.UpcomingFight{}, ufq.predicates...),
+		config:                  ufq.config,
+		ctx:                     ufq.ctx.Clone(),
+		order:                   append([]upcomingfight.Order{}, ufq.order...),
+		inters:                  append([]Interceptor{}, ufq.inters...),
+		predicates:              append([]predicate.UpcomingFight{}, ufq.predicates...),
+		withUpcomingEvent:       ufq.withUpcomingEvent.Clone(),
+		withFighters:            ufq.withFighters.Clone(),
+		withUpcomingFighterOdds: ufq.withUpcomingFighterOdds.Clone(),
 		// clone intermediate query.
 		sql:  ufq.sql.Clone(),
 		path: ufq.path,
 	}
+}
+
+// WithUpcomingEvent tells the query-builder to eager-load the nodes that are connected to
+// the "upcoming_event" edge. The optional arguments are used to configure the query builder of the edge.
+func (ufq *UpcomingFightQuery) WithUpcomingEvent(opts ...func(*UpcomingEventQuery)) *UpcomingFightQuery {
+	query := (&UpcomingEventClient{config: ufq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ufq.withUpcomingEvent = query
+	return ufq
+}
+
+// WithFighters tells the query-builder to eager-load the nodes that are connected to
+// the "fighters" edge. The optional arguments are used to configure the query builder of the edge.
+func (ufq *UpcomingFightQuery) WithFighters(opts ...func(*FighterQuery)) *UpcomingFightQuery {
+	query := (&FighterClient{config: ufq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ufq.withFighters = query
+	return ufq
+}
+
+// WithUpcomingFighterOdds tells the query-builder to eager-load the nodes that are connected to
+// the "upcoming_fighter_odds" edge. The optional arguments are used to configure the query builder of the edge.
+func (ufq *UpcomingFightQuery) WithUpcomingFighterOdds(opts ...func(*UpcomingFighterOddsQuery)) *UpcomingFightQuery {
+	query := (&UpcomingFighterOddsClient{config: ufq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ufq.withUpcomingFighterOdds = query
+	return ufq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -331,15 +441,28 @@ func (ufq *UpcomingFightQuery) prepareQuery(ctx context.Context) error {
 
 func (ufq *UpcomingFightQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UpcomingFight, error) {
 	var (
-		nodes = []*UpcomingFight{}
-		_spec = ufq.querySpec()
+		nodes       = []*UpcomingFight{}
+		withFKs     = ufq.withFKs
+		_spec       = ufq.querySpec()
+		loadedTypes = [3]bool{
+			ufq.withUpcomingEvent != nil,
+			ufq.withFighters != nil,
+			ufq.withUpcomingFighterOdds != nil,
+		}
 	)
+	if ufq.withUpcomingEvent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, upcomingfight.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UpcomingFight).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &UpcomingFight{config: ufq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +474,150 @@ func (ufq *UpcomingFightQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := ufq.withUpcomingEvent; query != nil {
+		if err := ufq.loadUpcomingEvent(ctx, query, nodes, nil,
+			func(n *UpcomingFight, e *UpcomingEvent) { n.Edges.UpcomingEvent = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := ufq.withFighters; query != nil {
+		if err := ufq.loadFighters(ctx, query, nodes,
+			func(n *UpcomingFight) { n.Edges.Fighters = []*Fighter{} },
+			func(n *UpcomingFight, e *Fighter) { n.Edges.Fighters = append(n.Edges.Fighters, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := ufq.withUpcomingFighterOdds; query != nil {
+		if err := ufq.loadUpcomingFighterOdds(ctx, query, nodes,
+			func(n *UpcomingFight) { n.Edges.UpcomingFighterOdds = []*UpcomingFighterOdds{} },
+			func(n *UpcomingFight, e *UpcomingFighterOdds) {
+				n.Edges.UpcomingFighterOdds = append(n.Edges.UpcomingFighterOdds, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (ufq *UpcomingFightQuery) loadUpcomingEvent(ctx context.Context, query *UpcomingEventQuery, nodes []*UpcomingFight, init func(*UpcomingFight), assign func(*UpcomingFight, *UpcomingEvent)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UpcomingFight)
+	for i := range nodes {
+		if nodes[i].upcoming_event_upcoming_fights == nil {
+			continue
+		}
+		fk := *nodes[i].upcoming_event_upcoming_fights
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(upcomingevent.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "upcoming_event_upcoming_fights" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (ufq *UpcomingFightQuery) loadFighters(ctx context.Context, query *FighterQuery, nodes []*UpcomingFight, init func(*UpcomingFight), assign func(*UpcomingFight, *Fighter)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*UpcomingFight)
+	nids := make(map[int]map[*UpcomingFight]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(upcomingfight.FightersTable)
+		s.Join(joinT).On(s.C(fighter.FieldID), joinT.C(upcomingfight.FightersPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(upcomingfight.FightersPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(upcomingfight.FightersPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*UpcomingFight]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Fighter](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "fighters" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (ufq *UpcomingFightQuery) loadUpcomingFighterOdds(ctx context.Context, query *UpcomingFighterOddsQuery, nodes []*UpcomingFight, init func(*UpcomingFight), assign func(*UpcomingFight, *UpcomingFighterOdds)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*UpcomingFight)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.UpcomingFighterOdds(func(s *sql.Selector) {
+		s.Where(sql.InValues(upcomingfight.UpcomingFighterOddsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UpcomingFightID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "upcoming_fight_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (ufq *UpcomingFightQuery) sqlCount(ctx context.Context) (int, error) {

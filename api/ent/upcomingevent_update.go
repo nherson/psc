@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/nherson/psc/api/ent/predicate"
 	"github.com/nherson/psc/api/ent/upcomingevent"
+	"github.com/nherson/psc/api/ent/upcomingfight"
 )
 
 // UpcomingEventUpdate is the builder for updating UpcomingEvent entities.
@@ -34,9 +35,63 @@ func (ueu *UpcomingEventUpdate) SetUpdatedAt(t time.Time) *UpcomingEventUpdate {
 	return ueu
 }
 
+// SetTapologyID sets the "tapology_id" field.
+func (ueu *UpcomingEventUpdate) SetTapologyID(s string) *UpcomingEventUpdate {
+	ueu.mutation.SetTapologyID(s)
+	return ueu
+}
+
+// SetName sets the "name" field.
+func (ueu *UpcomingEventUpdate) SetName(s string) *UpcomingEventUpdate {
+	ueu.mutation.SetName(s)
+	return ueu
+}
+
+// SetDate sets the "date" field.
+func (ueu *UpcomingEventUpdate) SetDate(t time.Time) *UpcomingEventUpdate {
+	ueu.mutation.SetDate(t)
+	return ueu
+}
+
+// AddUpcomingFightIDs adds the "upcoming_fights" edge to the UpcomingFight entity by IDs.
+func (ueu *UpcomingEventUpdate) AddUpcomingFightIDs(ids ...int) *UpcomingEventUpdate {
+	ueu.mutation.AddUpcomingFightIDs(ids...)
+	return ueu
+}
+
+// AddUpcomingFights adds the "upcoming_fights" edges to the UpcomingFight entity.
+func (ueu *UpcomingEventUpdate) AddUpcomingFights(u ...*UpcomingFight) *UpcomingEventUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ueu.AddUpcomingFightIDs(ids...)
+}
+
 // Mutation returns the UpcomingEventMutation object of the builder.
 func (ueu *UpcomingEventUpdate) Mutation() *UpcomingEventMutation {
 	return ueu.mutation
+}
+
+// ClearUpcomingFights clears all "upcoming_fights" edges to the UpcomingFight entity.
+func (ueu *UpcomingEventUpdate) ClearUpcomingFights() *UpcomingEventUpdate {
+	ueu.mutation.ClearUpcomingFights()
+	return ueu
+}
+
+// RemoveUpcomingFightIDs removes the "upcoming_fights" edge to UpcomingFight entities by IDs.
+func (ueu *UpcomingEventUpdate) RemoveUpcomingFightIDs(ids ...int) *UpcomingEventUpdate {
+	ueu.mutation.RemoveUpcomingFightIDs(ids...)
+	return ueu
+}
+
+// RemoveUpcomingFights removes "upcoming_fights" edges to UpcomingFight entities.
+func (ueu *UpcomingEventUpdate) RemoveUpcomingFights(u ...*UpcomingFight) *UpcomingEventUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ueu.RemoveUpcomingFightIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -75,7 +130,25 @@ func (ueu *UpcomingEventUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ueu *UpcomingEventUpdate) check() error {
+	if v, ok := ueu.mutation.TapologyID(); ok {
+		if err := upcomingevent.TapologyIDValidator(v); err != nil {
+			return &ValidationError{Name: "tapology_id", err: fmt.Errorf(`ent: validator failed for field "UpcomingEvent.tapology_id": %w`, err)}
+		}
+	}
+	if v, ok := ueu.mutation.Name(); ok {
+		if err := upcomingevent.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "UpcomingEvent.name": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ueu *UpcomingEventUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := ueu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(upcomingevent.Table, upcomingevent.Columns, sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt))
 	if ps := ueu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -86,6 +159,60 @@ func (ueu *UpcomingEventUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	}
 	if value, ok := ueu.mutation.UpdatedAt(); ok {
 		_spec.SetField(upcomingevent.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := ueu.mutation.TapologyID(); ok {
+		_spec.SetField(upcomingevent.FieldTapologyID, field.TypeString, value)
+	}
+	if value, ok := ueu.mutation.Name(); ok {
+		_spec.SetField(upcomingevent.FieldName, field.TypeString, value)
+	}
+	if value, ok := ueu.mutation.Date(); ok {
+		_spec.SetField(upcomingevent.FieldDate, field.TypeTime, value)
+	}
+	if ueu.mutation.UpcomingFightsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ueu.mutation.RemovedUpcomingFightsIDs(); len(nodes) > 0 && !ueu.mutation.UpcomingFightsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ueu.mutation.UpcomingFightsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ueu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -113,9 +240,63 @@ func (ueuo *UpcomingEventUpdateOne) SetUpdatedAt(t time.Time) *UpcomingEventUpda
 	return ueuo
 }
 
+// SetTapologyID sets the "tapology_id" field.
+func (ueuo *UpcomingEventUpdateOne) SetTapologyID(s string) *UpcomingEventUpdateOne {
+	ueuo.mutation.SetTapologyID(s)
+	return ueuo
+}
+
+// SetName sets the "name" field.
+func (ueuo *UpcomingEventUpdateOne) SetName(s string) *UpcomingEventUpdateOne {
+	ueuo.mutation.SetName(s)
+	return ueuo
+}
+
+// SetDate sets the "date" field.
+func (ueuo *UpcomingEventUpdateOne) SetDate(t time.Time) *UpcomingEventUpdateOne {
+	ueuo.mutation.SetDate(t)
+	return ueuo
+}
+
+// AddUpcomingFightIDs adds the "upcoming_fights" edge to the UpcomingFight entity by IDs.
+func (ueuo *UpcomingEventUpdateOne) AddUpcomingFightIDs(ids ...int) *UpcomingEventUpdateOne {
+	ueuo.mutation.AddUpcomingFightIDs(ids...)
+	return ueuo
+}
+
+// AddUpcomingFights adds the "upcoming_fights" edges to the UpcomingFight entity.
+func (ueuo *UpcomingEventUpdateOne) AddUpcomingFights(u ...*UpcomingFight) *UpcomingEventUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ueuo.AddUpcomingFightIDs(ids...)
+}
+
 // Mutation returns the UpcomingEventMutation object of the builder.
 func (ueuo *UpcomingEventUpdateOne) Mutation() *UpcomingEventMutation {
 	return ueuo.mutation
+}
+
+// ClearUpcomingFights clears all "upcoming_fights" edges to the UpcomingFight entity.
+func (ueuo *UpcomingEventUpdateOne) ClearUpcomingFights() *UpcomingEventUpdateOne {
+	ueuo.mutation.ClearUpcomingFights()
+	return ueuo
+}
+
+// RemoveUpcomingFightIDs removes the "upcoming_fights" edge to UpcomingFight entities by IDs.
+func (ueuo *UpcomingEventUpdateOne) RemoveUpcomingFightIDs(ids ...int) *UpcomingEventUpdateOne {
+	ueuo.mutation.RemoveUpcomingFightIDs(ids...)
+	return ueuo
+}
+
+// RemoveUpcomingFights removes "upcoming_fights" edges to UpcomingFight entities.
+func (ueuo *UpcomingEventUpdateOne) RemoveUpcomingFights(u ...*UpcomingFight) *UpcomingEventUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ueuo.RemoveUpcomingFightIDs(ids...)
 }
 
 // Where appends a list predicates to the UpcomingEventUpdate builder.
@@ -167,7 +348,25 @@ func (ueuo *UpcomingEventUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ueuo *UpcomingEventUpdateOne) check() error {
+	if v, ok := ueuo.mutation.TapologyID(); ok {
+		if err := upcomingevent.TapologyIDValidator(v); err != nil {
+			return &ValidationError{Name: "tapology_id", err: fmt.Errorf(`ent: validator failed for field "UpcomingEvent.tapology_id": %w`, err)}
+		}
+	}
+	if v, ok := ueuo.mutation.Name(); ok {
+		if err := upcomingevent.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "UpcomingEvent.name": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ueuo *UpcomingEventUpdateOne) sqlSave(ctx context.Context) (_node *UpcomingEvent, err error) {
+	if err := ueuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(upcomingevent.Table, upcomingevent.Columns, sqlgraph.NewFieldSpec(upcomingevent.FieldID, field.TypeInt))
 	id, ok := ueuo.mutation.ID()
 	if !ok {
@@ -195,6 +394,60 @@ func (ueuo *UpcomingEventUpdateOne) sqlSave(ctx context.Context) (_node *Upcomin
 	}
 	if value, ok := ueuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(upcomingevent.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := ueuo.mutation.TapologyID(); ok {
+		_spec.SetField(upcomingevent.FieldTapologyID, field.TypeString, value)
+	}
+	if value, ok := ueuo.mutation.Name(); ok {
+		_spec.SetField(upcomingevent.FieldName, field.TypeString, value)
+	}
+	if value, ok := ueuo.mutation.Date(); ok {
+		_spec.SetField(upcomingevent.FieldDate, field.TypeTime, value)
+	}
+	if ueuo.mutation.UpcomingFightsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ueuo.mutation.RemovedUpcomingFightsIDs(); len(nodes) > 0 && !ueuo.mutation.UpcomingFightsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ueuo.mutation.UpcomingFightsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   upcomingevent.UpcomingFightsTable,
+			Columns: []string{upcomingevent.UpcomingFightsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(upcomingfight.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &UpcomingEvent{config: ueuo.config}
 	_spec.Assign = _node.assignValues
