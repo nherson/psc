@@ -9,6 +9,7 @@ Base work
 * Clean up multiple connection functions (and rollback function)
 * ~~Setup Chakra UI basics~~
 * ~~Build UI parity with old site~~
+* Refactor fightodds prompt+fuzzy-matcher into its own package, to be reused by tapology
 
 Monthly process
 ---
