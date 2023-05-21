@@ -22,12 +22,38 @@ import (
 	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/ent/fighterresults"
 	"github.com/nherson/psc/api/internal/clients/db"
+	"github.com/nherson/psc/api/internal/clients/fightodds"
+	"github.com/nherson/psc/api/internal/clients/tapology"
 	"github.com/nherson/psc/api/internal/clients/ufc"
+	"github.com/nherson/psc/api/internal/fuzzy"
+	"github.com/nherson/psc/api/internal/upcoming"
 )
 
 const timestampFormat = "2006-01-02T15:04Z"
 
 type Import mg.Namespace
+
+func (Import) Upcoming(dateString string) error {
+	ctx := context.Background()
+	loadEnv()
+	dbClient := db.MustFromEnv()
+
+	until, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		return err
+	}
+
+	tapologyClient := tapology.NewClient()
+	oddsClient := fightodds.NewClient()
+	matcher, err := fuzzy.NewMatcher(
+		fuzzy.WithDB(dbClient),
+	)
+	if err != nil {
+		return err
+	}
+
+	return upcoming.ImportWithPrompt(ctx, dbClient, tapologyClient, oddsClient, matcher, until)
+}
 
 func (Import) Event(idString string) error {
 	ctx := context.Background()

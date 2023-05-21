@@ -10,12 +10,35 @@ import (
 	"github.com/adrg/strutil"
 	"github.com/manifoldco/promptui"
 	"github.com/nherson/psc/api/ent"
+	"github.com/nherson/psc/api/internal/clients/db"
 )
 
 // MatchFigher returns the best fighter name match so long as the confidence threshold is met.
 // Otherwise, returns an error
 func (m *Matcher) MatchFighter(ctx context.Context, fullName string) (*ent.Fighter, float64, error) {
-	ss, err := m.fighterSimilarities(ctx, fullName)
+	tx, err := m.db.Tx(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	f, c, err := m.matchFighter(ctx, tx, fullName)
+	if err != nil {
+		return nil, 0, db.Rollback(tx, err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
+
+	return f, c, nil
+}
+
+func (m *Matcher) MatchFighterTx(ctx context.Context, tx *ent.Tx, fullName string) (*ent.Fighter, float64, error) {
+	return m.matchFighter(ctx, tx, fullName)
+}
+
+func (m *Matcher) matchFighter(ctx context.Context, tx *ent.Tx, fullName string) (*ent.Fighter, float64, error) {
+	ss, err := m.fighterSimilarities(ctx, tx, fullName)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -27,8 +50,30 @@ func (m *Matcher) MatchFighter(ctx context.Context, fullName string) (*ent.Fight
 	}
 }
 
-func (m *Matcher) MatchWithPrompt(ctx context.Context, fullName string) (*ent.Fighter, float64, error) {
-	ss, err := m.fighterSimilarities(ctx, fullName)
+func (m *Matcher) MatchFighterWithPrompt(ctx context.Context, fullName string) (*ent.Fighter, float64, error) {
+	tx, err := m.db.Tx(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	f, c, err := m.matchFighterWithPrompt(ctx, tx, fullName)
+	if err != nil {
+		return nil, 0, db.Rollback(tx, err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
+
+	return f, c, nil
+}
+
+func (m *Matcher) MatchFighterWithPromptTx(ctx context.Context, tx *ent.Tx, fullName string) (*ent.Fighter, float64, error) {
+	return m.matchFighterWithPrompt(ctx, tx, fullName)
+}
+
+func (m *Matcher) matchFighterWithPrompt(ctx context.Context, tx *ent.Tx, fullName string) (*ent.Fighter, float64, error) {
+	ss, err := m.fighterSimilarities(ctx, tx, fullName)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -45,7 +90,7 @@ func (m *Matcher) MatchWithPrompt(ctx context.Context, fullName string) (*ent.Fi
 	matchOptions = append(matchOptions, "None of the above")
 
 	prompt := promptui.Select{
-		Label: "Choose the best DB match",
+		Label: fmt.Sprintf("Choose the best DB match for %s", fullName),
 		Items: matchOptions,
 		Size:  m.promptChoices + 1,
 	}
@@ -61,13 +106,14 @@ func (m *Matcher) MatchWithPrompt(ctx context.Context, fullName string) (*ent.Fi
 	}
 }
 
-func (m *Matcher) fighterSimilarities(ctx context.Context, fullName string) (similarities, error) {
+func (m *Matcher) fighterSimilarities(ctx context.Context, tx *ent.Tx, fullName string) (similarities, error) {
 	fullName = strings.ToLower(fullName)
 
-	fighters, err := m.getFighters(ctx)
+	fighters, err := m.getFighters(ctx, tx)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(fighters) == 0 {
 		// this shouldnt happen, but lets not risk panicking later
 		return nil, errors.New("no fighters")
@@ -75,9 +121,9 @@ func (m *Matcher) fighterSimilarities(ctx context.Context, fullName string) (sim
 
 	var out similarities
 	for _, f := range fighters {
-		candidateFullName := fmt.Sprintf("%s %s", strings.ToLower(f.FirstName), strings.ToLower(f.LastName))
+		candidateFullName := fmt.Sprintf("%s %s", f.FirstName, f.LastName)
 
-		score := strutil.Similarity(fullName, candidateFullName, m.stringMetric)
+		score := strutil.Similarity(fullName, strings.ToLower(candidateFullName), m.stringMetric)
 		out = append(out, similarityOutput{
 			fullName:  candidateFullName,
 			dbFighter: f,

@@ -78,13 +78,13 @@ func NewMatcher(opts ...Option) (*Matcher, error) {
 	}, nil
 }
 
-func (m *Matcher) getFighters(ctx context.Context) ([]*ent.Fighter, error) {
+func (m *Matcher) getFighters(ctx context.Context, tx *ent.Tx) ([]*ent.Fighter, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	now := time.Now()
 
 	if m.fighters == nil || now.After(m.fighterRefreshTimestamp) {
-		fighters, err := m.db.Fighter.Query().All(ctx)
+		fighters, err := tx.Fighter.Query().All(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -94,4 +94,12 @@ func (m *Matcher) getFighters(ctx context.Context) ([]*ent.Fighter, error) {
 	}
 
 	return m.fighters, nil
+}
+
+func (m *Matcher) ClearCache() {
+	// m.lock.Lock()
+	// defer m.lock.Unlock()
+
+	m.fighters = nil
+	m.fighterRefreshTimestamp = time.Time{} // epoch
 }

@@ -66,7 +66,7 @@ func AssignUpcomingIDs(dateString string) error {
 
 		fmt.Printf("Doing ID assignment for fighter '%s %s'\n", fighterOdds.FirstName, fighterOdds.LastName)
 		name := fmt.Sprintf("%s %s", fighterOdds.FirstName, fighterOdds.LastName)
-		f, score, err := matcher.MatchWithPrompt(ctx, name)
+		f, score, err := matcher.MatchFighterWithPrompt(ctx, name)
 		if f != nil {
 			fmt.Printf("Assigning %q FightInsider ID %q\n with score %.2f\n", name, fighterOdds.ID, score)
 			dbClient.Fighter.UpdateOne(f).SetFightinsiderID(fighterOdds.ID).SaveX(ctx)

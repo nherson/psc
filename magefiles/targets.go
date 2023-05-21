@@ -12,6 +12,8 @@ import (
 	_ "github.com/nherson/psc/api/magefiles/data"
 	//mage:import fightodds
 	_ "github.com/nherson/psc/api/magefiles/fightodds"
+	//mage:import tapology
+	_ "github.com/nherson/psc/api/magefiles/tapology"
 )
 
 type Ent mg.Namespace
