@@ -62,6 +62,7 @@ var (
 		{Name: "nick_name", Type: field.TypeString},
 		{Name: "fightinsider_id", Type: field.TypeString, Nullable: true},
 		{Name: "tapology_id", Type: field.TypeString, Nullable: true},
+		{Name: "temporary", Type: field.TypeBool, Default: false},
 	}
 	// FightersTable holds the schema information for the "fighters" table.
 	FightersTable = &schema.Table{

@@ -1755,6 +1755,7 @@ type FighterMutation struct {
 	nick_name                    *string
 	fightinsider_id              *string
 	tapology_id                  *string
+	temporary                    *bool
 	clearedFields                map[string]struct{}
 	fights                       map[int]struct{}
 	removedfights                map[int]struct{}
@@ -2244,6 +2245,42 @@ func (m *FighterMutation) ResetTapologyID() {
 	delete(m.clearedFields, fighter.FieldTapologyID)
 }
 
+// SetTemporary sets the "temporary" field.
+func (m *FighterMutation) SetTemporary(b bool) {
+	m.temporary = &b
+}
+
+// Temporary returns the value of the "temporary" field in the mutation.
+func (m *FighterMutation) Temporary() (r bool, exists bool) {
+	v := m.temporary
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTemporary returns the old "temporary" field's value of the Fighter entity.
+// If the Fighter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FighterMutation) OldTemporary(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTemporary is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTemporary requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTemporary: %w", err)
+	}
+	return oldValue.Temporary, nil
+}
+
+// ResetTemporary resets all changes to the "temporary" field.
+func (m *FighterMutation) ResetTemporary() {
+	m.temporary = nil
+}
+
 // AddFightIDs adds the "fights" edge to the Fight entity by ids.
 func (m *FighterMutation) AddFightIDs(ids ...int) {
 	if m.fights == nil {
@@ -2548,7 +2585,7 @@ func (m *FighterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FighterMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, fighter.FieldCreatedAt)
 	}
@@ -2576,6 +2613,9 @@ func (m *FighterMutation) Fields() []string {
 	if m.tapology_id != nil {
 		fields = append(fields, fighter.FieldTapologyID)
 	}
+	if m.temporary != nil {
+		fields = append(fields, fighter.FieldTemporary)
+	}
 	return fields
 }
 
@@ -2602,6 +2642,8 @@ func (m *FighterMutation) Field(name string) (ent.Value, bool) {
 		return m.FightinsiderID()
 	case fighter.FieldTapologyID:
 		return m.TapologyID()
+	case fighter.FieldTemporary:
+		return m.Temporary()
 	}
 	return nil, false
 }
@@ -2629,6 +2671,8 @@ func (m *FighterMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldFightinsiderID(ctx)
 	case fighter.FieldTapologyID:
 		return m.OldTapologyID(ctx)
+	case fighter.FieldTemporary:
+		return m.OldTemporary(ctx)
 	}
 	return nil, fmt.Errorf("unknown Fighter field %s", name)
 }
@@ -2700,6 +2744,13 @@ func (m *FighterMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTapologyID(v)
+		return nil
+	case fighter.FieldTemporary:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTemporary(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Fighter field %s", name)
@@ -2806,6 +2857,9 @@ func (m *FighterMutation) ResetField(name string) error {
 		return nil
 	case fighter.FieldTapologyID:
 		m.ResetTapologyID()
+		return nil
+	case fighter.FieldTemporary:
+		m.ResetTemporary()
 		return nil
 	}
 	return fmt.Errorf("unknown Fighter field %s", name)

@@ -100,6 +100,11 @@ func TapologyID(v string) predicate.Fighter {
 	return predicate.Fighter(sql.FieldEQ(FieldTapologyID, v))
 }
 
+// Temporary applies equality check predicate on the "temporary" field. It's identical to TemporaryEQ.
+func Temporary(v bool) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldTemporary, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Fighter {
 	return predicate.Fighter(sql.FieldEQ(FieldCreatedAt, v))
@@ -628,6 +633,16 @@ func TapologyIDEqualFold(v string) predicate.Fighter {
 // TapologyIDContainsFold applies the ContainsFold predicate on the "tapology_id" field.
 func TapologyIDContainsFold(v string) predicate.Fighter {
 	return predicate.Fighter(sql.FieldContainsFold(FieldTapologyID, v))
+}
+
+// TemporaryEQ applies the EQ predicate on the "temporary" field.
+func TemporaryEQ(v bool) predicate.Fighter {
+	return predicate.Fighter(sql.FieldEQ(FieldTemporary, v))
+}
+
+// TemporaryNEQ applies the NEQ predicate on the "temporary" field.
+func TemporaryNEQ(v bool) predicate.Fighter {
+	return predicate.Fighter(sql.FieldNEQ(FieldTemporary, v))
 }
 
 // HasFights applies the HasEdge predicate on the "fights" edge.

@@ -116,6 +116,20 @@ func (fu *FighterUpdate) ClearTapologyID() *FighterUpdate {
 	return fu
 }
 
+// SetTemporary sets the "temporary" field.
+func (fu *FighterUpdate) SetTemporary(b bool) *FighterUpdate {
+	fu.mutation.SetTemporary(b)
+	return fu
+}
+
+// SetNillableTemporary sets the "temporary" field if the given value is not nil.
+func (fu *FighterUpdate) SetNillableTemporary(b *bool) *FighterUpdate {
+	if b != nil {
+		fu.SetTemporary(*b)
+	}
+	return fu
+}
+
 // AddFightIDs adds the "fights" edge to the Fight entity by IDs.
 func (fu *FighterUpdate) AddFightIDs(ids ...int) *FighterUpdate {
 	fu.mutation.AddFightIDs(ids...)
@@ -391,6 +405,9 @@ func (fu *FighterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if fu.mutation.TapologyIDCleared() {
 		_spec.ClearField(fighter.FieldTapologyID, field.TypeString)
+	}
+	if value, ok := fu.mutation.Temporary(); ok {
+		_spec.SetField(fighter.FieldTemporary, field.TypeBool, value)
 	}
 	if fu.mutation.FightsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -744,6 +761,20 @@ func (fuo *FighterUpdateOne) ClearTapologyID() *FighterUpdateOne {
 	return fuo
 }
 
+// SetTemporary sets the "temporary" field.
+func (fuo *FighterUpdateOne) SetTemporary(b bool) *FighterUpdateOne {
+	fuo.mutation.SetTemporary(b)
+	return fuo
+}
+
+// SetNillableTemporary sets the "temporary" field if the given value is not nil.
+func (fuo *FighterUpdateOne) SetNillableTemporary(b *bool) *FighterUpdateOne {
+	if b != nil {
+		fuo.SetTemporary(*b)
+	}
+	return fuo
+}
+
 // AddFightIDs adds the "fights" edge to the Fight entity by IDs.
 func (fuo *FighterUpdateOne) AddFightIDs(ids ...int) *FighterUpdateOne {
 	fuo.mutation.AddFightIDs(ids...)
@@ -1049,6 +1080,9 @@ func (fuo *FighterUpdateOne) sqlSave(ctx context.Context) (_node *Fighter, err e
 	}
 	if fuo.mutation.TapologyIDCleared() {
 		_spec.ClearField(fighter.FieldTapologyID, field.TypeString)
+	}
+	if value, ok := fuo.mutation.Temporary(); ok {
+		_spec.SetField(fighter.FieldTemporary, field.TypeBool, value)
 	}
 	if fuo.mutation.FightsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -113,6 +113,20 @@ func (fc *FighterCreate) SetNillableTapologyID(s *string) *FighterCreate {
 	return fc
 }
 
+// SetTemporary sets the "temporary" field.
+func (fc *FighterCreate) SetTemporary(b bool) *FighterCreate {
+	fc.mutation.SetTemporary(b)
+	return fc
+}
+
+// SetNillableTemporary sets the "temporary" field if the given value is not nil.
+func (fc *FighterCreate) SetNillableTemporary(b *bool) *FighterCreate {
+	if b != nil {
+		fc.SetTemporary(*b)
+	}
+	return fc
+}
+
 // AddFightIDs adds the "fights" edge to the Fight entity by IDs.
 func (fc *FighterCreate) AddFightIDs(ids ...int) *FighterCreate {
 	fc.mutation.AddFightIDs(ids...)
@@ -231,6 +245,10 @@ func (fc *FighterCreate) defaults() {
 		v := fighter.DefaultUpdatedAt()
 		fc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := fc.mutation.Temporary(); !ok {
+		v := fighter.DefaultTemporary
+		fc.mutation.SetTemporary(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -260,6 +278,9 @@ func (fc *FighterCreate) check() error {
 	}
 	if _, ok := fc.mutation.NickName(); !ok {
 		return &ValidationError{Name: "nick_name", err: errors.New(`ent: missing required field "Fighter.nick_name"`)}
+	}
+	if _, ok := fc.mutation.Temporary(); !ok {
+		return &ValidationError{Name: "temporary", err: errors.New(`ent: missing required field "Fighter.temporary"`)}
 	}
 	return nil
 }
@@ -323,6 +344,10 @@ func (fc *FighterCreate) createSpec() (*Fighter, *sqlgraph.CreateSpec) {
 	if value, ok := fc.mutation.TapologyID(); ok {
 		_spec.SetField(fighter.FieldTapologyID, field.TypeString, value)
 		_node.TapologyID = value
+	}
+	if value, ok := fc.mutation.Temporary(); ok {
+		_spec.SetField(fighter.FieldTemporary, field.TypeBool, value)
+		_node.Temporary = value
 	}
 	if nodes := fc.mutation.FightsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -578,6 +603,18 @@ func (u *FighterUpsert) ClearTapologyID() *FighterUpsert {
 	return u
 }
 
+// SetTemporary sets the "temporary" field.
+func (u *FighterUpsert) SetTemporary(v bool) *FighterUpsert {
+	u.Set(fighter.FieldTemporary, v)
+	return u
+}
+
+// UpdateTemporary sets the "temporary" field to the value that was provided on create.
+func (u *FighterUpsert) UpdateTemporary() *FighterUpsert {
+	u.SetExcluded(fighter.FieldTemporary)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -753,6 +790,20 @@ func (u *FighterUpsertOne) UpdateTapologyID() *FighterUpsertOne {
 func (u *FighterUpsertOne) ClearTapologyID() *FighterUpsertOne {
 	return u.Update(func(s *FighterUpsert) {
 		s.ClearTapologyID()
+	})
+}
+
+// SetTemporary sets the "temporary" field.
+func (u *FighterUpsertOne) SetTemporary(v bool) *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetTemporary(v)
+	})
+}
+
+// UpdateTemporary sets the "temporary" field to the value that was provided on create.
+func (u *FighterUpsertOne) UpdateTemporary() *FighterUpsertOne {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateTemporary()
 	})
 }
 
@@ -1093,6 +1144,20 @@ func (u *FighterUpsertBulk) UpdateTapologyID() *FighterUpsertBulk {
 func (u *FighterUpsertBulk) ClearTapologyID() *FighterUpsertBulk {
 	return u.Update(func(s *FighterUpsert) {
 		s.ClearTapologyID()
+	})
+}
+
+// SetTemporary sets the "temporary" field.
+func (u *FighterUpsertBulk) SetTemporary(v bool) *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.SetTemporary(v)
+	})
+}
+
+// UpdateTemporary sets the "temporary" field to the value that was provided on create.
+func (u *FighterUpsertBulk) UpdateTemporary() *FighterUpsertBulk {
+	return u.Update(func(s *FighterUpsert) {
+		s.UpdateTemporary()
 	})
 }
 

@@ -92,6 +92,10 @@ func init() {
 	fighterDescUfcFighterID := fighterFields[0].Descriptor()
 	// fighter.UfcFighterIDValidator is a validator for the "ufc_fighter_id" field. It is called by the builders before save.
 	fighter.UfcFighterIDValidator = fighterDescUfcFighterID.Validators[0].(func(string) error)
+	// fighterDescTemporary is the schema descriptor for temporary field.
+	fighterDescTemporary := fighterFields[7].Descriptor()
+	// fighter.DefaultTemporary holds the default value on creation for the temporary field.
+	fighter.DefaultTemporary = fighterDescTemporary.Default.(bool)
 	fighteraliasMixin := schema.FighterAlias{}.Mixin()
 	fighteraliasMixinFields0 := fighteraliasMixin[0].Fields()
 	_ = fighteraliasMixinFields0

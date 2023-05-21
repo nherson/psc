@@ -35,6 +35,8 @@ type Fighter struct {
 	FightinsiderID string `json:"fightinsider_id,omitempty"`
 	// TapologyID holds the value of the "tapology_id" field.
 	TapologyID string `json:"tapology_id,omitempty"`
+	// True if the fighter is found in an external site and not UFC official data (e.g. debut fighters)
+	Temporary bool `json:"temporary,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FighterQuery when eager-loading is set.
 	Edges        FighterEdges `json:"edges"`
@@ -108,6 +110,8 @@ func (*Fighter) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case fighter.FieldTemporary:
+			values[i] = new(sql.NullBool)
 		case fighter.FieldID, fighter.FieldMmaID:
 			values[i] = new(sql.NullInt64)
 		case fighter.FieldUfcFighterID, fighter.FieldFirstName, fighter.FieldLastName, fighter.FieldNickName, fighter.FieldFightinsiderID, fighter.FieldTapologyID:
@@ -188,6 +192,12 @@ func (f *Fighter) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field tapology_id", values[i])
 			} else if value.Valid {
 				f.TapologyID = value.String
+			}
+		case fighter.FieldTemporary:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field temporary", values[i])
+			} else if value.Valid {
+				f.Temporary = value.Bool
 			}
 		default:
 			f.selectValues.Set(columns[i], values[i])
@@ -276,6 +286,9 @@ func (f *Fighter) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tapology_id=")
 	builder.WriteString(f.TapologyID)
+	builder.WriteString(", ")
+	builder.WriteString("temporary=")
+	builder.WriteString(fmt.Sprintf("%v", f.Temporary))
 	builder.WriteByte(')')
 	return builder.String()
 }

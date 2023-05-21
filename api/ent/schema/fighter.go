@@ -28,6 +28,7 @@ func (Fighter) Fields() []ent.Field {
 		field.String("nick_name"),
 		field.String("fightinsider_id").Optional(),
 		field.String("tapology_id").Optional(),
+		field.Bool("temporary").Default(false).Comment("True if the fighter is found in an external site and not UFC official data (e.g. debut fighters)"),
 	}
 }
 

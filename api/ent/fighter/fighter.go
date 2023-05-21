@@ -32,6 +32,8 @@ const (
 	FieldFightinsiderID = "fightinsider_id"
 	// FieldTapologyID holds the string denoting the tapology_id field in the database.
 	FieldTapologyID = "tapology_id"
+	// FieldTemporary holds the string denoting the temporary field in the database.
+	FieldTemporary = "temporary"
 	// EdgeFights holds the string denoting the fights edge name in mutations.
 	EdgeFights = "fights"
 	// EdgeUpcomingFights holds the string denoting the upcoming_fights edge name in mutations.
@@ -89,6 +91,7 @@ var Columns = []string{
 	FieldNickName,
 	FieldFightinsiderID,
 	FieldTapologyID,
+	FieldTemporary,
 }
 
 var (
@@ -119,6 +122,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// UfcFighterIDValidator is a validator for the "ufc_fighter_id" field. It is called by the builders before save.
 	UfcFighterIDValidator func(string) error
+	// DefaultTemporary holds the default value on creation for the "temporary" field.
+	DefaultTemporary bool
 )
 
 // Order defines the ordering method for the Fighter queries.
@@ -172,6 +177,11 @@ func ByFightinsiderID(opts ...sql.OrderTermOption) Order {
 // ByTapologyID orders the results by the tapology_id field.
 func ByTapologyID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldTapologyID, opts...).ToFunc()
+}
+
+// ByTemporary orders the results by the temporary field.
+func ByTemporary(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldTemporary, opts...).ToFunc()
 }
 
 // ByFightsCount orders the results by fights count.
