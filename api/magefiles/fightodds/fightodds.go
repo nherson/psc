@@ -4,20 +4,16 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"sort"
-	"strings"
 	"time"
 
-	"github.com/adrg/strutil"
-	"github.com/adrg/strutil/metrics"
 	"github.com/joho/godotenv"
 	"github.com/magefile/mage/sh"
-	"github.com/manifoldco/promptui"
 
 	"github.com/nherson/psc/api/ent"
 	"github.com/nherson/psc/api/ent/fighter"
 	"github.com/nherson/psc/api/internal/clients/db"
 	"github.com/nherson/psc/api/internal/clients/fightodds"
+	"github.com/nherson/psc/api/internal/fuzzy"
 )
 
 func Generate() error {
@@ -46,13 +42,12 @@ func AssignUpcomingIDs(dateString string) error {
 		return err
 	}
 
-	allFighters := dbClient.Fighter.Query().
-		Select(
-			fighter.FieldID,
-			fighter.FieldFirstName,
-			fighter.FieldLastName,
-			fighter.FieldFightinsiderID,
-		).AllX(ctx)
+	matcher, err := fuzzy.NewMatcher(
+		fuzzy.WithDB(dbClient),
+	)
+	if err != nil {
+		return err
+	}
 
 	oddsClient := fightodds.NewClient()
 	oddsData, err := oddsClient.UpcomingFighterOdds(ctx, t)
@@ -70,76 +65,19 @@ func AssignUpcomingIDs(dateString string) error {
 		}
 
 		fmt.Printf("Doing ID assignment for fighter '%s %s'\n", fighterOdds.FirstName, fighterOdds.LastName)
-		selection, err := chooseBestMatch(fighterOdds, allFighters)
-		if err != nil {
-			return err
-		}
-
-		if selection != nil {
-			fmt.Printf("Assigning %q FightInsider ID %q\n", selection.fullName, fighterOdds.ID)
-			dbClient.Fighter.UpdateOne(selection.dbFighter).SetFightinsiderID(fighterOdds.ID).SaveX(ctx)
-		} else {
+		name := fmt.Sprintf("%s %s", fighterOdds.FirstName, fighterOdds.LastName)
+		f, score, err := matcher.MatchWithPrompt(ctx, name)
+		if f != nil {
+			fmt.Printf("Assigning %q FightInsider ID %q\n with score %.2f\n", name, fighterOdds.ID, score)
+			dbClient.Fighter.UpdateOne(f).SetFightinsiderID(fighterOdds.ID).SaveX(ctx)
+		} else if err == fuzzy.ErrNoMatch {
 			fmt.Printf("Skipping FightInsider ID assignment for %q\n", fighterOdds.ID)
+		} else if err != nil {
+			fmt.Println("Unexpected error finding match:", err.Error())
 		}
 	}
 
 	return nil
-}
-
-type similarityOutput struct {
-	dbFighter *ent.Fighter
-	fullName  string
-	score     float64
-}
-
-type similarities []similarityOutput
-
-func (s similarities) Len() int           { return len(s) }
-func (s similarities) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s similarities) Less(i, j int) bool { return s[i].score > s[j].score }
-
-// if (nil, nil) is returned, none were chosen
-func chooseBestMatch(fighter fightodds.Fighter, candidates []*ent.Fighter) (*similarityOutput, error) {
-	sd := metrics.NewSorensenDice()
-
-	fighterFullName := fmt.Sprintf("%s %s", strings.ToLower(fighter.FirstName), strings.ToLower(fighter.LastName))
-
-	var out similarities
-	for _, f := range candidates {
-		candidateFullName := fmt.Sprintf("%s %s", strings.ToLower(f.FirstName), strings.ToLower(f.LastName))
-
-		score := strutil.Similarity(fighterFullName, candidateFullName, sd)
-		out = append(out, similarityOutput{
-			fullName:  candidateFullName,
-			dbFighter: f,
-			score:     score,
-		})
-	}
-
-	sort.Sort(out)
-
-	var matchOptions []string
-	for i := 0; i < 5; i++ {
-		match := out[i]
-		matchOptions = append(matchOptions, fmt.Sprintf("Name: %s, Score: %.2f", match.fullName, match.score))
-	}
-	matchOptions = append(matchOptions, "None of the above")
-
-	prompt := promptui.Select{
-		Label: "Choose the best DB match",
-		Items: matchOptions,
-		Size:  6,
-	}
-	idx, _, err := prompt.Run()
-	if err != nil {
-		panic(err)
-	}
-
-	if idx == 5 {
-		return nil, nil
-	} else {
-		return &out[idx], nil
-	}
 }
 
 func loadEnv() {
