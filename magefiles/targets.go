@@ -63,6 +63,13 @@ func (Web) Start() error {
 	return err
 }
 
+type API mg.Namespace
+
+func (API) Start() error {
+	_, err := sh.Exec(nil, os.Stdout, os.Stderr, "go", "run", "./api/cmd/psc/main.go", "-local")
+	return err
+}
+
 func Deploy() error {
 	return sh.Run("flyctl", "deploy")
 }

@@ -1,5 +1,5 @@
 .env
 data
-!api/magefiles/data
+!api/**/data
 .DS_Store
 .vscode
