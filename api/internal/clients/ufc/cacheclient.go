@@ -36,7 +36,7 @@ func (c *CacheClient) EventByID(id int) (Event, error) {
 		err = json.Unmarshal(b, &payload)
 		event = payload.Event
 	} else {
-		log.Printf("cache miss for fight %d\n", id)
+		log.Printf("cache miss for event %d\n", id)
 		event, err = c.client.EventByID(id)
 		cacheErr := c.cacheResponse(path, c.client.eventURL(id))
 		if cacheErr != nil {

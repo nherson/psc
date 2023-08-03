@@ -157,7 +157,8 @@ func doImport(
 		fmt.Printf("Attempting odds data association for '%s %s'\n", fighterOdds.FirstName, fighterOdds.LastName)
 		fighter, _, err := matcher.findMatch(ctx, tx, fmt.Sprintf("%s %s", fighterOdds.FirstName, fighterOdds.LastName))
 		if err == fuzzy.ErrNoMatch {
-			fmt.Printf("Skipping odds association for fighter '%s %s'", fighterOdds.FirstName, fighterOdds.LastName)
+			fmt.Printf("Skipping odds association for fighter '%s %s'\n", fighterOdds.FirstName, fighterOdds.LastName)
+			continue
 		}
 
 		oddsEdge, err := tx.UpcomingFighterOdds.Query().Where(upcomingfighterodds.FighterID(fighter.ID)).Only(ctx)
