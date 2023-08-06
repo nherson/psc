@@ -29,7 +29,11 @@ type Entry struct {
 	ControlTimeSeconds int     `csv:"control_time_seconds"`
 	Odds               int     `csv:"odds"`
 	Score              float32 `csv:"score"`
-	debut              bool    `csv:"-"`
+
+	OpponentName string `csv:"opponent_name"`
+	Date         string `csv:"date"`
+
+	debut bool `csv:"-"`
 }
 
 func (s *Service) PublicCSV(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +126,14 @@ func (s *Service) fetchEntries(ctx context.Context) ([]*Entry, error) {
 		WithUpcomingFighterOdds().
 		WithFights(
 			func(q *ent.FightQuery) {
-				q.WithFighterResults()
+				q.WithFighterResults(
+					func(q *ent.FighterResultsQuery) {
+						q.WithFighter()
+					},
+				)
+			},
+			func(q *ent.FightQuery) {
+				q.WithEvent()
 			},
 		).
 		All(ctx)
@@ -145,21 +156,26 @@ func (s *Service) fetchEntries(ctx context.Context) ([]*Entry, error) {
 
 		for _, fight := range f.Edges.Fights {
 			endingRound := fight.ResultEndingRound
+			var entry Entry
 			for _, fr := range fight.Edges.FighterResults {
 				if fr.FighterID != f.ID {
-					continue
+					// The other fighter, get their name
+					firstName := fr.Edges.Fighter.FirstName
+					lastName := fr.Edges.Fighter.LastName
+					entry.OpponentName = strings.TrimSpace(fmt.Sprintf("%s %s", firstName, lastName))
+				} else {
+					// The fighter we care about, pull the stats
+					entry.Name = fullName
+					entry.SigStrikes = fr.SignificantStrikesLanded
+					entry.Takedowns = fr.Takedowns
+					entry.Knockdowns = fr.Knockdowns
+					entry.ControlTimeSeconds = fr.ControlTimeSeconds
+					entry.Odds = odds
+					entry.Score = score.Compute(fr, endingRound)
+					entry.Date = fight.Edges.Event.Date.Format("2006-01-02")
 				}
-
-				entries = append(entries, &Entry{
-					Name:               fullName,
-					SigStrikes:         fr.SignificantStrikesLanded,
-					Takedowns:          fr.Takedowns,
-					Knockdowns:         fr.Knockdowns,
-					ControlTimeSeconds: fr.ControlTimeSeconds,
-					Odds:               odds,
-					Score:              score.Compute(fr, endingRound),
-				})
 			}
+			entries = append(entries, &entry)
 		}
 		// Make a dummy entry if this is a new fighter
 		if len(f.Edges.Fights) == 0 {
