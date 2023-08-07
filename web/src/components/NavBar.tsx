@@ -8,10 +8,12 @@ import {
   useDisclosure,
   useColorModeValue,
   Stack,
+  Button,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { ColorModeSwitcher } from "./ColorModeSwitcher";
 import { useLocation } from "react-router-dom";
+import { downloadStats } from "../lib/stats";
 
 const Links: LinkData[] = [
   {
@@ -79,6 +81,7 @@ export default function NavBar() {
             </HStack>
           </HStack>
           <Flex alignItems={"center"}>
+            <Button onClick={downloadStats}>Download Stats</Button>
             <ColorModeSwitcher justifySelf="flex-end" />
           </Flex>
         </Flex>
