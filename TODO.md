@@ -10,17 +10,21 @@
 - ~~Setup Chakra UI basics~~
 - ~~Build UI parity with old site~~
 - ~~Refactor fightodds prompt+fuzzy-matcher into its own package, to be reused by tapology~~
-- Cron to remove upcoming fights and events that are no longer "upcoming"
+- ~~Cron to remove upcoming fights and events that are no longer "upcoming"~~
 - UI for upcoming event and fight info
-- Personal data mangling endpoint, hands back a CSV
-  - How I like the data
-- Public data endpoint
+- ~~Personal data mangling endpoint, hands back a CSV~~
+  - ~~How I like the data~~
+- ~~Public data endpoint~~
   - ~~CSV~~
   - ~~For every upcoming fighter, one row for each past fight~~
     - ~~Name, sig strikes, takedowns, knockdowns, control time, odds, score, date~~
-  - Add date of previous fight to CSV data
+  - ~~Add date of previous fight to CSV data~~
 - Logging
 - Use React env vars to determine URL for both twirp and stat clients
+- Add "last updated" info somewhere near the stat downlaod button
+- "Fighter Alias" table to stash other names for fighters to bypass future similarity-based matches
+- Fix layout on mobile
+- ~~HTTPS redirect~~
 
 ## Monthly process
 

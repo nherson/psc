@@ -62,7 +62,24 @@ func main() {
 		Debug:              true,
 	})
 
+	var h http.Handler
+	h = mux
+	h = c.Handler(mux)
+	if !local {
+		h = forceHTTPS(h)
+	}
+
 	fmt.Println("Listening on port :8080")
 
-	http.ListenAndServe(":8080", c.Handler(mux))
+	http.ListenAndServe(":8080", h)
+}
+
+func forceHTTPS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-Forwarded-Proto") == "http" {
+			http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
 }
