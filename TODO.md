@@ -44,16 +44,16 @@
 
 ## Upcoming Import Process (implemented!)
 
-- For upcoming DB loading
-  - Wipe all Upcoming\* records and re-create in a single transaction
-  - Not possible to "upsert" since upcoming fights have no unique identifier and the card is constantly changing
-  - To associate fighters, go through these cases in order
-    - If tapology_id set on fighter and matches, done!
-      - Can tapology IDs change?
-        - If yes, maybe need to store just the number part of the id (e.g. `123456-jon-doe-the-killa` vs `123456`)
-          - DONT DO THIS: found at least one fighter with no number prefix, just their name as the id
-    - If fuzzy match is above certain threshold, associate tapology_id
-    - Else
-      - If automated process, create temporary fighter record (need bool on fighter schema)
-      - If mage task, prompt fuzzy match best options
-        - If none, create temporary record
+- ~~For upcoming DB loading~~
+  - ~~Wipe all Upcoming\* records and re-create in a single transaction~~
+  - ~~Not possible to "upsert" since upcoming fights have no unique identifier and the card is constantly changing~~
+  - ~~To associate fighters, go through these cases in order~~
+    - ~~If tapology_id set on fighter and matches, done!~~
+      - ~~Can tapology IDs change?~~
+        - ~~If yes, maybe need to store just the number part of the id (e.g. `123456-jon-doe-the-killa` vs `123456`)~~
+          - ~~DONT DO THIS: found at least one fighter with no number prefix, just their name as the id~~
+    - ~~If fuzzy match is above certain threshold, associate tapology_id~~
+    - ~~Else~~
+      - ~~If automated process, create temporary fighter record (need bool on fighter schema)~~
+      - ~~If mage task, prompt fuzzy match best options~~
+        - ~~If none, create temporary record~~
